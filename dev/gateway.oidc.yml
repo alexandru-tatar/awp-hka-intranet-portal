@@ -1,0 +1,52 @@
+# Portal UI config for local development with real login: Keycloak (OIDC) + Redis sessions.
+# Start: make idp-up && make dev-oidc   (Keycloak: http://localhost:8180, Benutzer = Passwort)
+env: dev
+auth_mode: oidc
+kontakt: "dem IT-Servicedesk (Kontakt folgt)"
+manifests_dir: manifests
+state_file: state.yml
+schema_path: ../schemas/manifest.schema.json
+kit_dist: ../kit/dist
+role_vocabulary: [student, employee, professor, platform-admin, pilot-tester]
+adapter_scopes: [noten:read, mail:send]
+links: { help: "#", privacy: "#", imprint: "#" }
+
+# Cookie-Namen ohne __Host-Präfix und ohne Secure: läuft auf http://localhost auch in Safari.
+# In prod: __Host-portal_sid / __Host-portal_login und cookie_secure: true (02 §4).
+session_cookie: portal_sid
+login_cookie: portal_login
+cookie_secure: false
+
+redis_url: redis://localhost:6379/0
+idle_seconds: 1800
+absolute_seconds: 28800
+touch_min_interval_seconds: 60
+login_state_ttl_seconds: 600
+
+oidc:
+  issuer: http://localhost:8180/realms/hka
+  client_id: portal
+  client_secret_file: keycloak/portal-client-secret
+  redirect_uri: http://localhost:8000/oidc/callback
+  post_logout_redirect_uri: http://localhost:8000/   # IdP-Abmeldung (RP-initiated Logout); Wert muss im Client erlaubt sein
+  scopes: [openid, profile, email]
+  id_token_algs: [RS256, ES256]
+  clock_leeway_seconds: 60
+
+roles_file: roles.yml
+grants_file: grants.yml
+
+# Logging (core/log.py): Konsole immer, Logdatei optional. Level je Logger überschreiben die Mindestlevel.
+logging:
+  console_level: DEBUG          # TRACE | DEBUG | INFO | SUCCESS | WARNING | ERROR | CRITICAL
+  color: always                 # auto = nur auf einem Terminal; always = auch in docker logs und IDE-Konsolen
+  # file: /tmp/hka-portal.log   # Logdatei einschalten (rotiert, ältere Dateien als .gz)
+  # file_level: DEBUG
+  # rotation: 10 MB
+  # retention: 3
+  levels:
+    uvicorn.access: WARNING       # die Zugriffszeile schreibt portal.web.middleware, mit Request-ID
+    httpx: WARNING
+    redis: INFO
+    httpcore: WARNING
+    watchfiles: WARNING

@@ -1,0 +1,27 @@
+# Portal UI config for local development. Paths are relative to this file.
+env: dev
+kontakt: "dem IT-Servicedesk (Kontakt folgt)"   # open item 04 §13 — HKA-IT to supply
+manifests_dir: manifests
+state_file: state.yml
+dev_users_file: users.yml
+schema_path: ../schemas/manifest.schema.json
+kit_dist: ../kit/dist
+session_cookie: portal_sid
+role_vocabulary: [student, employee, professor, platform-admin, pilot-tester]   # = roles.yml + grants.yml (02 §8)
+adapter_scopes: [noten:read, mail:send]                                         # later: x-required-scope from adapter OpenAPI (05)
+links: { help: "#", privacy: "#", imprint: "#" }
+
+# Logging (core/log.py): Konsole immer, Logdatei optional. Level je Logger überschreiben die Mindestlevel.
+logging:
+  console_level: DEBUG          # TRACE | DEBUG | INFO | SUCCESS | WARNING | ERROR | CRITICAL
+  color: always                 # auto = nur auf einem Terminal; always = auch in docker logs und IDE-Konsolen
+  # file: /tmp/hka-portal.log   # Logdatei einschalten (rotiert, ältere Dateien als .gz)
+  # file_level: DEBUG
+  # rotation: 10 MB
+  # retention: 3
+  levels:
+    uvicorn.access: WARNING       # die Zugriffszeile schreibt portal.web.middleware, mit Request-ID
+    httpx: WARNING
+    redis: INFO
+    httpcore: WARNING
+    watchfiles: WARNING
