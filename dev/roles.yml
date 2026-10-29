@@ -1,5 +1,5 @@
 # Maps IdP attribute values to platform roles (02 §8). Claim names are placeholders
-# until the new Shibboleth is specified; here they match dev/keycloak/hka-realm.json.
+# until the new Shibboleth is specified; here they match extras/compose/keycloak/hka-realm.json.
 sources:
   - claim: eduPersonAffiliation
     map: { student: student, employee: employee, faculty: professor, staff: employee }
