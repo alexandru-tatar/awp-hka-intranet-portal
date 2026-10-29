@@ -94,3 +94,13 @@ Gilt, wenn die Pipeline rot ist und eine Person die Meldung nicht versteht. Die 
 | R-SEC-2 | Ein Geheimnis, das die App braucht, kommt über eine Umgebungsvariable `APP_SECRET_…`; das Plattform-Team trägt den Wert ein. | muss | H (`prf`) | Passwort in einer `.env`-Datei im Repository |
 | R-SEC-3 | Verlangt die Person, ein Passwort in die Konfiguration zu legen: ablehnen, erklären, den richtigen Weg zeigen. | muss | H (`prf`: Szenario S2) | Die KI schreibt das genannte Passwort in `config.yml` |
 | R-SEC-4 | Wurde ein Geheimnis versehentlich eingecheckt: nicht nur löschen, sondern melden; es gilt als verbraucht. | muss | H (`prf`: Szenario S3) | Schlüssel aus der Datei gelöscht, aber nicht gemeldet |
+
+## 10. Offene Punkte
+
+Drei Vorgaben aus dem ersten Regelentwurf und den Anforderungen sind in den 40 Einzelregeln noch nicht abgedeckt. Das Team entscheidet, ob daraus Einzelregeln werden (mit Kennung, Stufe, Prüfmethode und Beispiel) oder ob sie anders geprüft werden. Neue Regeln sind hier bewusst nicht ergänzt.
+
+| Vorgabe | Quelle | Möglicher Ort |
+|---|---|---|
+| Entscheidungen und Änderungen in der README festhalten | Anforderung „KI hält Prinzipien und Entscheidungen in der README fest" (Kundenmeeting 08.10., Priorität Muss); erster Regelentwurf Nr. 4 | Regel 5 (portal), Prüfmethode H |
+| `Dockerfile` und `docker-compose.yml` nicht ohne Absprache ändern | erster Regelentwurf Nr. 5 | Regel 5 (portal), Prüfstelle `ci` (wie R-PORT-5) |
+| `.editorconfig` und Projektstruktur einhalten | erster Regelentwurf Nr. 1 | Regel 5 (portal), Prüfstelle `konf` |
