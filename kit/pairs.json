@@ -1,0 +1,26 @@
+{
+  "_comment": "Contrast pairs checked by tools/contrast.py (04 §5). kind: text 4.5, large-text 3.0, ui 3.0, decorative (reported, not gated). Every colour token in tokens.css must appear in at least one pair.",
+  "pairs": [
+    { "fg": "--ink",         "bg": "--bg",          "kind": "text" },
+    { "fg": "--ink",         "bg": "--bg-subtle",   "kind": "text" },
+    { "fg": "--ink-muted",   "bg": "--bg",          "kind": "text" },
+    { "fg": "--ink-muted",   "bg": "--bg-subtle",   "kind": "text" },
+    { "fg": "--accent",      "bg": "--bg",          "kind": "text", "note": "links" },
+    { "fg": "--accent",      "bg": "--bg-subtle",   "kind": "text", "note": "links" },
+    { "fg": "--accent-ink",  "bg": "--accent",      "kind": "text", "note": "buttons, hovered tiles" },
+    { "fg": "--accent-ink",  "bg": "--accent-strong", "kind": "text", "note": "hovered buttons" },
+    { "fg": "--accent-strong", "bg": "--bg",        "kind": "text", "note": "hovered links" },
+    { "fg": "--accent-strong", "bg": "--bg-subtle", "kind": "text", "note": "hovered secondary buttons" },
+    { "fg": "--danger",      "bg": "--bg",          "kind": "text" },
+    { "fg": "--danger",      "bg": "--bg-subtle",   "kind": "text" },
+    { "fg": "--success",     "bg": "--bg",          "kind": "text" },
+    { "fg": "--accent",      "bg": "--accent-ink",  "kind": "ui", "note": "red button border on white" },
+    { "fg": "--warn-ink",    "bg": "--warn-bg",     "kind": "text" },
+    { "fg": "--warn-ink",    "bg": "--bg",          "kind": "text", "note": "status badge" },
+    { "fg": "--border-ui",   "bg": "--bg",          "kind": "ui" },
+    { "fg": "--border-ui",   "bg": "--bg-subtle",   "kind": "ui" },
+    { "fg": "--focus",       "bg": "--bg",          "kind": "ui" },
+    { "fg": "--focus",       "bg": "--bg-subtle",   "kind": "ui" },
+    { "fg": "--border-soft", "bg": "--bg",          "kind": "decorative" }
+  ]
+}
