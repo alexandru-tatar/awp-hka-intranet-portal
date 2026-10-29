@@ -1,0 +1,8 @@
+{
+  "slug": "abschlussarbeiten",
+  "name": "Abschlussarbeiten",
+  "category": "Verwaltung",
+  "menu": { "label": "Abschlussarbeiten", "icon": "book" },
+  "roles": ["professor"],
+  "version": "0.1.0"
+}

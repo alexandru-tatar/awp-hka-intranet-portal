@@ -1,0 +1,8 @@
+{
+  "slug": "antraege",
+  "name": "Anträge und Formulare",
+  "category": "Verwaltung",
+  "menu": { "label": "Anträge", "icon": "document" },
+  "roles": ["employee", "professor"],
+  "version": "0.9.0"
+}

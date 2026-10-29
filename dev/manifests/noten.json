@@ -1,0 +1,9 @@
+{
+  "slug": "noten",
+  "name": "Meine Noten",
+  "category": "Studium",
+  "menu": { "label": "Meine Noten", "icon": "grades" },
+  "roles": ["student"],
+  "adapters": ["noten:read"],
+  "version": "1.0.0"
+}

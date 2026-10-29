@@ -1,0 +1,8 @@
+{
+  "slug": "raumbuchung",
+  "name": "Raumbuchung",
+  "category": "Sonstiges",
+  "menu": { "label": "Raum buchen", "icon": "room" },
+  "roles": ["employee", "professor"],
+  "version": "0.2.0"
+}

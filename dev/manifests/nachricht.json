@@ -1,0 +1,10 @@
+{
+  "slug": "nachricht",
+  "name": "Nachricht an das Studienbüro",
+  "category": "Kommunikation",
+  "menu": { "label": "Nachricht senden", "icon": "mail" },
+  "roles": ["student", "employee", "professor"],
+  "adapters": ["mail:send"],
+  "claims": ["email"],
+  "version": "1.2.0"
+}
