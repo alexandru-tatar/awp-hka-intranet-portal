@@ -1,0 +1,25 @@
+/* Design tokens — HKA look (after www.h-ka.de), 04 §5. Swap values when the
+   official design manual arrives; keep the names. Every colour token needs a
+   row in pairs.json. */
+:root {
+  /* colour */
+  --bg: #ffffff;           --bg-subtle: #f4f4f4;
+  --ink: #1a1a1a;          --ink-muted: #6e6e6e;
+  --accent: #d72305;       --accent-ink: #ffffff;    /* HKA red */
+  --accent-strong: #990b24;                          /* hover / pressed */
+  --danger: #990b24;       --success: #288732;
+  --warn-ink: #7a4b00;     --warn-bg: #fff4d6;
+  --border-ui: #6e6e6e;    /* borders of inputs/buttons (non-text contrast) */
+  --border-soft: #d8d8d8;  /* purely decorative dividers */
+  --focus: #1e4696;        /* HKA blue: stays visible next to red buttons */
+  /* type — IBM Plex (OFL, self-hosted); Condensed and Mono stand in for GT Pressura */
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-heading: "IBM Plex Sans Condensed", "IBM Plex Sans", "Arial Narrow", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --fs-0: 1rem; --fs-1: 1.25rem; --fs-2: 1.75rem; --fs-3: 2.5rem; --lh: 1.75;
+  /* space (4 px base) */
+  --s-1: .25rem; --s-2: .5rem; --s-3: .75rem; --s-4: 1rem; --s-6: 1.5rem; --s-8: 2rem;
+  --s-12: 3rem;
+  /* shape */
+  --radius: 0; --measure: 68ch;
+}
