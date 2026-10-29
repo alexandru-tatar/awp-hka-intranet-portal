@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="error-page">
+  <p class="error-page__status">{{ t('error.status', status=status) }}</p>
+  <h1>{{ error_title }}</h1>
+  <p>{{ error_body }}</p>
+  {%- if status == 401 %}
+  <p><a class="cta" href="/login">{{ t('error.login') }}</a></p>
+  {%- endif %}
+  <p><a class="cta" href="/">{{ t('error.back_home') }}</a></p>
+  <p class="error-page__code">{{ t('error.request_id') }}: <code>{{ request_id }}</code></p>
+</div>
+{% endblock %}

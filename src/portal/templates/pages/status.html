@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ t('status.title') }}</h1>
+{% if apps %}
+<div class="table-wrap" role="region" aria-labelledby="status-caption" tabindex="0">
+  <table class="table">
+    <caption id="status-caption">{{ t('status.caption') }}</caption>
+    <thead>
+      <tr>
+        <th scope="col">{{ t('status.col.app') }}</th>
+        <th scope="col">{{ t('status.col.version') }}</th>
+        <th scope="col">{{ t('status.col.status') }}</th>
+        <th scope="col">{{ t('status.col.last_probe') }}</th>
+        <th scope="col">{{ t('status.col.last_deploy') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for a in apps %}
+      <tr>
+        <th scope="row">{{ a.name }} <span class="muted small">({{ a.slug }})</span></th>
+        <td>{{ a.version }}</td>
+        <td><span class="badge badge--{{ a.status }}">{{ t('status.' ~ a.status) }}</span></td>
+        <td>{{ a.last_probe_at or t('status.unknown') }}</td>
+        <td>{{ a.last_deployed_at or t('status.unknown') }}</td>
+      </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p>{{ t('status.none') }}</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ t('home.greeting', name=user.name) }}</h1>
+{% if groups %}
+<p class="lead">{{ t('home.intro') }}</p>
+<div class="app-groups">
+  {%- for g in groups %}
+  <section class="app-group" aria-labelledby="cat-{{ loop.index }}">
+    <h2 id="cat-{{ loop.index }}">{{ g.category }}</h2>
+    <ul class="app-list">
+      {%- for a in g.items %}
+      <li>
+        <a class="app-card" href="{{ a.path }}">
+          <svg class="icon" aria-hidden="true" focusable="false"><use href="{{ kit.icons_url }}#i-{{ a.menu_icon }}"></use></svg>
+          <span class="app-card__name">{{ a.menu_label }}</span>
+          {%- if a.name != a.menu_label %}
+          <span class="app-card__meta">{{ a.name }}</span>
+          {%- endif %}
+          <span class="app-card__cta cta" aria-hidden="true">{{ t('home.open') }}</span>
+        </a>
+      </li>
+      {%- endfor %}
+    </ul>
+  </section>
+  {%- endfor %}
+</div>
+{% else %}
+<div class="notice"><p>{{ t('nav.empty') }}</p></div>
+{% endif %}
+{% endblock %}
