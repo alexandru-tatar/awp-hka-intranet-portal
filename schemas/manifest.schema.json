@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hka:portal:manifest:v1",
+  "title": "HKA Portal app manifest",
+  "description": "Manifest für HKA Portal micro-apps",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["slug", "name", "category", "menu", "roles", "version"],
+  "properties": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{2,30}$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "category": {
+      "enum": ["Studium", "Verwaltung", "Kommunikation", "Sonstiges"]
+    },
+    "menu": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "icon"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "icon": {
+          "enum": ["grades", "mail", "calendar", "document", "people", "book", "room", "settings", "info"]
+        }
+      }
+    },
+    "roles": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" }
+    },
+    "adapters": {
+      "type": "array",
+      "uniqueItems": true,
+      "default": [],
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*:[a-z][a-z0-9-]*$" }
+    },
+    "claims": {
+      "type": "array",
+      "uniqueItems": true,
+      "default": [],
+      "items": { "enum": ["email"] }
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    }
+  }
+}
