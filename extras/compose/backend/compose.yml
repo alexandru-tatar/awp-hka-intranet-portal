@@ -1,0 +1,16 @@
+# Portal-Backend (Gateway + Registry + Portal-UI) als Container.
+# Aufruf: docker compose up --build   (im Verzeichnis extras/compose/backend)
+#
+# Allein gestartet findet das Backend Redis und Keycloak nicht (eigenes Netz).
+# Alles zusammen: extras/compose/server.
+name: hka-portal-backend
+
+services:
+  backend:
+    build:
+      context: ../../..
+      dockerfile: Dockerfile.trixie
+    environment:
+      PORTAL_CONFIG: /opt/app/dev/gateway.compose.yml
+    ports:
+      - "127.0.0.1:8000:8000"

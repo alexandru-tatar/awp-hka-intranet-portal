@@ -1,0 +1,15 @@
+# Redis für die Sessions des Portals (02 §4).
+# Aufruf: docker compose up   (im Verzeichnis extras/compose/redis)
+name: hka-portal-redis
+
+services:
+  redis:
+    image: redis:8-alpine
+    ports:
+      - "127.0.0.1:6379:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 10

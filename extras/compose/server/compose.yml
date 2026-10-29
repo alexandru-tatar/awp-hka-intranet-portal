@@ -1,0 +1,11 @@
+# Alles zusammen: Redis, Keycloak und Portal-Backend.
+# Aufruf: docker compose up --build   (im Verzeichnis extras/compose/server)
+#         docker compose down
+# Portal: http://localhost:8000   Keycloak: http://localhost:8180
+name: hka-portal
+
+# Das Backend verbindet sich zu Redis erst bei der ersten Anfrage, eine Startreihenfolge ist nicht nötig.
+include:
+  - ../redis/compose.yml
+  - ../keycloak/compose.yml
+  - ../backend/compose.yml
