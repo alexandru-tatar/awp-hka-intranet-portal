@@ -85,5 +85,5 @@ Ein Testschlüssel wird auf einem Wegwerf-Branch eingecheckt, die Pipeline melde
 2. Prompts 1 bis 6 eingeben; die Antworten der KI und das erzeugte Repository sichern.
 3. Automatische Prüfungen laufen lassen (`make lint`, `make test`, Pipeline); Ergebnisse je Einzelregel eintragen.
 4. Halbautomatische und manuelle Punkte durch die prüfende Person bewerten.
-5. Je Abweichung ein Eintrag mit **Datei und Zeile**, **was passiert ist**, **welcher Skill die Regel abdecken soll** und der **Einordnung** (Abschnitt 6).
+5. Je Abweichung ein Eintrag mit **Datei und Zeile**, **was passiert ist**, **welcher Skill die Regel abdecken soll** und der **Einordnung** (Die KI hat die Regel nicht befolgt, die Regel steht im Skill nicht klar genug oder sie fehlt im Skill; siehe `pruefprotokoll-vorlage.md`).
 6. Skills gemäß Protokoll ergänzen und **denselben Test erneut** laufen lassen. Ein Lauf ohne Abweichungen wird als **Goldener Standard** gespeichert; jede neue Skill-Version wird mit ihm verglichen (Angebot §5.3).
