@@ -1,0 +1,10 @@
+[project]
+name = "fixture"
+version = "0.0.1"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
