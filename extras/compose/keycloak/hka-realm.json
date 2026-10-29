@@ -1,0 +1,218 @@
+{
+  "realm": "hka",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "components": {
+    "org.keycloak.userprofile.UserProfileProvider": [
+      {
+        "providerId": "declarative-user-profile",
+        "subComponents": {},
+        "config": {
+          "kc.user.profile.config": [
+            "{\"attributes\": [{\"name\": \"username\", \"displayName\": \"${username}\", \"validations\": {\"length\": {\"min\": 3, \"max\": 255}}, \"permissions\": {\"view\": [\"admin\", \"user\"], \"edit\": [\"admin\", \"user\"]}}, {\"name\": \"email\", \"displayName\": \"${email}\", \"validations\": {\"email\": {}}, \"permissions\": {\"view\": [\"admin\", \"user\"], \"edit\": [\"admin\", \"user\"]}}, {\"name\": \"firstName\", \"displayName\": \"${firstName}\", \"validations\": {}, \"permissions\": {\"view\": [\"admin\", \"user\"], \"edit\": [\"admin\", \"user\"]}}, {\"name\": \"lastName\", \"displayName\": \"${lastName}\", \"validations\": {}, \"permissions\": {\"view\": [\"admin\", \"user\"], \"edit\": [\"admin\", \"user\"]}}, {\"name\": \"eduPersonAffiliation\", \"displayName\": \"eduPersonAffiliation\", \"multivalued\": true, \"validations\": {}, \"permissions\": {\"view\": [\"admin\"], \"edit\": [\"admin\"]}}, {\"name\": \"eduPersonEntitlement\", \"displayName\": \"eduPersonEntitlement\", \"multivalued\": true, \"validations\": {}, \"permissions\": {\"view\": [\"admin\"], \"edit\": [\"admin\"]}}]}"
+          ]
+        }
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "portal",
+      "name": "HKA Portal (dev)",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "dev-portal-secret",
+      "clientAuthenticatorType": "client-secret",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:8000/oidc/callback"
+      ],
+      "webOrigins": [],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:8000/"
+      },
+      "protocolMappers": [
+        {
+          "name": "eduPersonAffiliation",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "config": {
+            "user.attribute": "eduPersonAffiliation",
+            "claim.name": "eduPersonAffiliation",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "false",
+            "userinfo.token.claim": "false"
+          }
+        },
+        {
+          "name": "eduPersonEntitlement",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "config": {
+            "user.attribute": "eduPersonEntitlement",
+            "claim.name": "eduPersonEntitlement",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "false",
+            "userinfo.token.claim": "false"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "alexandru",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Alexandru",
+      "lastName": "Tatar",
+      "email": "alexandru@portal.test",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "alexandru",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "eduPersonAffiliation": [
+          "student"
+        ]
+      }
+    },
+    {
+      "username": "antonio",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Antonio",
+      "lastName": "Codrean",
+      "email": "antonio@portal.test",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "antonio",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "eduPersonAffiliation": [
+          "student"
+        ]
+      }
+    },
+    {
+      "username": "david",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "David",
+      "lastName": "Coric",
+      "email": "david@portal.test",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "david",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "eduPersonAffiliation": [
+          "student"
+        ]
+      }
+    },
+    {
+      "username": "neumann",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Prof. Dr.-Ing. Rainer",
+      "lastName": "Neumann",
+      "email": "neumann@portal.test",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "neumann",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "eduPersonAffiliation": [
+          "faculty"
+        ]
+      }
+    },
+    {
+      "username": "max",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Max",
+      "lastName": "Beispiel",
+      "email": "max@portal.test",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "max",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "eduPersonAffiliation": [
+          "employee"
+        ]
+      }
+    },
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Sam",
+      "lastName": "Betrieb",
+      "email": "admin@portal.test",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "eduPersonAffiliation": [
+          "employee"
+        ],
+        "eduPersonEntitlement": [
+          "urn:hka:portal:admin"
+        ]
+      }
+    },
+    {
+      "username": "gast",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Gast",
+      "lastName": "Ohnerolle",
+      "email": "gast@portal.test",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "gast",
+          "temporary": false
+        }
+      ],
+      "attributes": {}
+    }
+  ],
+  "loginTheme": "hka",
+  "internationalizationEnabled": true,
+  "supportedLocales": [
+    "de"
+  ],
+  "defaultLocale": "de"
+}
