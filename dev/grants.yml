@@ -1,0 +1,2 @@
+# Per-subject role additions (02 §8). `sub` is the IdP subject (Keycloak user id in dev).
+grants: []

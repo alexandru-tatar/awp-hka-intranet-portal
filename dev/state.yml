@@ -1,0 +1,8 @@
+# Stand-in for the registry's status columns (03 §7) until the prober exists.
+# Apps without an entry count as healthy. Edit and reload the page to try states.
+noten:             { status: healthy,     last_probe_at: "2026-10-26 09:14:02", last_deployed_at: "2026-10-20 16:03" }
+stundenplan:       { status: healthy,     last_probe_at: "2026-10-26 09:14:05", last_deployed_at: "2026-10-22 11:40" }
+nachricht:         { status: healthy,     last_probe_at: "2026-10-26 09:13:58", last_deployed_at: "2026-10-24 08:12" }
+antraege:          { status: healthy,     last_probe_at: "2026-10-26 09:14:01", last_deployed_at: "2026-10-18 14:25" }
+raumbuchung:       { status: unhealthy,   last_probe_at: "2026-10-26 09:14:07", last_deployed_at: "2026-10-25 17:51" }
+abschlussarbeiten: { status: registering, last_probe_at: "2026-10-26 09:14:08", last_deployed_at: "2026-10-26 09:13" }

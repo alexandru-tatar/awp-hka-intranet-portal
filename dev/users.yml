@@ -1,0 +1,9 @@
+# Test people for the dev login picker. Roles must come from role_vocabulary.
+users:
+  alexandru: { name: Alexandru Tatar,              roles: [student] }
+  antonio:   { name: Antonio Codrean,              roles: [student] }
+  david:     { name: David Coric,                  roles: [student] }
+  neumann:   { name: Prof. Dr.-Ing. Rainer Neumann, roles: [professor] }
+  max:       { name: Max Beispiel,                 roles: [employee] }
+  admin:     { name: Sam Betrieb,                  roles: [employee, platform-admin] }
+  gast:      { name: Gast ohne Rolle,              roles: [] }
