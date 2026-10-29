@@ -1,0 +1,119 @@
+# UI-Texte (04 §6). Register: Sie, kurze Sätze, einfache Sprache.
+# Platzhalter in {geschweiften Klammern}; {kontakt} kommt aus der Konfiguration.
+
+app.title: HKA Portal
+brand.name: Hochschule Karlsruhe
+brand.sub: Portal
+skip.link: Zum Inhalt springen
+
+nav.label: Hauptnavigation
+nav.menu_button: Menü
+nav.empty: Für Sie ist im Moment keine Anwendung freigeschaltet. Wenn Sie eine erwarten, melden Sie sich bei {kontakt}.
+
+header.logout: Abmelden
+header.signed_in_as: Angemeldet als
+
+logout.title: Abmelden?
+logout.body: Möchten Sie sich vom Portal abmelden?
+
+footer.label: Fußzeile
+footer.help: Hilfe
+footer.privacy: Datenschutz
+footer.imprint: Impressum
+
+home.title: Startseite
+home.greeting: Willkommen, {name}
+home.intro: Hier finden Sie alle Anwendungen, die für Sie freigeschaltet sind. Wählen Sie eine Anwendung aus.
+home.apps_heading: Ihre Anwendungen
+home.open: öffnen
+
+login.title: Anmelden
+login.failed.title: Anmeldung nicht möglich
+login.failed.body: Die Anmeldung hat nicht geklappt. Bitte versuchen Sie es noch einmal. Wenn es wieder nicht klappt, melden Sie sich bei {kontakt}.
+login.expired.title: Anmeldung abgelaufen
+login.expired.body: Die Anmeldung hat zu lange gedauert. Bitte beginnen Sie noch einmal.
+
+error.back_home: zur Startseite
+error.status: Fehler {status}
+error.request_id: Fehlernummer
+error.400.title: Anfrage nicht möglich
+error.400.body: Diese Anfrage konnte das Portal nicht verarbeiten. Bitte versuchen Sie es noch einmal.
+error.403.title: Dafür fehlt Ihnen die Berechtigung
+error.403.body: Diese Anwendung ist für Ihre Rolle nicht freigegeben. Wenn Sie glauben, dass das ein Fehler ist, melden Sie sich bei {kontakt}.
+error.404.title: Seite nicht gefunden
+error.404.body: Diese Adresse gibt es nicht (mehr). Nutzen Sie das Menü, um zu Ihrer Anwendung zu kommen.
+error.503.title: Anwendung vorübergehend nicht verfügbar
+error.503.body: Diese Anwendung antwortet im Moment nicht. Bitte versuchen Sie es in ein paar Minuten noch einmal. Wenn es länger dauert, melden Sie sich bei {kontakt}.
+error.401.title: Bitte melden Sie sich an
+error.401.body: Für diese Seite müssen Sie angemeldet sein. Melden Sie sich an und versuchen Sie es noch einmal.
+error.405.title: Diese Aktion ist hier nicht möglich
+error.405.body: Diese Seite kennt die gewünschte Art der Anfrage nicht. Nutzen Sie bitte die Links und Schaltflächen im Portal.
+error.408.title: Die Anfrage hat zu lange gedauert
+error.408.body: Das Portal hat Ihre Anfrage nicht rechtzeitig erhalten. Bitte versuchen Sie es noch einmal.
+error.409.title: Die Änderung passt nicht zum aktuellen Stand
+error.409.body: Seit Sie die Seite geöffnet haben, hat sich etwas geändert. Laden Sie die Seite neu und versuchen Sie es noch einmal.
+error.410.title: Nicht mehr verfügbar
+error.410.body: Diese Seite gibt es nicht mehr. Nutzen Sie das Menü, um zu Ihrer Anwendung zu kommen.
+error.413.title: Die Eingabe ist zu groß
+error.413.body: Die gesendeten Daten sind größer als erlaubt. Bitte senden Sie weniger Daten oder eine kleinere Datei.
+error.414.title: Die Adresse ist zu lang
+error.414.body: Diese Adresse kann das Portal nicht verarbeiten. Bitte rufen Sie die Seite über die Startseite auf.
+error.415.title: Dieses Format wird nicht unterstützt
+error.415.body: Das Portal kann die gesendeten Daten nicht lesen. Bitte nutzen Sie ein anderes Format.
+error.422.title: Eingabe nicht verarbeitbar
+error.422.body: Einige Angaben sind ungültig oder fehlen. Bitte prüfen Sie Ihre Eingaben und versuchen Sie es noch einmal.
+error.429.title: Zu viele Anfragen
+error.429.body: Sie haben in kurzer Zeit sehr viele Anfragen gesendet. Bitte warten Sie einen Moment und versuchen Sie es dann noch einmal.
+error.501.title: Diese Funktion gibt es noch nicht
+error.501.body: Das Portal kann diese Anfrage nicht beantworten. Bitte melden Sie sich bei {kontakt}.
+error.502.title: Anwendung nicht erreichbar
+error.502.body: Das Portal hat von der Anwendung keine brauchbare Antwort bekommen. Bitte versuchen Sie es in ein paar Minuten noch einmal. Wenn es länger dauert, melden Sie sich bei {kontakt}.
+error.504.title: Die Antwort dauert zu lange
+error.504.body: Die Anwendung hat nicht rechtzeitig geantwortet. Bitte versuchen Sie es in ein paar Minuten noch einmal. Wenn es länger dauert, melden Sie sich bei {kontakt}.
+error.4xx.title: Die Anfrage war nicht möglich
+error.4xx.body: Diese Anfrage konnte das Portal nicht verarbeiten. Bitte versuchen Sie es noch einmal. Wenn es wieder nicht klappt, melden Sie sich bei {kontakt}.
+error.login: Anmelden
+error.5xx.title: Es ist ein Fehler aufgetreten
+error.5xx.body: "Das liegt nicht an Ihnen. Bitte versuchen Sie es später noch einmal. Nennen Sie bei einer Meldung diese Nummer: {request_id}."
+
+maintenance.title: Wartungsarbeiten
+maintenance.body: Das Portal ist gerade nicht erreichbar. Bitte versuchen Sie es später noch einmal.
+
+status.title: Betriebsstatus
+status.caption: Alle registrierten Anwendungen
+status.col.app: Anwendung
+status.col.version: Version
+status.col.status: Status
+status.col.last_probe: Letzte Prüfung
+status.col.last_deploy: Letzte Bereitstellung
+status.healthy: in Betrieb
+status.unhealthy: gestört
+status.failed: fehlgeschlagen
+status.registering: wird geprüft
+status.retired: stillgelegt
+status.none: Es sind noch keine Anwendungen registriert.
+status.unknown: –
+
+connections.title: Meine Verbindungen
+connections.intro: Für einige Systeme braucht das Portal einmal Ihr Passwort, damit Anwendungen dort für Sie lesen können. Das Passwort wird verschlüsselt und nur für diese Sitzung gespeichert.
+connections.none: Im Moment braucht keine Anwendung eine Verbindung.
+
+dialog.cancel: Abbrechen
+
+# ── Nur Entwicklungsmodus ─────────────────────────────────────
+dev.banner: Entwicklungsmodus – Anmeldung ist simuliert, Anwendungen sind Platzhalter.
+dev.login.intro: Im Entwicklungsmodus gibt es keine echte Anmeldung. Wählen Sie eine Testperson.
+dev.login.no_roles: keine Rolle
+dev.app.notice: Platzhalter. Hier erscheint später die Anwendung „{name}“. Die Beispiele unten zeigen die Muster aus dem Design-Kit.
+dev.app.table_caption: Meine Noten
+dev.app.form_heading: Nachricht senden
+dev.app.dialog_title: Nachricht senden?
+dev.app.dialog_body: Die Nachricht geht an das Studienbüro. Das lässt sich danach nicht zurücknehmen.
+dev.app.send: Senden
+dev.app.sent: Gesendet (Platzhalter – es wurde nichts verschickt).
+dev.app.subject: Betreff
+dev.app.subject_hint: Höchstens 120 Zeichen.
+dev.app.subject_error: Bitte geben Sie einen Betreff ein.
+dev.app.message: Nachricht
+dev.app.required: Pflichtfeld
+dev.app.error_summary: Bitte prüfen Sie Ihre Eingaben
