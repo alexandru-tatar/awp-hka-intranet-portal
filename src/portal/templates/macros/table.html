@@ -1,0 +1,17 @@
+{#- Data table (04 §7.4). rows: first cell becomes the row header.
+    num_cols: indexes of right-aligned numeric columns. Wide tables scroll in a
+    focusable, labelled container. -#}
+{% macro table(caption, columns, rows, num_cols=(), id=None) -%}
+{%- set cid = id or ("t-" ~ caption | lower | replace(" ", "-")) -%}
+<div class="table-wrap" role="region" aria-labelledby="{{ cid }}-caption" tabindex="0">
+  <table class="table">
+    <caption id="{{ cid }}-caption">{{ caption }}</caption>
+    <thead><tr>{% for c in columns %}<th scope="col"{% if loop.index0 in num_cols %} class="num"{% endif %}>{{ c }}</th>{% endfor %}</tr></thead>
+    <tbody>
+      {%- for row in rows %}
+      <tr>{% for cell in row %}{% if loop.first %}<th scope="row">{{ cell }}</th>{% else %}<td{% if loop.index0 in num_cols %} class="num"{% endif %}>{{ cell }}</td>{% endif %}{% endfor %}</tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+</div>
+{%- endmacro %}

@@ -1,0 +1,39 @@
+{#- Form field: label + hint + input + error (04 §7.3). -#}
+{% macro field(id, label, name=None, type="text", value="", hint=None, error=None, required=False, textarea=False) -%}
+{%- set described = [] -%}
+{%- if hint %}{% set _ = described.append(id ~ "-hint") %}{% endif -%}
+{%- if error %}{% set _ = described.append(id ~ "-error") %}{% endif -%}
+<div class="field">
+  <label for="{{ id }}">{{ label }}{% if required %} <span class="field__required">({{ t('dev.app.required') }})</span>{% endif %}</label>
+  {%- if hint %}
+  <p id="{{ id }}-hint" class="field__hint">{{ hint }}</p>
+  {%- endif %}
+  {%- if textarea %}
+  <textarea id="{{ id }}" name="{{ name or id }}"
+    {%- if described %} aria-describedby="{{ described | join(' ') }}"{% endif %}
+    {%- if error %} aria-invalid="true"{% endif %}
+    {%- if required %} required{% endif %}>{{ value }}</textarea>
+  {%- else %}
+  <input id="{{ id }}" name="{{ name or id }}" type="{{ type }}" value="{{ value }}"
+    {%- for k, v in kwargs.items() %} {{ k }}="{{ v }}"{% endfor %}
+    {%- if described %} aria-describedby="{{ described | join(' ') }}"{% endif %}
+    {%- if error %} aria-invalid="true"{% endif %}
+    {%- if required %} required{% endif %}>
+  {%- endif %}
+  {%- if error %}
+  <p id="{{ id }}-error" class="field__error">{{ error }}</p>
+  {%- endif %}
+</div>
+{%- endmacro %}
+
+{#- Error summary at the top of a form; errors = [(field_id, message)]. -#}
+{% macro error_summary(title, errors) -%}
+<div class="error-summary" role="alert" tabindex="-1">
+  <h2>{{ title }}</h2>
+  <ul>
+    {%- for fid, msg in errors %}
+    <li><a href="#{{ fid }}">{{ msg }}</a></li>
+    {%- endfor %}
+  </ul>
+</div>
+{%- endmacro %}

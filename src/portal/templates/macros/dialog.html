@@ -1,0 +1,14 @@
+{#- Dialog with exactly two buttons (04 §7.2, rule R-UI-2).
+    `submit_form`: id of the form kit.js submits when the user confirms. -#}
+{% macro dialog(id, title, body, confirm_label, submit_form=None) -%}
+<dialog id="{{ id }}" aria-labelledby="{{ id }}-title"{% if submit_form %} data-submit-form="{{ submit_form }}"{% endif %}>
+  <form method="dialog">
+    <h2 id="{{ id }}-title">{{ title }}</h2>
+    <p>{{ body }}</p>
+    <div class="dialog__actions">
+      <button value="cancel" class="btn btn--secondary">{{ t('dialog.cancel') }}</button>
+      <button value="confirm" class="btn btn--primary" autofocus>{{ confirm_label }}</button>
+    </div>
+  </form>
+</dialog>
+{%- endmacro %}
