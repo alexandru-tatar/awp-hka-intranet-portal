@@ -1,0 +1,100 @@
+# syntax=docker.io/docker/dockerfile-upstream:1.22.0
+# check=error=true
+
+# Variante mit Debian Trixie (ohne Docker Hardened Images, kein Login bei dhi.io nötig)
+# Aufruf:   docker build --file Dockerfile.trixie --tag hka/portal:0.1.0-trixie .
+#               ggf. --no-cache
+#
+#           Windows:   Get-Content Dockerfile | docker run --rm --interactive hadolint/hadolint:v2.14.0-debian
+#           macOS:     cat Dockerfile | docker run --rm --interactive hadolint/hadolint:v2.14.0-debian
+#
+#           docker run --rm --publish 8000:8000 hka/portal:0.1.0-trixie
+#           docker debug hka/portal:0.1.0-trixie
+#           docker scout sbom hka/portal:0.1.0-trixie
+#           docker scout cves hka/portal:0.1.0-trixie
+
+# https://docs.docker.com/engine/reference/builder/#syntax
+# https://docs.docker.com/build/building/multi-stage
+# https://docs.docker.com/dhi
+# https://github.com/astral-sh/uv-docker-example/blob/main/multistage.Dockerfile
+
+# ARG: "build-time" Variable
+# ENV: "build-time" und "runtime" Variable
+ARG PYTHON_MAIN_VERSION=3.14
+ARG PYTHON_VERSION=${PYTHON_MAIN_VERSION}.3
+ARG UV_VERSION=0.11.0
+
+# ------------------------------------------------------------------------------
+# S t a g e   b u i l d e r
+# ------------------------------------------------------------------------------
+FROM ghcr.io/astral-sh/uv:${UV_VERSION}-python${PYTHON_MAIN_VERSION}-trixie-slim AS builder
+
+WORKDIR /opt/app
+
+# Enable bytecode compilation
+# Copy from the cache instead of linking since it's a mounted volume
+# Kein Python-Download erforderlich
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PYTHON_DOWNLOADS=0 \
+    UV_NO_MANAGED_PYTHON=true \
+    UV_SYSTEM_PYTHON=true
+
+# .venv erstellen
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    ["/usr/local/bin/uv", "venv"]
+# Install the project's dependencies using the lockfile and settings
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    ["/usr/local/bin/uv", "sync", "--frozen", "--no-install-project", "--no-default-groups", "--no-editable"]
+
+# Then, add the rest of the project source code and install it
+# Installing separately from its dependencies allows optimal layer caching
+COPY README.md pyproject.toml ./
+COPY src ./src
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    ["/usr/local/bin/uv", "sync", "--frozen", "--no-default-groups", "--no-editable"]
+
+# Design-Kit bauen (kit/dist, nur Standardbibliothek) sowie Schema und Dev-Konfiguration
+COPY kit ./kit
+COPY schemas ./schemas
+COPY dev ./dev
+RUN ["/opt/app/.venv/bin/python", "kit/tools/build.py"]
+
+# ------------------------------------------------------------------------------
+# S t a g e   f i n a l
+# ------------------------------------------------------------------------------
+FROM python:${PYTHON_MAIN_VERSION}-slim-trixie AS final
+
+# Anzeige bei "docker inspect ..."
+# https://specs.opencontainers.org/image-spec/annotations
+LABEL org.opencontainers.image.title="hka-portal" \
+    org.opencontainers.image.description="HKA Portal: Gateway, Registry und Portal-UI mit Basis-Image Trixie" \
+    org.opencontainers.image.version="0.1.0-trixie"
+
+# "working directory" fuer die Docker-Kommandos RUN, ENTRYPOINT, CMD, COPY und ADD
+WORKDIR /opt/app
+
+# User "nonroot" statt User "root"
+RUN ["useradd", "--system", "--create-home", "nonroot"]
+USER nonroot
+
+# .venv, kit/dist, schemas und dev (Pfade in dev/gateway.dev.yml sind relativ dazu)
+COPY --from=builder --chown=nonroot:nonroot /opt/app/.venv ./.venv
+COPY --from=builder --chown=nonroot:nonroot /opt/app/kit/dist ./kit/dist
+COPY --from=builder --chown=nonroot:nonroot /opt/app/schemas ./schemas
+COPY --from=builder --chown=nonroot:nonroot /opt/app/dev ./dev
+
+# Place executables in the environment at the front of the path
+ENV PATH="/opt/app/.venv/bin:$PATH" \
+    PORTAL_CONFIG=/opt/app/dev/gateway.dev.yml
+
+EXPOSE 8000
+
+STOPSIGNAL SIGINT
+
+ENTRYPOINT ["python", "-m", "uvicorn", "portal.dev:app", "--host", "0.0.0.0", "--port", "8000"]
