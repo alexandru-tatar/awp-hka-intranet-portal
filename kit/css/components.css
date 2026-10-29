@@ -1,0 +1,273 @@
+/* Patterns (04 §7) in the HKA look. Markup lives in gateway/templates/macros. */
+
+/* ── Navigation ─────────────────────────────────────────────── */
+.nav__group {
+  margin: var(--s-6) 0 var(--s-1);
+  color: var(--ink-muted);
+  font-family: var(--font-body);
+  font-size: .8125rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.nav__group:first-child { margin-top: 0; }
+.nav__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.nav__list a {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  border-left: 4px solid transparent;
+  color: var(--ink);
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+}
+.nav__list a:hover { color: var(--accent); }
+.nav__list a[aria-current="page"] {
+  border-left-color: var(--accent);
+  background: var(--bg-subtle);
+  color: var(--accent);
+}
+.nav__empty { color: var(--ink-muted); }
+
+/* ── Buttons: square, bold mono (h-ka.de style) ─────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-height: 2.75rem;
+  padding: var(--s-2) var(--s-6);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: .9375rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 100ms, border-color 100ms, color 100ms;
+}
+.btn:hover { background: var(--bg-subtle); color: var(--accent-strong); border-color: var(--accent-strong); }
+.btn--primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.btn--primary:hover {
+  border-color: var(--accent-strong);
+  background: var(--accent-strong);
+  color: var(--accent-ink);
+}
+.btn--link {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-decoration: underline;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+}
+
+/* ── Form fields ────────────────────────────────────────────── */
+.field { margin: 0 0 var(--s-6); max-width: 40rem; }
+.field label { display: block; margin-bottom: var(--s-1); font-weight: 600; }
+.field__required { color: var(--ink-muted); font-weight: 400; }
+.field__hint { margin: 0 0 var(--s-2); color: var(--ink-muted); font-size: .9375rem; }
+.field input,
+.field textarea,
+.field select {
+  display: block;
+  width: 100%;
+  padding: var(--s-3);
+  border: 1px solid var(--border-ui);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.5;
+}
+.field textarea { min-height: 8rem; resize: vertical; }
+.field [aria-invalid="true"] { border: 2px solid var(--danger); }
+.field__error {
+  margin: var(--s-2) 0 0;
+  color: var(--danger);
+  font-weight: 600;
+}
+.field__error::before { content: "Fehler: "; }
+
+.error-summary {
+  margin: 0 0 var(--s-6);
+  padding: var(--s-4) var(--s-6);
+  border-left: 4px solid var(--danger);
+  background: var(--bg-subtle);
+  max-width: 40rem;
+}
+.error-summary h2 { font-size: var(--fs-1); color: var(--danger); }
+.error-summary ul { margin: 0; }
+
+/* ── Tables ─────────────────────────────────────────────────── */
+.table-wrap {
+  max-width: 100%;
+  margin: 0 0 var(--s-8);
+  overflow-x: auto;
+}
+.table {
+  border-collapse: collapse;
+  min-width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+.table-wrap .table { margin: 0; }
+.table caption {
+  padding: 0 0 var(--s-3);
+  font-family: var(--font-heading);
+  font-size: var(--fs-1);
+  font-weight: 700;
+  text-align: left;
+}
+.table th,
+.table td {
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--border-soft);
+  text-align: left;
+  vertical-align: top;
+}
+.table thead th {
+  border-bottom: 2px solid var(--ink);
+  font-size: .875rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.table tbody th { font-weight: 600; }
+.table .num { text-align: right; }
+
+/* ── Dialog (exactly two buttons, rule R-UI-2) ──────────────── */
+dialog {
+  width: min(36rem, calc(100vw - 2 * var(--s-4)));
+  padding: var(--s-8);
+  border: 1px solid var(--border-ui);
+  border-top: 6px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--ink);
+}
+dialog::backdrop { background: rgb(0 0 0 / .5); }
+dialog h2 { font-size: var(--fs-2); }
+.dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--s-3);
+  margin-top: var(--s-8);
+}
+
+/* ── Notices and status badges ──────────────────────────────── */
+.notice {
+  margin: 0 0 var(--s-8);
+  padding: var(--s-4) var(--s-6);
+  border-left: 4px solid var(--accent);
+  background: var(--bg-subtle);
+  max-width: var(--measure);
+}
+.notice--warn {
+  border-left-color: var(--warn-ink);
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+}
+.notice > :last-child { margin-bottom: 0; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-weight: 600;
+}
+.badge::before {
+  content: "";
+  width: .625rem;
+  height: .625rem;
+  background: currentColor;
+}
+.badge--healthy { color: var(--success); }
+.badge--unhealthy { color: var(--warn-ink); }
+.badge--failed { color: var(--danger); }
+.badge--registering,
+.badge--retired { color: var(--ink-muted); }
+
+/* ── Home: app tiles (grey teaser boxes, red on hover) ──────── */
+.lead { max-width: var(--measure); font-size: var(--fs-1); line-height: 1.6; }
+.app-groups { display: grid; gap: var(--s-12); margin-top: var(--s-8); }
+.app-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: var(--s-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.app-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  height: 100%;
+  padding: var(--s-6);
+  background: var(--bg-subtle);
+  color: var(--ink);
+  text-decoration: none;
+  transition: background-color 100ms, color 100ms;
+}
+.app-card .icon { width: 2rem; height: 2rem; color: var(--accent); }
+.app-card__name {
+  font-family: var(--font-heading);
+  font-size: var(--fs-1);
+  font-weight: 700;
+  line-height: 1.2;
+}
+.app-card__meta { color: var(--ink-muted); font-size: .9375rem; }
+.app-card__cta { margin-top: auto; color: var(--accent); }
+.app-card:hover,
+.app-card:hover .icon,
+.app-card:hover .app-card__meta,
+.app-card:hover .app-card__cta {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* ── Error pages ────────────────────────────────────────────── */
+.error-page { max-width: var(--measure); }
+.error-page__status {
+  margin: 0 0 var(--s-2);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+.error-page__code { color: var(--ink-muted); font-size: .875rem; }
+
+/* ── Dev-only marker (never ships to prod pages) ────────────── */
+.dev-banner {
+  padding: var(--s-1) var(--s-6);
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+  font-size: .875rem;
+  text-align: center;
+}
+.user-list {
+  display: grid;
+  gap: var(--s-3);
+  max-width: 40rem;
+  padding: 0;
+  list-style: none;
+}
+.user-list .btn { width: 100%; justify-content: space-between; text-align: left; }
+.user-list .btn .muted { font-family: var(--font-body); font-weight: 400; }
+.user-list .btn:hover .muted { color: var(--accent-strong); }

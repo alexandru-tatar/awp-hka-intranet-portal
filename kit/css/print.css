@@ -1,0 +1,15 @@
+/* Print: content only (test UI13). */
+@media print {
+  .skip,
+  .site-header,
+  .portal-nav,
+  .site-footer,
+  .dev-banner,
+  .actions,
+  dialog { display: none !important; }
+
+  .shell { display: block !important; }
+  .main { padding: 0 !important; }
+  a { color: inherit; }
+  .table-wrap { overflow: visible; }
+}
