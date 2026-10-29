@@ -1,0 +1,90 @@
+# Zentrale Pipeline-Vorlage der Micro-App-Plattform — Phase 1: Lint und Test
+#
+# Einbindung (siehe README.md):
+#   Einstellung „CI/CD-Konfigurationsdatei" des App-Projekts:
+#     app-pipeline.yml@<gruppe>/pipeline-templates:v1
+#   Alternative (ohne diese Einstellung): in der .gitlab-ci.yml des Projekts
+#     include:
+#       - project: "<gruppe>/pipeline-templates"
+#         ref: v1
+#         file: app-pipeline.yml
+#
+# Prinzipien:
+#   - Die Prüfwerkzeuge und ihre Versionen stehen HIER, nicht im App-Projekt.
+#   - Die Befehle der Jobs sind einfache Shell-Zeilen; ci-local.py führt dieselben Zeilen lokal aus.
+#   - Eine rote Prüfung sperrt den Merge (Projekteinstellung „Pipelines müssen erfolgreich sein").
+#   - Es werden nur Funktionen ohne kostenpflichtige Lizenzstufe verwendet.
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+stages:
+  - lint
+  - test
+
+variables:
+  RUFF_VERSION: "0.17.2"
+  PYTEST_VERSION: "9.1.1"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PIP_NO_INPUT: "1"
+  NPM_CONFIG_CACHE: "$CI_PROJECT_DIR/.npm"
+  NPM_CONFIG_UPDATE_NOTIFIER: "false"
+
+default:
+  interruptible: true
+  timeout: 10 minutes
+
+# ---------------------------------------------------------------- Python (FastAPI-Starter)
+.python-job:
+  image: python:3.12-slim
+  rules:
+    - exists:
+        - pyproject.toml
+        - requirements.txt
+  before_script:
+    - python -m venv .venv
+    - . .venv/bin/activate
+    - pip install --quiet "ruff==${RUFF_VERSION}" "pytest==${PYTEST_VERSION}"
+    - if [ -f requirements.txt ]; then pip install --quiet -r requirements.txt; fi
+
+lint:python:
+  extends: .python-job
+  stage: lint
+  script:
+    - ruff check .
+
+test:python:
+  extends: .python-job
+  stage: test
+  script:
+    - pytest -q
+
+# ---------------------------------------------------------------- JavaScript (Express-Starter)
+.js-job:
+  image: node:24-slim
+  rules:
+    - exists:
+        - package.json
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm/
+  before_script:
+    - npm ci --no-audit --no-fund
+
+lint:js:
+  extends: .js-job
+  stage: lint
+  script:
+    - npm run lint
+
+test:js:
+  extends: .js-job
+  stage: test
+  script:
+    - npm test
