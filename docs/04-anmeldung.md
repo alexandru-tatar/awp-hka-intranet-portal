@@ -73,6 +73,11 @@ sources:
 default_roles: []
 ```
 
+Gelesen werden nur die Claims des ID-Tokens (der UserInfo-Endpunkt wird nicht abgefragt). Ein Claim darf ein einzelner
+Wert oder eine Liste sein; mehrere Treffer ergeben mehrere Rollen. Die Werte werden exakt verglichen (Groß-/Kleinschreibung
+zählt): `student` passt, `student@hochschule.example` nicht; ein Wert mit Domain-Zusatz, wie ihn `eduPersonScopedAffiliation`
+liefert, ergibt keine Rolle.
+
 Nicht zugeordnete Werte ergeben keine Rolle (leeres Menü). Rollen werden bei der Anmeldung berechnet und in der
 Session gespeichert; Änderungen gelten ab der nächsten Anmeldung. Manifeste dürfen nur Rollen aus `role_vocabulary`
 (Konfiguration) verwenden. Die Claim-Namen sind Platzhalter, bis das Shibboleth-Attributschema feststeht (02 §8).
