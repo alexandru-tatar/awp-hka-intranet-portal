@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ t('login.title') }}</h1>
+<p class="prose">{{ t('dev.login.intro') }}</p>
+<form method="post" action="/login">
+  <input type="hidden" name="next" value="{{ next }}">
+  <ul class="user-list">
+    {%- for u in users %}
+    <li>
+      <button class="btn btn--secondary" name="user" value="{{ u.id }}">
+        <span>{{ u.name }}</span>
+        <span class="muted small">{{ u.roles | join(', ') if u.roles else t('dev.login.no_roles') }}</span>
+      </button>
+    </li>
+    {%- endfor %}
+  </ul>
+</form>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "macros/table.html" import table %}
+{% from "macros/fields.html" import field, error_summary %}
+{% from "macros/dialog.html" import dialog %}
+{% block content %}
+<h1>{{ app.name }}</h1>
+<div class="notice notice--warn"><p>{{ t('dev.app.notice', name=app.name) }}</p></div>
+
+{{ table(t('dev.app.table_caption'), ['Modul', 'Semester', 'ECTS', 'Note'], [
+  ['Mathematik 1', 'WS 2025/26', '8', '2,3'],
+  ['Programmieren 1', 'WS 2025/26', '6', '1,7'],
+  ['Technische Informatik', 'SS 2026', '5', '3,0'],
+], num_cols=(2, 3), id='grades') }}
+
+<h2>{{ t('dev.app.form_heading') }}</h2>
+{% if submitted and not subject_error %}
+<div class="notice" role="status"><p>{{ t('dev.app.sent') }}</p></div>
+{% endif %}
+<form id="send-form" method="post" action="{{ app.path }}" novalidate>
+  {% if subject_error %}{{ error_summary(t('dev.app.error_summary'), [('subject', t('dev.app.subject_error'))]) }}{% endif %}
+  {{ field('subject', t('dev.app.subject'), hint=t('dev.app.subject_hint'),
+           error=t('dev.app.subject_error') if subject_error else None,
+           required=True, value=subject, maxlength=120) }}
+  {{ field('message', t('dev.app.message'), textarea=True) }}
+  <div class="actions">
+    <button type="button" class="btn btn--primary" data-dialog-open="confirm-send">{{ t('dev.app.send') }} …</button>
+  </div>
+</form>
+{{ dialog('confirm-send', t('dev.app.dialog_title'), t('dev.app.dialog_body'), t('dev.app.send'), submit_form='send-form') }}
+{% endblock %}
