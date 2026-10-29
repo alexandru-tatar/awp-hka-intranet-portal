@@ -1,0 +1,27 @@
+{#- Menu tree (04 §7.1). Also the body of GET /nav.
+    Rendered twice: inside <details> for narrow screens, as a sidebar for wide
+    ones. CSS hides one copy with display:none, so only one <nav> landmark is
+    ever exposed to assistive technology. -#}
+{%- macro tree() -%}
+<nav aria-label="{{ t('nav.label') }}" class="nav">
+  {%- for g in groups %}
+  <h2 class="nav__group">{{ g.category }}</h2>
+  <ul class="nav__list">
+    {%- for a in g.items %}
+    <li><a href="{{ a.path }}"{% if a.slug == current_slug %} aria-current="page"{% endif %}><svg class="icon" aria-hidden="true" focusable="false"><use href="{{ kit.icons_url }}#i-{{ a.menu_icon }}"></use></svg>{{ a.menu_label }}</a></li>
+    {%- endfor %}
+  </ul>
+  {%- else %}
+  <p class="nav__empty">{{ t('nav.empty') }}</p>
+  {%- endfor %}
+</nav>
+{%- endmacro -%}
+<div class="portal-nav">
+  <details class="portal-nav__narrow">
+    <summary>{{ t('nav.menu_button') }}</summary>
+    {{ tree() }}
+  </details>
+  <div class="portal-nav__wide">
+    {{ tree() }}
+  </div>
+</div>

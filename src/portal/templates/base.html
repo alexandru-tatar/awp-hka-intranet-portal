@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page_title }} – {{ t('app.title') }}</title>
+  <link rel="stylesheet" href="{{ kit.css_url }}">
+  <script src="{{ kit.js_url }}" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">{{ t('skip.link') }}</a>
+  {% if cfg.dev %}<div class="dev-banner">{{ t('dev.banner') }}</div>{% endif %}
+  {% include "partials/header.html" %}
+  <div class="shell{% if not nav_html %} shell--plain{% endif %}">
+    {% if nav_html %}{{ nav_html }}{% endif %}
+    <main id="main" tabindex="-1" class="main">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  {% include "partials/footer.html" %}
+</body>
+</html>

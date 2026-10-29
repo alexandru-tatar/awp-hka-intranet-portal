@@ -1,0 +1,12 @@
+<header class="site-header">
+  <a class="brand" href="/">
+    <span class="brand__name">{{ t('brand.name') }}</span>
+    <span class="brand__sub">{{ t('brand.sub') }}</span>
+  </a>
+  {% if user %}
+  <div class="site-header__user">
+    <span class="muted"><span class="visually-hidden">{{ t('header.signed_in_as') }} </span>{{ user.name }}</span>
+    <a href="/logout">{{ t('header.logout') }}</a>
+  </div>
+  {% endif %}
+</header>
