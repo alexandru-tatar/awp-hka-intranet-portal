@@ -1,6 +1,6 @@
 PORT ?= 8000
 
-.PHONY: setup kit contrast dev dev-oidc idp-up idp-down server-up server-down test docs
+.PHONY: setup kit contrast dev dev-oidc idp-up idp-down server-up server-down test docs sdk-test sdk-release
 
 COMPOSE = extras/compose
 
@@ -36,8 +36,15 @@ server-up:
 server-down:
 	docker compose -f $(COMPOSE)/server/compose.yml down
 
-test: contrast
+test: contrast sdk-test
 	uv run pytest -q tests
+
+# Portal-SDK (sdk/README.md): Tests und Freigabe nach sdk/dist/python/platform_sdk
+sdk-test:
+	PYTHONPATH=sdk/python uv run pytest -q sdk/python/tests
+
+sdk-release: sdk-test
+	uv run python sdk/tools/release.py
 
 # API-Dokumentation als HTML aus den Docstrings: docs/api/_build/html/index.html
 # portal.dev bleibt draußen, weil der Import die Anwendung erzeugt.

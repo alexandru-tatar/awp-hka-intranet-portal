@@ -6,3 +6,4 @@ kit/dist/
 docs/api/generated/
 docs/api/_build/
 .DS_Store
+sdk/dist/

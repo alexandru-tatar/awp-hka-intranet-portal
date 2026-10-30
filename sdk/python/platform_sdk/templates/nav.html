@@ -1,0 +1,18 @@
+{#- Ersatz-Menü aus dem eigenen Manifest (Entwicklung oder Portal nicht erreichbar). Markup wie portal/templates/partials/nav.html. -#}
+{%- macro tree() -%}
+<nav aria-label="Hauptnavigation" class="nav">
+  <h2 class="nav__group">{{ item.category }}</h2>
+  <ul class="nav__list">
+    <li><a href="{{ item.path }}"{% if current == item.path or current == item.path ~ '/' %} aria-current="page"{% endif %}><svg class="icon" aria-hidden="true" focusable="false"><use href="{{ kit.icons }}#i-{{ item.icon }}"></use></svg>{{ item.label }}</a></li>
+  </ul>
+</nav>
+{%- endmacro -%}
+<div class="portal-nav">
+  <details class="portal-nav__narrow">
+    <summary>Menü</summary>
+    {{ tree() }}
+  </details>
+  <div class="portal-nav__wide">
+    {{ tree() }}
+  </div>
+</div>

@@ -1,0 +1,9 @@
+{
+  "items": [
+    { "module": "Mathematik 1", "semester": "WS 2025/26", "grade": "2,3", "credits": 8 },
+    { "module": "Einführung in die Informatik", "semester": "WS 2025/26", "grade": "1,7", "credits": 6 },
+    { "module": "Technisches Englisch", "semester": "WS 2025/26", "grade": "bestanden", "credits": 2 },
+    { "module": "Mathematik 2", "semester": "SS 2026", "grade": "3,0", "credits": 8 },
+    { "module": "Programmieren 1", "semester": "SS 2026", "grade": "1,3", "credits": 6 }
+  ]
+}
