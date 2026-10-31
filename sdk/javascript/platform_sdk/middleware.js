@@ -12,8 +12,8 @@ const ASSERTION_HEADER = "x-portal-assertion";
 const LOGIN_HINT = "Bitte öffnen Sie die Anwendung über das Portal und melden Sie sich dort an.";
 
 function logLine(req, res, started, user, requestId) {
-  process.stdout.write(
-    `${JSON.stringify({
+  console.log(
+    JSON.stringify({
       ts: new Date().toISOString().replace(/\.\d+Z$/, "Z"),
       level: "info",
       event: "request",
@@ -22,7 +22,7 @@ function logLine(req, res, started, user, requestId) {
       path: req.path,
       status: res.statusCode,
       ms: Math.round(performance.now() - started),
-    })}\n`,
+    }),
   );
 }
 
