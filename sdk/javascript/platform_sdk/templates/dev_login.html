@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Test-Anmeldung – {{ app }}</title>
+  <link rel="stylesheet" href="/__dev/kit/kit.css">
+</head>
+<body>
+  <div class="dev-banner">Entwicklungsmodus – Anmeldung ist simuliert.</div>
+  <main id="main" class="main prose">
+    <h1>Test-Anmeldung</h1>
+    <p class="lead">Im Entwicklungsmodus gibt es keine echte Anmeldung. Wählen Sie eine Testperson und ihre Rollen.</p>
+    <form method="post" action="/__dev/login">
+      <fieldset class="field">
+        <legend>Testperson</legend>
+        {% for p in persons %}
+        <div><input type="radio" id="sub-{{ p.sub }}" name="sub" value="{{ p.sub }}"{% if loop.first %} checked{% endif %}>
+          <label for="sub-{{ p.sub }}">{{ p.name }} ({{ p.hint }})</label></div>
+        {% endfor %}
+      </fieldset>
+      <fieldset class="field">
+        <legend>Rollen aus dem Manifest</legend>
+        {% for r in roles %}
+        <div><input type="checkbox" id="role-{{ r }}" name="roles" value="{{ r }}" checked>
+          <label for="role-{{ r }}">{{ r }}</label></div>
+        {% endfor %}
+      </fieldset>
+      <div class="field">
+        <label for="extra_roles">Weitere Rollen</label>
+        <p id="extra_roles-hint" class="field__hint">Zum Beispiel „employee“. Mehrere mit Leerzeichen trennen.</p>
+        <input id="extra_roles" name="extra_roles" type="text" aria-describedby="extra_roles-hint">
+      </div>
+      <div class="actions"><button type="submit" class="btn btn--primary">Anmelden</button></div>
+    </form>
+  </main>
+</body>
+</html>
