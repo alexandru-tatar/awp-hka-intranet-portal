@@ -67,7 +67,8 @@ def test_reg5_unknown_role_and_scope_named(validator):
 
 
 def test_icon_enum_matches_sprite():
-    import json, re
+    import json
+    import re
     enum = json.loads((ROOT / "schemas" / "manifest.schema.json").read_text())["properties"]["menu"]["properties"]["icon"]["enum"]
     sprite = re.findall(r'<symbol id="i-([a-z-]+)"', (ROOT / "kit" / "icons" / "icons.svg").read_text())
     assert sorted(enum) == sorted(sprite)
