@@ -1,23 +1,25 @@
 #!/usr/bin/env bash
 # Neue App aus dem Golden Master anlegen (HKA-54).
 #
-# Aufruf:  tools/neue-app.sh <slug> js|python [--pruefen]
+# Aufruf:  tools/neue-app.sh <slug> js|python [--pruefen] [--ohne-team]
 #
 # Legt mit einem Befehl ein fertig eingerichtetes GitHub-Repository "app-<slug>" an:
 #   - Inhalt des Golden Master (Vorlage awp-hka-gold-js bzw. awp-hka-gold-python)
 #   - Zweige main und develop, der Slug steht im manifest.json
 #   - Ruleset "main-schutz" auf main: Pull Request mit 1 Freigabe, Pflicht-Check "check", keine Ausnahme
 #   - Environment test-vm mit den Secrets DEPLOY_SSH_KEY, DEPLOY_HOST, DEPLOY_KNOWN_HOSTS
-#   - Mitglieder des Portal-Repositories als Collaborators (Push-Recht)
+#   - Mitglieder des Portal-Repositories als Collaborators (Push-Recht), außer mit --ohne-team
 #
 # Voraussetzungen: gh (angemeldet als Konto-Inhaber) und jq.
 # Nur der Konto-Inhaber (OWNER) kann Rulesets und Secrets setzen: Das Skript gilt für die Demo.
 #
 # Mit --pruefen läuft nur Teil A (alle Prüfungen vor dem Anlegen), es wird nichts angelegt.
+# Mit --ohne-team werden keine Collaborators eingetragen, es gehen also keine Einladungen raus (für Testläufe).
 #
 # Umgebungsvariablen:
 #   OWNER                    Konto der Repositories                (Standard: alexandru-tatar)
 #   VORLAGE_OWNER            Konto der Golden Master               (Standard: $OWNER)
+#   PORTAL_OWNER             Konto des Portal-Repositories         (Standard: $OWNER)
 #   PORTAL_REPO              Portal-Repository (Slugs, Team)       (Standard: awp-hka-intranet-portal)
 #   DEPLOY_SSH_KEY_FILE      Datei mit dem privaten Deploy-Schlüssel   (Pflicht)
 #   DEPLOY_KNOWN_HOSTS_FILE  Datei mit dem known_hosts-Eintrag der VM  (Pflicht)
@@ -30,6 +32,7 @@ set -euo pipefail
 
 OWNER="${OWNER:-alexandru-tatar}"
 VORLAGE_OWNER="${VORLAGE_OWNER:-$OWNER}"
+PORTAL_OWNER="${PORTAL_OWNER:-$OWNER}"
 PORTAL_REPO="${PORTAL_REPO:-awp-hka-intranet-portal}"
 DEPLOY_HOST="${DEPLOY_HOST:-iwi-hean-05.hs-karlsruhe.de}"
 DEPLOY_SSH_KEY_FILE="${DEPLOY_SSH_KEY_FILE:-}"
@@ -51,11 +54,12 @@ REPO=""
 
 verwendung() {
   cat <<'TEXT'
-Aufruf: tools/neue-app.sh <slug> js|python [--pruefen]
+Aufruf: tools/neue-app.sh <slug> js|python [--pruefen] [--ohne-team]
 
   <slug>     Kurzname der App: Kleinbuchstaben, Ziffern, Bindestrich; 3 bis 31 Zeichen; beginnt mit einem Buchstaben
   js|python  Golden Master als Vorlage
   --pruefen  nur prüfen, nichts anlegen
+  --ohne-team  keine Collaborators eintragen (keine Einladungen an das Team), z. B. für Testläufe
 
 Pflicht: DEPLOY_SSH_KEY_FILE und DEPLOY_KNOWN_HOSTS_FILE (Dateien mit den Werten). Mehr in tools/README.md.
 TEXT
@@ -108,11 +112,11 @@ existiert() {
 # Slugs aus dev/manifests des Portals und aus den bisher angelegten Apps (Thema hka-app)
 vergebene_slugs() {
   local liste pfad name inhalt
-  liste=$(gh api "repos/$OWNER/$PORTAL_REPO/contents/dev/manifests" \
+  liste=$(gh api "repos/$PORTAL_OWNER/$PORTAL_REPO/contents/dev/manifests" \
     --jq '.[] | select(.name | endswith(".json")) | .path') || return 1
   while IFS= read -r pfad; do
     [ -n "$pfad" ] || continue
-    inhalt=$(roh "repos/$OWNER/$PORTAL_REPO/contents/$pfad") || return 1
+    inhalt=$(roh "repos/$PORTAL_OWNER/$PORTAL_REPO/contents/$pfad") || return 1
     printf '%s\n' "$inhalt" | jq -r '.slug // empty' || return 1
   done <<EOF
 $liste
@@ -175,7 +179,7 @@ pruefungen() {
     fehler "Das Repository $OWNER/$REPO_NAME gibt es schon."
   fi
 
-  belegt=$(vergebene_slugs) || fehler "Vergebene Slugs nicht gelesen (Portal $OWNER/$PORTAL_REPO, Apps mit Thema hka-app)."
+  belegt=$(vergebene_slugs) || fehler "Vergebene Slugs nicht gelesen (Portal $PORTAL_OWNER/$PORTAL_REPO, Apps mit Thema hka-app)."
   if printf '%s\n' "$belegt" | grep -qx -- "$SLUG"; then
     fehler "Der Slug '$SLUG' gehört schon zu einer anderen App."
   fi
@@ -217,21 +221,25 @@ anlegen() {
   schritt "Thema hka-app setzen"
   gh repo edit "$REPO" --add-topic hka-app > /dev/null
 
-  schritt "Mitglieder des Portal-Repositories als Collaborators eintragen"
-  local mitglieder
-  mitglieder=$(gh api "repos/$OWNER/$PORTAL_REPO/collaborators" --paginate --jq '.[].login')
-  while IFS= read -r login; do
-    [ -n "$login" ] || continue
-    [ "$(printf '%s' "$login" | tr '[:upper:]' '[:lower:]')" != "$(printf '%s' "$OWNER" | tr '[:upper:]' '[:lower:]')" ] || continue
-    if gh api -X PUT "repos/$REPO/collaborators/$login" -f permission=push > /dev/null; then
-      echo "    $login (muss die Einladung annehmen)"
-    else
-      warnung "$login konnte nicht eingetragen werden."
-      fehlgeschlagen="$fehlgeschlagen $login"
-    fi
-  done <<EOF
+  if [ "$OHNE_TEAM" = 1 ]; then
+    schritt "Collaborators übersprungen (--ohne-team): keine Einladungen"
+  else
+    schritt "Mitglieder des Portal-Repositories als Collaborators eintragen"
+    local mitglieder
+    mitglieder=$(gh api "repos/$PORTAL_OWNER/$PORTAL_REPO/collaborators" --paginate --jq '.[].login')
+    while IFS= read -r login; do
+      [ -n "$login" ] || continue
+      [ "$(printf '%s' "$login" | tr '[:upper:]' '[:lower:]')" != "$(printf '%s' "$OWNER" | tr '[:upper:]' '[:lower:]')" ] || continue
+      if gh api -X PUT "repos/$REPO/collaborators/$login" -f permission=push > /dev/null; then
+        echo "    $login (muss die Einladung annehmen)"
+      else
+        warnung "$login konnte nicht eingetragen werden."
+        fehlgeschlagen="$fehlgeschlagen $login"
+      fi
+    done <<EOF
 $mitglieder
 EOF
+  fi
 
   schritt "Environment $UMGEBUNG anlegen"
   gh api -X PUT "repos/$REPO/environments/$UMGEBUNG" > /dev/null
@@ -289,10 +297,12 @@ JSON
 # --- Hauptteil ------------------------------------------------------------------------------------
 
 PRUEFEN=0
+OHNE_TEAM=0
 ARGUMENTE=()
 for argument in "$@"; do
   case "$argument" in
     --pruefen) PRUEFEN=1 ;;
+    --ohne-team) OHNE_TEAM=1 ;;
     -h | --help)
       verwendung
       exit 0
@@ -320,7 +330,11 @@ if [ "$PRUEFEN" = 1 ]; then
   echo "  Repository $REPO (öffentlich) aus $VORLAGE_OWNER/$VORLAGE, Slug '$SLUG', Zweige main und develop"
   echo "  Ruleset $RULESET_NAME: Pull Request mit 1 Freigabe, Pflicht-Check 'check', keine Ausnahme"
   echo "  Environment $UMGEBUNG mit DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS, DEPLOY_HOST"
-  echo "  Collaborators aus $OWNER/$PORTAL_REPO"
+  if [ "$OHNE_TEAM" = 1 ]; then
+    echo "  Keine Collaborators (--ohne-team)"
+  else
+    echo "  Collaborators aus $PORTAL_OWNER/$PORTAL_REPO"
+  fi
   exit 0
 fi
 

@@ -10,6 +10,7 @@ export DEPLOY_SSH_KEY_FILE=~/.ssh/hka-deploy          # privater Schlüssel des 
 export DEPLOY_KNOWN_HOSTS_FILE=~/.ssh/hka-known-hosts # Zeile(n) aus known_hosts für die Test-VM
 tools/neue-app.sh noten-uebersicht python --pruefen   # nur prüfen
 tools/neue-app.sh noten-uebersicht python             # anlegen
+tools/neue-app.sh test-abc js --ohne-team             # anlegen, ohne das Team einzuladen (Testlauf)
 ```
 
 ### Was entsteht
@@ -20,7 +21,7 @@ tools/neue-app.sh noten-uebersicht python             # anlegen
 | Zweige | `main` und `develop`; im `manifest.json` auf `main` steht der Slug |
 | Ruleset `main-schutz` | Pull Request mit 1 Freigabe (die Autorin kann nicht selbst freigeben, der letzte Push zählt nicht), Pflicht-Check `check`, kein Löschen, kein Force-Push, **keine Ausnahme** (`bypass_actors: []`) |
 | Environment `test-vm` | Secrets `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS`, `DEPLOY_HOST` |
-| Collaborators | alle Mitglieder von `awp-hka-intranet-portal` mit Push-Recht (jede Person nimmt die Einladung an) |
+| Collaborators | alle Mitglieder von `awp-hka-intranet-portal` mit Push-Recht (jede Person nimmt die Einladung an); mit `--ohne-team` entfällt dieser Schritt, es gehen keine Einladungen raus |
 | Thema | `hka-app`; damit prüft das Skript später, ob ein Slug schon vergeben ist |
 
 Die Secret-Namen gelten auch für HKA-46 (Deployment) und HKA-53 (Registrierung): beide nutzen denselben Deploy-Benutzer.
@@ -34,8 +35,8 @@ Der Slug muss `^[a-z][a-z0-9-]{2,30}$` erfüllen (wie `schemas/manifest.schema.j
 
 ### Umgebungsvariablen
 
-`OWNER` (Standard `alexandru-tatar`), `VORLAGE_OWNER` (Standard `$OWNER`), `PORTAL_REPO`
-(Standard `awp-hka-intranet-portal`), `DEPLOY_HOST` (Standard `iwi-hean-05.hs-karlsruhe.de`), `NEUE_APP_WARTEN`
+`OWNER` (Standard `alexandru-tatar`), `VORLAGE_OWNER` (Standard `$OWNER`), `PORTAL_OWNER` (Konto des Portals,
+Standard `$OWNER`), `PORTAL_REPO` (Standard `awp-hka-intranet-portal`), `DEPLOY_HOST` (Standard `iwi-hean-05.hs-karlsruhe.de`), `NEUE_APP_WARTEN`
 (Sekunden zwischen Abfragen nach dem Anlegen, Standard 2).
 
 ### Voraussetzungen und Grenzen
@@ -61,4 +62,6 @@ Der Slug muss `^[a-z][a-z0-9-]{2,30}$` erfüllen (wie `schemas/manifest.schema.j
    (setzt HKA-47 in der Vorlage voraus).
 6. AK6: `tools/neue-app.sh meine-app js --pruefen` und ein schon vergebener Slug brechen vor dem Anlegen ab.
    Automatisch: `uv run pytest tests/test_neue_app.py`.
-7. Testrepositories danach löschen: `gh repo delete alexandru-tatar/app-<slug>`.
+7. Testlauf unter eigenem Konto, ohne Einladungen: Golden Master dort forken und als Vorlage markieren, dann
+   `OWNER=<konto> VORLAGE_OWNER=<konto> PORTAL_OWNER=alexandru-tatar tools/neue-app.sh test-abc js --ohne-team`.
+8. Testrepositories danach löschen: `gh repo delete alexandru-tatar/app-<slug>`.

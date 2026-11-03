@@ -267,6 +267,35 @@ def test_anlegen_komplett(umgebung):
     assert "Fertig" in r.stdout
 
 
+def test_ohne_team_keine_einladungen(umgebung):
+    r = umgebung.starte("noten-uebersicht", "js", "--ohne-team")
+    assert r.returncode == 0, r.stderr
+    log = umgebung.log()
+    assert not any(e.get("aktion") == "api" and "collaborators" in e["endpunkt"] for e in log)
+    assert "--ohne-team" in r.stdout
+    # Alles andere bleibt: develop, Environment, Secrets, Ruleset.
+    assert len(umgebung.zustand()["secrets"]) == 3
+    reihenfolge(log, "POST", "/rulesets")
+    assert umgebung.zustand()["repos"]["app-noten-uebersicht"]["branches"] == ["main", "develop"]
+
+
+def test_ohne_team_im_plan(umgebung):
+    r = umgebung.starte("noten-uebersicht", "js", "--pruefen", "--ohne-team")
+    assert r.returncode == 0, r.stderr
+    assert "Keine Collaborators (--ohne-team)" in r.stdout
+    assert "Collaborators aus" not in r.stdout
+
+
+def test_portal_owner_getrennt_vom_owner(umgebung):
+    # Testlauf unter eigenem Konto: Portal und Golden Master liegen bei einem anderen Konto.
+    umgebung.aendern(lambda z: z.update({"login": "krya1012"}))
+    r = umgebung.starte("noten-uebersicht", "js", "--pruefen", OWNER="krya1012", VORLAGE_OWNER="krya1012",
+                        PORTAL_OWNER="alexandru-tatar")
+    assert r.returncode == 0, r.stderr
+    portal = [e["endpunkt"] for e in umgebung.log() if e.get("aktion") == "api" and "dev/manifests" in e["endpunkt"]]
+    assert portal and all(p.startswith("repos/alexandru-tatar/") for p in portal)
+
+
 def test_geheimnisse_nirgends_sichtbar(umgebung):
     r = umgebung.starte("noten-uebersicht", "python")
     assert r.returncode == 0, r.stderr
