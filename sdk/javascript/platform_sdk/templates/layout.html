@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }} – HKA Portal</title>
+  <link rel="stylesheet" href="{{ kit.css }}">
+  <link rel="stylesheet" href="{{ app_css }}">
+  <script src="{{ kit.js }}" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Zum Inhalt springen</a>
+  {% if dev %}<div class="dev-banner">Entwicklungsmodus – Testperson: {{ user.name }}</div>{% endif %}
+  <header class="site-header">
+    <a class="brand" href="/">
+      <span class="brand__name">Hochschule Karlsruhe</span>
+      <span class="brand__sub">Portal</span>
+    </a>
+    <div class="site-header__user">
+      <span class="muted"><span class="visually-hidden">Angemeldet als </span>{{ user.name }}</span>
+      <a href="{{ '/__dev/login' if dev else '/logout' }}">Abmelden</a>
+    </div>
+  </header>
+  <div class="shell">
+    {{ nav_html | safe }}
+    <main id="main" tabindex="-1" class="main">
+      {{ body | safe }}
+    </main>
+  </div>
+  <footer class="site-footer">
+    <p class="site-footer__brand"><strong>Hochschule Karlsruhe</strong> Portal</p>
+  </footer>
+</body>
+</html>

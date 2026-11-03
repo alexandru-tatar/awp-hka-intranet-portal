@@ -7,3 +7,4 @@ docs/api/generated/
 docs/api/_build/
 .DS_Store
 sdk/dist/
+node_modules/

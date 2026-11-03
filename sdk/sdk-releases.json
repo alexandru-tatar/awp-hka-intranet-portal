@@ -1,9 +1,10 @@
 {
   "1.0.0-dev": {
     "python": "sha256:578aed1e78d7dd1780d709858a059fd1a2b543683c5ebb97d0b10fbbbbca42c1",
+    "javascript": "sha256:190b5b5df1fed11ba70eb6e45a6df5b59734040ea90d31f90507af646c9921df",
     "assertion_versions": [
       1
     ],
-    "released": "2026-10-30"
+    "released": "2026-10-31"
   }
 }

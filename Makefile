@@ -39,9 +39,10 @@ server-down:
 test: contrast sdk-test
 	uv run pytest -q tests
 
-# Portal-SDK (sdk/README.md): Tests und Freigabe nach sdk/dist/python/platform_sdk
+# Portal-SDK (sdk/README.md): Tests und Freigabe nach sdk/dist/<sprache>/platform_sdk
 sdk-test:
 	PYTHONPATH=sdk/python uv run pytest -q sdk/python/tests
+	cd sdk/javascript && { test -d node_modules || npm ci --no-audit --no-fund; } && npm test
 
 sdk-release: sdk-test
 	uv run python sdk/tools/release.py

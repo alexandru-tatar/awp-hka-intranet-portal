@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }} – HKA Portal</title>
+</head>
+<body>
+  <main id="main">
+    <h1>{{ title }}</h1>
+    <p>{{ detail }}</p>
+    {% if request_id %}<p>Vorgangsnummer: {{ request_id }}</p>{% endif %}
+  </main>
+</body>
+</html>
