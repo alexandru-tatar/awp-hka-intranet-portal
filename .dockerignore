@@ -5,6 +5,6 @@ claude-proposal/
 tests/
 kit/dist/
 **/__pycache__/
-*.egg-info/
+**/*.egg-info/
 extras/
 docs/

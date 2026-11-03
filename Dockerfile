@@ -53,13 +53,14 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # Then, add the rest of the project source code and install it
 # Installing separately from its dependencies allows optimal layer caching
 COPY README.md pyproject.toml ./
-COPY src ./src
+# Der Builder läuft als nonroot: src und kit gehören ihm, sonst scheitern egg_info und kit/dist
+COPY --chown=nonroot:nonroot src ./src
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     ["/usr/local/bin/uv", "sync", "--frozen", "--no-default-groups", "--no-editable"]
 
 # Design-Kit bauen (kit/dist, nur Standardbibliothek) sowie Schema und Dev-Konfiguration
-COPY kit ./kit
+COPY --chown=nonroot:nonroot kit ./kit
 COPY schemas ./schemas
 COPY dev ./dev
 RUN ["/opt/app/.venv/bin/python", "kit/tools/build.py"]
