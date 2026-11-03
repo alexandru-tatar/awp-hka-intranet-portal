@@ -1,0 +1,52 @@
+# Portal auf der Test-VM iwi-hean-05 (extras/compose/vm): wie gateway.compose.yml, aber hinter nginx mit HTTPS.
+# Der Browser erreicht Portal und Keycloak über https://iwi-hean-05.hs-karlsruhe.de (Keycloak unter /auth = issuer);
+# der Container holt Discovery, Token und JWKS intern über keycloak:8080/auth (KC_HOSTNAME_BACKCHANNEL_DYNAMIC).
+env: dev
+auth_mode: oidc
+kontakt: "dem IT-Servicedesk (Kontakt folgt)"
+manifests_dir: manifests
+state_file: state.yml
+schema_path: ../schemas/manifest.schema.json
+kit_dist: ../kit/dist
+role_vocabulary: [student, employee, professor, platform-admin, pilot-tester]
+adapter_scopes: [noten:read, mail:send]
+links: { help: "#", privacy: "#", imprint: "#" }
+
+session_cookie: portal_sid
+login_cookie: portal_login
+cookie_secure: true
+
+redis_url: redis://redis:6379/0
+idle_seconds: 1800
+absolute_seconds: 28800
+touch_min_interval_seconds: 60
+login_state_ttl_seconds: 600
+
+oidc:
+  issuer: https://iwi-hean-05.hs-karlsruhe.de/auth/realms/hka
+  discovery_url: http://keycloak:8080/auth/realms/hka/.well-known/openid-configuration
+  client_id: portal
+  client_secret_file: keycloak/portal-client-secret
+  redirect_uri: https://iwi-hean-05.hs-karlsruhe.de/oidc/callback
+  post_logout_redirect_uri: https://iwi-hean-05.hs-karlsruhe.de/   # IdP-Abmeldung (RP-initiated Logout); Wert muss im Client erlaubt sein
+  scopes: [openid, profile, email]
+  id_token_algs: [RS256, ES256]
+  clock_leeway_seconds: 60
+
+roles_file: roles.yml
+grants_file: grants.yml
+
+# Logging (core/log.py): Konsole immer, Logdatei optional. Level je Logger überschreiben die Mindestlevel.
+logging:
+  console_level: INFO           # TRACE | DEBUG | INFO | SUCCESS | WARNING | ERROR | CRITICAL
+  color: auto                   # auto = nur auf einem Terminal; always = auch in docker logs und IDE-Konsolen
+  # file: /tmp/hka-portal.log   # Logdatei einschalten (rotiert, ältere Dateien als .gz)
+  # file_level: DEBUG
+  # rotation: 10 MB
+  # retention: 3
+  levels:
+    uvicorn.access: WARNING       # die Zugriffszeile schreibt portal.web.middleware, mit Request-ID
+    httpx: WARNING
+    redis: INFO
+    httpcore: WARNING
+    watchfiles: WARNING

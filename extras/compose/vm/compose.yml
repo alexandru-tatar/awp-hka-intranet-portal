@@ -1,0 +1,58 @@
+# Test-VM iwi-hean-05: Redis, Keycloak und Portal-Backend hinter nginx (nginx-portal.conf).
+# Die VM erreicht keine Registry. Images deshalb auf dem Mac bauen und übertragen:
+#
+#   Mac:  docker compose -f extras/compose/vm/compose.yml build
+#         docker pull --platform linux/amd64 redis:8-alpine
+#         docker save hka/portal:0.1.0-hardened hka/portal-keycloak:0.1.0 redis:8-alpine | gzip > ~/Downloads/portal-vm.tar.gz
+#         scp ~/Downloads/portal-vm.tar.gz extras/compose/vm/compose.yml sadmin@iwi-hean-05.hs-karlsruhe.de:~
+#   VM:   gunzip -c ~/portal-vm.tar.gz | sudo docker load
+#         sudo docker compose -f ~/compose.yml up -d --no-build
+#
+# Alle Ports nur an 127.0.0.1; von außen erreichbar ist nur nginx (80/443).
+# Keycloak läuft im Dev-Modus mit bekannten Test-Passwörtern (hka-realm.json): nur für Tests mit Testdaten.
+name: hka-portal-vm
+
+services:
+  redis:
+    image: redis:8-alpine
+    platform: linux/amd64
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+
+  keycloak:
+    image: hka/portal-keycloak:0.1.0
+    platform: linux/amd64
+    build:
+      context: ../../..
+      dockerfile: extras/compose/keycloak/Dockerfile
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: "8080"
+      KC_HTTP_RELATIVE_PATH: /auth
+      KC_HOSTNAME: https://iwi-hean-05.hs-karlsruhe.de/auth
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_PROXY_HEADERS: xforwarded
+    ports:
+      - "127.0.0.1:8180:8080"
+    restart: unless-stopped
+
+  backend:
+    image: hka/portal:0.1.0-hardened
+    platform: linux/amd64
+    build:
+      context: ../../..
+      dockerfile: Dockerfile
+    environment:
+      PORTAL_CONFIG: /opt/app/dev/gateway.vm.yml
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
