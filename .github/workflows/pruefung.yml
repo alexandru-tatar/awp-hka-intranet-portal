@@ -58,7 +58,7 @@ jobs:
           "$RUNNER_TEMP/gitleaks" git . --log-opts="HEAD" --redact --no-banner --verbose
 
       - name: uv einrichten
-        uses: astral-sh/setup-uv@v10
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           python-version: "3.14" # wie im Container (Dockerfile.trixie)
           enable-cache: true
