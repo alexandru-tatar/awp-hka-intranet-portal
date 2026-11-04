@@ -2,13 +2,14 @@
 
 ``auth_mode: oidc`` meldet über den IdP an (Keycloak in dev, Shibboleth in prod) und hält die
 Sessions in Redis (02 §4); ``auth_mode: dev`` ist die Auswahl der Testpersonen mit Sessions im
-Speicher. Platzhalter: Die Registry liest Manifeste aus einem Ordner (keine SQLite-Registry, kein
-Prober). ``/apps/<slug>/`` wird mit Abschnitt ``apps`` an den App-Container weitergeleitet, sonst zeigt es
-in dev eine Platzhalter-Seite.
+Speicher. Die Registry liest Manifeste aus einem Ordner (keine SQLite-Registry) und lädt sie im Hintergrund neu.
+Mit ``registry.probe`` prüft der Prober ``/healthz`` jeder App und setzt den Status. ``/apps/<slug>/`` wird mit
+Abschnitt ``apps`` an den App-Container weitergeleitet, sonst zeigt es in dev eine Platzhalter-Seite.
 """
 
 from __future__ import annotations
 
+import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -61,7 +62,15 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
+        tasks = [asyncio.create_task(portal.registry.watch(cfg.registry.refresh_seconds))]
+        if portal.prober is not None:
+            tasks.append(asyncio.create_task(portal.prober.run()))
         yield
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        if portal.prober is not None:
+            await portal.prober.aclose()
         if portal.proxy is not None:
             await portal.proxy.aclose()
 

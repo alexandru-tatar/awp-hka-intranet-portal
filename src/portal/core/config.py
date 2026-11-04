@@ -119,6 +119,19 @@ class AppsConfig:
 
 
 @dataclass(frozen=True)
+class RegistryConfig:
+    """Einstellungen der Registry (Abschnitt ``registry``).
+
+    :ivar refresh_seconds: Abstand, in dem das Portal den Manifest-Ordner auf Änderungen prüft
+    :ivar probe: ``True``, wenn das Portal ``/healthz`` jeder App prüft und den Status selbst setzt
+    :ivar owners_file: JSON-Datei ``{slug: owner}``, die nur der Befehl ``python -m portal.registry`` schreibt
+    """
+    refresh_seconds: float = 5.0
+    probe: bool = False
+    owners_file: Path | None = None
+
+
+@dataclass(frozen=True)
 class Config:
     """Geprüfte Konfiguration des Portals.
 
@@ -147,6 +160,7 @@ class Config:
     :ivar links: Footer-Links
     :ivar assertion: Identitäts-Token für Apps, ``None`` ohne Abschnitt
     :ivar apps: Weiterleitung an App-Container, ``None`` ohne Abschnitt (dann Platzhalter bzw. 404)
+    :ivar registry: Nachladen der Manifeste, Prober und Besitzerdatei
     """
     env: str
     kontakt: str
@@ -173,6 +187,7 @@ class Config:
     links: Links = field(default_factory=Links)
     assertion: AssertionConfig | None = None
     apps: AppsConfig | None = None
+    registry: RegistryConfig = field(default_factory=RegistryConfig)
 
     @property
     def dev(self) -> bool:
@@ -189,8 +204,9 @@ _KEYS = {
     "adapter_scopes", "state_file", "dev_users_file", "session_cookie", "links",
     "login_cookie", "cookie_secure", "auth_mode", "redis_url", "idle_seconds", "absolute_seconds",
     "touch_min_interval_seconds", "login_state_ttl_seconds", "oidc", "logging", "roles_file", "grants_file",
-    "assertion", "apps",
+    "assertion", "apps", "registry",
 }
+_REGISTRY_KEYS = {"refresh_seconds", "probe", "owners_file"}
 _ASSERTION_KEYS = {"issuer", "ttl_seconds", "signing_key_current", "signing_key_next", "signing_key_previous"}
 _APPS_KEYS = {"upstream", "connect_timeout_seconds", "read_timeout_seconds", "max_body_bytes"}
 _OIDC_KEYS = {
@@ -263,7 +279,13 @@ def load_config(path: Path) -> Config:
         links=Links(**links_raw),
         assertion=_load_assertion(path, base, raw.get("assertion")),
         apps=_load_apps(path, raw.get("apps")),
+        registry=_load_registry(path, base, raw.get("registry")),
     )
+    if cfg.registry.probe:
+        if cfg.apps is None:
+            raise ConfigError(f"{path}: registry probe needs an apps section")
+        if cfg.state_file is not None:
+            raise ConfigError(f"{path}: registry probe sets the status itself, remove state_file")
     if cfg.apps is not None:
         if cfg.assertion is None:
             raise ConfigError(f"{path}: apps needs an assertion section")
@@ -417,3 +439,32 @@ def _load_apps(path: Path, raw: dict | None) -> AppsConfig | None:
     if min(cfg.connect_timeout_seconds, cfg.read_timeout_seconds, cfg.max_body_bytes) <= 0:
         raise ConfigError(f"{path}: apps timeouts and max_body_bytes must be positive")
     return cfg
+
+
+def _load_registry(path: Path, base: Path, raw: dict | None) -> RegistryConfig:
+    """Den Abschnitt ``registry`` lesen und prüfen.
+
+    :param path: Pfad der Konfigurationsdatei, für Fehlermeldungen
+    :param base: Ordner der Konfigurationsdatei, Basis für einen relativen ``owners_file``
+    :param raw: Rohwerte des Abschnitts, ``None`` ohne Abschnitt
+    :return: Die Einstellungen, ohne Abschnitt die Voreinstellung
+    :rtype: RegistryConfig
+    :raises ConfigError: Bei unbekannten Schlüsseln, falschen Typen oder einem Abstand unter einer Sekunde
+    """
+    if raw is None:
+        return RegistryConfig()
+    if not isinstance(raw, dict):
+        raise ConfigError(f"{path}: registry must be a mapping")
+    unknown = set(raw) - _REGISTRY_KEYS
+    if unknown:
+        raise ConfigError(f"{path}: unknown registry key(s) {', '.join(sorted(unknown))}")
+    if not isinstance(raw.get("probe", False), bool):
+        raise ConfigError(f"{path}: registry probe must be true or false")
+    refresh = float(raw.get("refresh_seconds", 5))
+    if refresh < 1:
+        raise ConfigError(f"{path}: registry refresh_seconds must be at least 1")
+    return RegistryConfig(
+        refresh_seconds=refresh,
+        probe=raw.get("probe", False),
+        owners_file=(base / raw["owners_file"]).resolve() if raw.get("owners_file") else None,
+    )
