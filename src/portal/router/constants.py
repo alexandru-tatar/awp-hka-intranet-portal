@@ -2,6 +2,7 @@
 
 from typing import Final
 
+AUTHORIZATION: Final = "authorization"
 ETAG: Final = "ETag"
 IF_NONE_MATCH: Final = "if-none-match"
 CACHE_CONTROL: Final = "Cache-Control"

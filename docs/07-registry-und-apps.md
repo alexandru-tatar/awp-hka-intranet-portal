@@ -113,7 +113,7 @@ apps:
   `email` fehlt noch, weil die Session keine Adresse speichert. Das Token steht weder im Log noch in der Fehlerseite.
 - **JWKS:** `GET /.well-known/jwks.json` mit allen veröffentlichten Schlüsseln, `Cache-Control: public, max-age=300`. Apps setzen
   `PORTAL_API_URL` auf die Adresse des Portals.
-- **Menü der App:** `GET /nav` nimmt `X-Portal-Assertion` (Zielgruppe `portal`) an und liefert das Menü für die Rollen im Token. Die Dateien
+- **Menü der App:** `GET /nav` nimmt `Authorization: Bearer <Token>` (Zielgruppe `portal`) an, übergangsweise auch `X-Portal-Assertion` (SDK bis 1.0.0-dev) und liefert das Menü für die Rollen im Token. Die Dateien
   des Kits liegen zusätzlich unter `kit.css`, `kit.js`, `icons.svg` und `<X-Portal-Kit>.js` (Cache `no-cache`).
 - **Fehler:** Container nicht erreichbar oder Status `unhealthy` ergibt 503, Zeitüberschreitung 504, anderer Fehler 502, Body über
   `max_body_bytes` 413 (jeweils Fehlerseite im Portalrahmen).

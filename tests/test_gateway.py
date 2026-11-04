@@ -237,25 +237,46 @@ def test_verify_rejects_foreign_tokens(gw):
         keys.verify("kein.token.hier", "portal")
 
 
-def test_nav_accepts_assertion_with_portal_audience(gw, apps):
+NAV_TOKEN_HEADERS = {
+    "bearer": lambda t: {"Authorization": f"Bearer {t}"},  # 02 §3, SDK ab 1.0.1-dev
+    "bearer-kleingeschrieben": lambda t: {"Authorization": f"bearer {t}"},
+    "x-portal-assertion": lambda t: {"X-Portal-Assertion": t},  # Übergang für SDK bis 1.0.0-dev
+}
+
+
+@pytest.mark.parametrize("form", NAV_TOKEN_HEADERS)
+def test_nav_accepts_assertion_with_portal_audience(gw, apps, form):
     login(gw, "alexandru")
     gw.get("/apps/noten/")
     token = token_of(apps)
     gw.cookies.clear()
-    r = gw.get("/nav", headers={"X-Portal-Assertion": token})
+    r = gw.get("/nav", headers=NAV_TOKEN_HEADERS[form](token))
     assert r.status_code == 200 and "Meine Noten" in r.text and "x-portal-kit" in r.headers
     assert "Raumbuchung" not in r.text
 
 
-def test_nav_rejects_bad_assertion(gw):
+@pytest.mark.parametrize("form", NAV_TOKEN_HEADERS)
+def test_nav_rejects_bad_assertion(gw, form):
     keys = gw.app.state.portal.keys
     now = int(time.time())
     claims = {"iss": ISSUER, "sub": "a", "roles": ["student"], "iat": now, "exp": now + 60, "v": 1}
     wrong_aud = keys.sign({**claims, "aud": ["noten"]})
-    assert gw.get("/nav", headers={"X-Portal-Assertion": wrong_aud}).status_code == 401
-    assert gw.get("/nav", headers={"X-Portal-Assertion": "x.y.z"}).status_code == 401
     forged = wrong_aud[:-4] + "AAAA"
-    assert gw.get("/nav", headers={"X-Portal-Assertion": forged}).status_code == 401
+    for token in (wrong_aud, "x.y.z", forged):
+        assert gw.get("/nav", headers=NAV_TOKEN_HEADERS[form](token)).status_code == 401
+
+
+def test_nav_bearer_wins_over_transition_header(gw):
+    keys = gw.app.state.portal.keys
+    now = int(time.time())
+    claims = {"iss": ISSUER, "sub": "a", "roles": ["student"], "iat": now, "exp": now + 60, "v": 1}
+    good = keys.sign({**claims, "aud": ["portal"]})
+    r = gw.get("/nav", headers={"Authorization": f"Bearer {good}", "X-Portal-Assertion": "x.y.z"})
+    assert r.status_code == 200
+
+
+def test_nav_other_auth_scheme_without_session_is_401(gw):
+    assert gw.get("/nav", headers={"Authorization": "Basic YTpi"}).status_code == 401
 
 
 def test_kit_files_are_served_under_sdk_names(client):

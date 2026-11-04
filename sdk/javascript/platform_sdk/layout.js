@@ -53,7 +53,7 @@ class Layout {
     if (token === null) return null;
     try {
       const response = await fetch(`${this.config.apiUrl}/nav`, {
-        headers: { "X-Portal-Assertion": token },
+        headers: { Authorization: `Bearer ${token}` },
         signal: AbortSignal.timeout(2000),
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
