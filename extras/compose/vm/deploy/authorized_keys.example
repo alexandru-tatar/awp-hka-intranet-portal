@@ -1,0 +1,6 @@
+# /home/deploy/.ssh/authorized_keys (Ordner 0700, Datei 0600, Besitzer deploy)
+# Ein Schlüssel je App-Repository. Der Besitzer steht fest im Schlüssel: Die Pipeline kann ihn nicht ändern, deshalb
+# kann sie auch keinen fremden Namen für sich beanspruchen (TOFU, 03 §6).
+# "restrict" schaltet Terminal, Port- und Agent-Weiterleitung aus. Ein Aufruf mit anderem Befehl scheitert
+# ("ssh deploy@iwi-hean-05.hs-karlsruhe.de bash" -> Exit 2). Optional "from=<Adresse des Runners>," davor.
+restrict,command="sudo -n /usr/local/sbin/portal-deploy --owner alexandru-tatar/meine-app" ssh-ed25519 AAAAC3Nza...Beispiel deploy-meine-app

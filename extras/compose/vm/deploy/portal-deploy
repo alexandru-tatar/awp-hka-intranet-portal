@@ -1,0 +1,52 @@
+#!/bin/bash
+# Festes Kommando des Benutzers "deploy" auf der Test-VM (HKA-53, AK5).
+#
+# Die Pipeline ruft per SSH nur "check" oder "register" auf und schickt das Manifest auf der Standardeingabe.
+# Der Schlüssel in authorized_keys erlaubt nichts anderes (restrict,command="sudo -n … --owner <owner/repo>"),
+# also keine Shell. Das Skript läuft über sudo als root, nur damit es docker starten darf, ohne dass "deploy" in der
+# Gruppe docker (= root) sein muss. Es vertraut deshalb nichts aus der Umgebung außer SSH_ORIGINAL_COMMAND.
+#
+# Installation: sudo install -m 0755 -o root -g root portal-deploy /usr/local/sbin/portal-deploy
+# Einstellungen: /etc/portal/deploy.env (README.md in diesem Ordner)
+set -euo pipefail
+
+if [ "$(id -u)" -eq 0 ]; then
+  PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  ENV_FILE=/etc/portal/deploy.env
+else
+  # Nur für Tests ohne root: Ersatz-docker im PATH und eigene Einstellungen.
+  ENV_FILE=${PORTAL_DEPLOY_ENV:-/etc/portal/deploy.env}
+fi
+
+log() { command -v logger >/dev/null 2>&1 && logger -t portal-deploy -- "$*" || true; }
+refuse() { log "abgelehnt: $1 (owner=${OWNER:-?})"; echo "portal-deploy: $1" >&2; exit 2; }
+
+OWNER=
+if [ "$#" -ne 2 ] || [ "$1" != "--owner" ]; then refuse "Aufruf ohne --owner"; fi
+OWNER=$2
+if ! [[ "$OWNER" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9._-]+$ ]]; then refuse "ungültiger Besitzer"; fi
+
+COMMAND=${SSH_ORIGINAL_COMMAND:-}
+case "$COMMAND" in
+  check) WRITABLE=ro ;;
+  register) WRITABLE=rw ;;
+  *) refuse "nur check oder register erlaubt" ;;
+esac
+
+# shellcheck source=/dev/null
+. "$ENV_FILE"
+: "${PORTAL_IMAGE:?PORTAL_IMAGE fehlt in $ENV_FILE}"
+: "${MANIFESTS_DIR:?MANIFESTS_DIR fehlt in $ENV_FILE}"
+: "${REGISTRY_DIR:?REGISTRY_DIR fehlt in $ENV_FILE}"
+PORTAL_CONFIG_IN_IMAGE=${PORTAL_CONFIG_IN_IMAGE:-/opt/app/dev/gateway.vm.yml}
+
+log "$COMMAND owner=$OWNER"
+exec docker run --rm -i \
+  --network none --read-only --tmpfs /tmp \
+  --cap-drop ALL --security-opt no-new-privileges \
+  --memory 256m --pids-limit 64 \
+  -v "$MANIFESTS_DIR:/var/lib/portal/manifests:$WRITABLE" \
+  -v "$REGISTRY_DIR:/var/lib/portal/registry:$WRITABLE" \
+  --entrypoint python \
+  "$PORTAL_IMAGE" \
+  -m portal.registry "$COMMAND" --config "$PORTAL_CONFIG_IN_IMAGE" --owner "$OWNER"

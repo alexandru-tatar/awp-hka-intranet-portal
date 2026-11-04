@@ -4,8 +4,9 @@
 env: dev
 auth_mode: oidc
 kontakt: "dem IT-Servicedesk (Kontakt folgt)"
-manifests_dir: manifests
-state_file: state.yml
+# Die Manifeste der Apps legt die Pipeline ab (extras/compose/vm/deploy/README.md), das Portal liest sie nur.
+# Der Prober setzt den Status (registry.probe), deshalb gibt es hier keine state.yml.
+manifests_dir: /var/lib/portal/manifests
 schema_path: ../schemas/manifest.schema.json
 kit_dist: ../kit/dist
 role_vocabulary: [student, employee, professor, platform-admin, pilot-tester]
@@ -35,6 +36,20 @@ oidc:
 
 roles_file: roles.yml
 grants_file: grants.yml
+
+# Registry (docs/07-registry-und-apps.md): Manifest-Ordner alle 5 s auf Änderungen prüfen und /healthz jeder App prüfen.
+# owners_file benutzt nur der Befehl "python -m portal.registry" der Pipeline (portal-deploy), nicht das Portal.
+registry:
+  refresh_seconds: 5
+  probe: true
+  owners_file: /var/lib/portal/registry/owners.json
+
+# Weiterleitung /apps/<slug>/ an den Container "app-<slug>" im selben Docker-Netz (HKA-52); der Prober fragt dort /healthz.
+# env dev: Der Signaturschlüssel ist flüchtig und ändert sich bei jedem Start des Portals.
+assertion:
+  issuer: https://iwi-hean-05.hs-karlsruhe.de/
+apps:
+  upstream: http://app-{slug}:8080
 
 # Logging (core/log.py): Konsole immer, Logdatei optional. Level je Logger überschreiben die Mindestlevel.
 logging:
