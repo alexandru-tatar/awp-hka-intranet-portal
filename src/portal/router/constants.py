@@ -8,3 +8,4 @@ CACHE_CONTROL: Final = "Cache-Control"
 X_PORTAL_KIT: Final = "X-Portal-Kit"
 NAV_MAX_AGE: Final = "private, max-age=60"
 UNAUTHORIZED: Final = '{"type":"urn:hka:problem:unauthorized","status":401}'
+JWKS_MAX_AGE: Final = "public, max-age=300"

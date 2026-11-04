@@ -101,7 +101,17 @@ class Views:
         :return: Das HTML-Fragment
         :rtype: Markup
         """
-        groups = self._apps.find_nav_groups(session.roles if session else frozenset())
+        return self.nav_html_for_roles(session.roles if session else frozenset(), current)
+
+    def nav_html_for_roles(self, roles: frozenset[str], current: str | None) -> Markup:
+        """Menü-Fragment für Rollen rendern, etwa aus dem Token einer App.
+
+        :param roles: Rollen der Person
+        :param current: Pfad der aktuellen Seite, markiert den Menüeintrag
+        :return: Das HTML-Fragment
+        :rtype: Markup
+        """
+        groups = self._apps.find_nav_groups(roles)
         html = self._templates.get_template("partials/nav.html").render(
             groups=groups, current_slug=current_slug(current)
         )

@@ -78,6 +78,47 @@ class OidcConfig:
 
 
 @dataclass(frozen=True)
+class AssertionConfig:
+    """Einstellungen des Identitäts-Tokens für Apps (Abschnitt ``assertion``).
+
+    :ivar issuer: Wert von ``iss``, muss dem ``PORTAL_ISSUER`` der Apps exakt entsprechen
+    :ivar ttl_seconds: Gültigkeit eines Tokens in Sekunden
+    :ivar signing_key_current: PEM-Datei des aktuellen Signaturschlüssels; ohne Wert erzeugt ``env: dev`` einen flüchtigen
+    :ivar signing_key_next: PEM-Datei des nächsten Schlüssels, wird nur im JWKS veröffentlicht
+    :ivar signing_key_previous: PEM-Datei des vorigen Schlüssels, wird nur im JWKS veröffentlicht
+    """
+    issuer: str
+    ttl_seconds: int = 60
+    signing_key_current: Path | None = None
+    signing_key_next: Path | None = None
+    signing_key_previous: Path | None = None
+
+
+@dataclass(frozen=True)
+class AppsConfig:
+    """Weiterleitung an die App-Container (Abschnitt ``apps``).
+
+    :ivar upstream: Adresse eines App-Containers mit ``{slug}`` als Platzhalter, z. B. ``http://app-{slug}:8080``
+    :ivar connect_timeout_seconds: Zeitlimit für den Verbindungsaufbau
+    :ivar read_timeout_seconds: Zeitlimit für die Antwort der App
+    :ivar max_body_bytes: Größte erlaubte Anfrage an eine App
+    """
+    upstream: str
+    connect_timeout_seconds: float = 2.0
+    read_timeout_seconds: float = 30.0
+    max_body_bytes: int = 10 * 1024 * 1024
+
+    def upstream_for(self, slug: str) -> str:
+        """Adresse des Containers einer App.
+
+        :param slug: Slug der App
+        :return: Basisadresse ohne abschließenden Slash
+        :rtype: str
+        """
+        return self.upstream.replace("{slug}", slug).rstrip("/")
+
+
+@dataclass(frozen=True)
 class Config:
     """Geprüfte Konfiguration des Portals.
 
@@ -104,6 +145,8 @@ class Config:
     :ivar roles_file: Zuordnung IdP-Claims zu Rollen
     :ivar grants_file: Zusätzliche Rollen je Subject
     :ivar links: Footer-Links
+    :ivar assertion: Identitäts-Token für Apps, ``None`` ohne Abschnitt
+    :ivar apps: Weiterleitung an App-Container, ``None`` ohne Abschnitt (dann Platzhalter bzw. 404)
     """
     env: str
     kontakt: str
@@ -128,6 +171,8 @@ class Config:
     roles_file: Path | None = None
     grants_file: Path | None = None
     links: Links = field(default_factory=Links)
+    assertion: AssertionConfig | None = None
+    apps: AppsConfig | None = None
 
     @property
     def dev(self) -> bool:
@@ -144,7 +189,10 @@ _KEYS = {
     "adapter_scopes", "state_file", "dev_users_file", "session_cookie", "links",
     "login_cookie", "cookie_secure", "auth_mode", "redis_url", "idle_seconds", "absolute_seconds",
     "touch_min_interval_seconds", "login_state_ttl_seconds", "oidc", "logging", "roles_file", "grants_file",
+    "assertion", "apps",
 }
+_ASSERTION_KEYS = {"issuer", "ttl_seconds", "signing_key_current", "signing_key_next", "signing_key_previous"}
+_APPS_KEYS = {"upstream", "connect_timeout_seconds", "read_timeout_seconds", "max_body_bytes"}
 _OIDC_KEYS = {
     "issuer", "client_id", "client_secret_file", "redirect_uri", "post_logout_redirect_uri", "discovery_url", "scopes",
     "id_token_algs", "clock_leeway_seconds",
@@ -213,7 +261,14 @@ def load_config(path: Path) -> Config:
         roles_file=p("roles_file"),
         grants_file=p("grants_file"),
         links=Links(**links_raw),
+        assertion=_load_assertion(path, base, raw.get("assertion")),
+        apps=_load_apps(path, raw.get("apps")),
     )
+    if cfg.apps is not None:
+        if cfg.assertion is None:
+            raise ConfigError(f"{path}: apps needs an assertion section")
+        if not cfg.dev and cfg.assertion.signing_key_current is None:
+            raise ConfigError(f"{path}: apps in prod needs assertion.signing_key_current")
     for key in ("manifests_dir", "schema_path", "kit_dist"):
         if not getattr(cfg, key).exists():
             raise ConfigError(f"{path}: {key} does not exist: {getattr(cfg, key)}")
@@ -306,3 +361,59 @@ def _load_oidc(path: Path, base: Path, raw: dict | None) -> OidcConfig:
         redirect_uri=raw["redirect_uri"],
         **optional,
     )
+
+
+def _load_assertion(path: Path, base: Path, raw: dict | None) -> AssertionConfig | None:
+    """Den Abschnitt ``assertion`` lesen und prüfen.
+
+    :param path: Pfad der Konfigurationsdatei, für Fehlermeldungen
+    :param base: Ordner der Konfigurationsdatei, Basis für die Schlüsseldateien
+    :param raw: Rohwerte des Abschnitts, ``None`` ohne Abschnitt
+    :return: Die Einstellungen oder ``None``
+    :rtype: AssertionConfig | None
+    :raises ConfigError: Bei unbekannten oder fehlenden Schlüsseln, ungültiger Laufzeit oder fehlenden Dateien
+    """
+    if raw is None:
+        return None
+    unknown = set(raw) - _ASSERTION_KEYS
+    if unknown:
+        raise ConfigError(f"{path}: unknown assertion key(s) {', '.join(sorted(unknown))}")
+    if not raw.get("issuer"):
+        raise ConfigError(f"{path}: missing assertion key issuer")
+    ttl = int(raw.get("ttl_seconds", 60))
+    if ttl < 1:
+        raise ConfigError(f"{path}: assertion ttl_seconds must be positive")
+    keys: dict[str, Path | None] = {}
+    for key in ("signing_key_current", "signing_key_next", "signing_key_previous"):
+        keys[key] = (base / raw[key]).resolve() if raw.get(key) else None
+        if keys[key] is not None and not keys[key].exists():
+            raise ConfigError(f"{path}: assertion {key} does not exist: {keys[key]}")
+    return AssertionConfig(issuer=str(raw["issuer"]), ttl_seconds=ttl, **keys)
+
+
+def _load_apps(path: Path, raw: dict | None) -> AppsConfig | None:
+    """Den Abschnitt ``apps`` lesen und prüfen.
+
+    :param path: Pfad der Konfigurationsdatei, für Fehlermeldungen
+    :param raw: Rohwerte des Abschnitts, ``None`` ohne Abschnitt
+    :return: Die Einstellungen oder ``None``
+    :rtype: AppsConfig | None
+    :raises ConfigError: Bei unbekannten Schlüsseln, fehlendem ``upstream`` oder ungültigen Grenzen
+    """
+    if raw is None:
+        return None
+    unknown = set(raw) - _APPS_KEYS
+    if unknown:
+        raise ConfigError(f"{path}: unknown apps key(s) {', '.join(sorted(unknown))}")
+    upstream = str(raw.get("upstream") or "")
+    if not upstream.startswith(("http://", "https://")):
+        raise ConfigError(f"{path}: apps upstream must start with http:// or https://")
+    cfg = AppsConfig(
+        upstream=upstream,
+        connect_timeout_seconds=float(raw.get("connect_timeout_seconds", 2)),
+        read_timeout_seconds=float(raw.get("read_timeout_seconds", 30)),
+        max_body_bytes=int(raw.get("max_body_bytes", 10 * 1024 * 1024)),
+    )
+    if min(cfg.connect_timeout_seconds, cfg.read_timeout_seconds, cfg.max_body_bytes) <= 0:
+        raise ConfigError(f"{path}: apps timeouts and max_body_bytes must be positive")
+    return cfg

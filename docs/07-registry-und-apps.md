@@ -82,3 +82,48 @@ Eine Quelle erfüllt das Protocol `RegistrySource` (`registry/sources.py`):
 
 `Registry` hält den aktuellen `Snapshot` (laufende Nummer plus Apps nach Slug). Leser sperren nie; `reload()` tauscht die Referenz
 unter einem Lock aus (`snapshot_swapped version=… apps=…` im Log). `refresh()` lädt nur, wenn sich der `fingerprint()` geändert hat.
+
+## Weiterleitung an die App (`apps`)
+
+Mit dem Abschnitt `apps` in der Konfiguration leitet das Portal `/apps/<slug>/…` selbst an den Container der App weiter
+(`router/app_router.py`, `web/proxy.py`). Ohne den Abschnitt bleibt es bei der Platzhalter-Seite (nur `env: dev`).
+
+```yaml
+assertion:
+  issuer: https://portal.example/          # muss PORTAL_ISSUER der Apps exakt entsprechen (auch der Schrägstrich am Ende)
+  ttl_seconds: 60
+  signing_key_current: secrets/jwt_current.pem   # PEM, RSA; ohne Datei erzeugt env dev einen flüchtigen Schlüssel
+  signing_key_next: secrets/jwt_next.pem         # optional, wird nur im JWKS veröffentlicht
+  signing_key_previous: secrets/jwt_previous.pem # optional, bleibt nach einem Wechsel im JWKS
+apps:
+  upstream: http://app-{slug}:8080         # {slug} wird ersetzt
+  connect_timeout_seconds: 2
+  read_timeout_seconds: 30
+  max_body_bytes: 10485760
+```
+
+- **Ablauf:** Zugriffsentscheidung wie oben (`find_authorized`: 404, Anmeldung, 403, 503). Erst danach stellt das Portal das Token aus und
+  leitet weiter. Eine abgewiesene Anfrage erreicht die App nie. Anfragen mit Seiteneffekt von einer fremden Seite
+  (`Sec-Fetch-Site: cross-site`/`same-site` oder fremder `Origin`) beantwortet das Portal mit 403.
+- **Pfad:** unverändert, also `/apps/<slug>/…` samt Query. Die App läuft mit `PORTAL_BASE_PATH=/apps/<slug>` auf Port 8080.
+- **Kopfzeilen zur App:** `X-Portal-Assertion` (ersetzt jede mitgeschickte), `X-Request-Id`, `X-Forwarded-For/-Proto/-Host`.
+  `Cookie` geht nie an die App, `Set-Cookie` kommt nie zurück. `Location` auf die Adresse des Containers wird zum relativen Pfad.
+- **Token** (`AssertionService.mint`): RS256, `kid` = RFC-7638-Fingerabdruck. Claims `iss`, `sub`, `name`, `roles` (nur Rollen aus
+  `role_vocabulary`), `aud` = `[slug, "portal"]` (plus `"adapters"` bei Apps mit Adaptern), `azp`, `scp`, `iat`, `exp`, `jti`, `v: 1`.
+  `email` fehlt noch, weil die Session keine Adresse speichert. Das Token steht weder im Log noch in der Fehlerseite.
+- **JWKS:** `GET /.well-known/jwks.json` mit allen veröffentlichten Schlüsseln, `Cache-Control: public, max-age=300`. Apps setzen
+  `PORTAL_API_URL` auf die Adresse des Portals.
+- **Menü der App:** `GET /nav` nimmt `X-Portal-Assertion` (Zielgruppe `portal`) an und liefert das Menü für die Rollen im Token. Die Dateien
+  des Kits liegen zusätzlich unter `kit.css`, `kit.js`, `icons.svg` und `<X-Portal-Kit>.js` (Cache `no-cache`).
+- **Fehler:** Container nicht erreichbar oder Status `unhealthy` ergibt 503, Zeitüberschreitung 504, anderer Fehler 502, Body über
+  `max_body_bytes` 413 (jeweils Fehlerseite im Portalrahmen).
+- **Grenzen:** keine WebSockets, keine Lastverteilung, kein Schlüsselwechsel im Betrieb (nur `next`/`previous` vorbereitet). Prod ohne
+  `signing_key_current` bricht den Start ab.
+
+### Prüfanleitung (lokal, ohne VM)
+
+1. App aus dem Golden Master starten, z. B. Python:
+   `PORTAL_ENV=production PORTAL_SLUG=noten PORTAL_BASE_PATH=/apps/noten PORTAL_API_URL=http://localhost:8000 PORTAL_ISSUER=http://localhost:8000/ PORT=8080 uvicorn app.main:app --app-dir src --port 8080`
+2. `make dev-apps`, als `alexandru` anmelden, `http://localhost:8000/apps/noten/` öffnen: Die App zeigt Name und Rollen.
+3. App beenden und neu laden: Das Portal zeigt die 503-Seite.
+4. Als `gast` anmelden: 403, die App bekommt keine Anfrage.

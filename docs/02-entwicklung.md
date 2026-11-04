@@ -10,6 +10,7 @@ Python ≥ 3.13, [uv](https://docs.astral.sh/uv/), für Anmeldung und Container 
 |---|---|
 | `make setup` | `uv sync`: `.venv` und Abhängigkeiten aus `uv.lock` |
 | `make dev` | baut das Kit, startet mit Testpersonen-Login auf `:8000` (`dev/gateway.dev.yml`) |
+| `make dev-apps` | wie `dev`, aber `/apps/<slug>/` geht an einen App-Container auf `:8080` (`dev/gateway.apps.yml`) |
 | `make dev-oidc` | wie `dev`, aber mit Keycloak + Redis (`dev/gateway.oidc.yml`); vorher `make idp-up` |
 | `make idp-up` / `idp-down` | nur Redis und Keycloak als Container |
 | `make server-up` / `server-down` | Redis, Keycloak und Backend als Container |
@@ -28,6 +29,7 @@ Unbekannte Schlüssel brechen den Start ab. Schlüssel: `core/config.py`.
 | Datei | Zweck |
 |---|---|
 | `dev/gateway.dev.yml` | Testpersonen (`auth_mode: dev`), Sessions im Speicher |
+| `dev/gateway.apps.yml` | wie `dev`, mit `assertion` und `apps` (Weiterleitung, siehe [07](07-registry-und-apps.md)) |
 | `dev/gateway.oidc.yml` | Keycloak + Redis, Portal auf dem Host |
 | `dev/gateway.compose.yml` | wie oben, Portal im Container (`redis`, `keycloak` als Hostnamen) |
 
@@ -50,6 +52,7 @@ Fake-IdP-Tests nutzen weiterhin `httpx`, beide Pakete sind unabhängig voneinand
 | `test_service.py` | Service-Schicht ohne HTTP |
 | `test_oidc.py` | Anmeldung, Sessions in Redis, Abmeldung, Token-Prüfung |
 | `test_kit.py` | Kontrast-Gate, Kit-Build, keine Hex-Farben außerhalb der Tokens |
+| `test_gateway.py` | Weiterleitung an Apps, Token, JWKS, `/nav` mit Token, Kit-Aliase (HKA-52, AK1 bis AK6) |
 | `test_logging.py` | Logformat, Level je Logger, Request-ID in den Zeilen, Umleitung des Standard-Loggings |
 
 ## Konventionen

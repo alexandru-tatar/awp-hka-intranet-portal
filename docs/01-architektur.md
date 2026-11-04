@@ -63,8 +63,9 @@ docs/              diese Dokumentation (Markdown); docs/api/ = Sphinx-Konfigurat
 | `/_portal/status` | `platform-admin` | Status aller Apps |
 | `/_portal/connections` | Session | „Meine Verbindungen" |
 | `/_portal/error/{code}` | – | Fehlerseite (HTML) mit dem angefragten Status 400–599, für die `errors`-Middleware von Traefik |
-| `/nav` | Session | Menü-Fragment (ETag, `X-Portal-Kit`); ohne Session 401 als JSON für das SDK |
+| `/nav` | Session oder `X-Portal-Assertion` | Menü-Fragment (ETag, `X-Portal-Kit`); ohne beides 401 als JSON für das SDK |
+| `/.well-known/jwks.json` | – | öffentliche Schlüssel des Identitäts-Tokens (nur mit Abschnitt `assertion`) |
 | `/login`, `/oidc/callback` | – | Anmeldung (OIDC) bzw. Testpersonen-Auswahl |
 | `/logout` | Session | GET Bestätigung, POST mit CSRF-Token |
 | `/readyz` | – | 200, oder 503 (JSON) wenn Redis nicht antwortet |
-| `/apps/<slug>/` | Session + Rolle | Platzhalter-Seite (nur Dev) |
+| `/apps/<slug>/…` | Session + Rolle | Weiterleitung an den App-Container mit `X-Portal-Assertion` (Abschnitt `apps`, [07](07-registry-und-apps.md)); ohne Abschnitt Platzhalter-Seite (nur Dev) |

@@ -9,7 +9,7 @@ import time
 from fastapi import FastAPI, Request, Response
 from loguru import logger
 
-from ..core.kit import is_static_path
+from ..core.kit import STATIC_PREFIX, is_static_path
 from .deps import get_portal
 
 REQUEST_ID_RE = re.compile(r"^[A-Za-z0-9-]{1,64}$")
@@ -30,14 +30,16 @@ def request_id_for(request: Request) -> str:
 def apply_default_headers(request: Request, response: Response) -> None:
     """Standard-Header setzen: Request-ID, Cache-Control, ``nosniff`` und Referrer-Policy.
 
-    Static-Dateien erhalten langes ``immutable``-Caching, alles andere ``no-store``.
+    Static-Dateien erhalten langes ``immutable``-Caching, ihre festen Alias-Namen ``no-cache`` (sie zeigen auf das
+    jeweils aktuelle Kit), alles andere ``no-store``.
 
     :param request: Anfrage
     :param response: Antwort, wird verändert
     """
     response.headers["X-Request-Id"] = request.state.request_id
     if is_static_path(request.url.path):
-        response.headers["Cache-Control"] = STATIC_CACHE
+        alias = request.url.path[len(STATIC_PREFIX) + 1:] in get_portal(request).kit.aliases
+        response.headers["Cache-Control"] = "no-cache" if alias else STATIC_CACHE
     else:
         response.headers.setdefault("Cache-Control", "no-store")
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
