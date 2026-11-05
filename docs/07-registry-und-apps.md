@@ -63,14 +63,14 @@ raumbuchung:  { status: unhealthy, last_probe_at: "…",                   last_
 
 Ein unbekannter Status wird ins Log geschrieben (`state_rejected`) und die App übersprungen.
 
-## Registrierung durch die Pipeline (HKA-53)
+## Registrierung (HKA-53)
 
-Einfache Stufe der Registry (03 §4 bis §8, ohne SQLite und ohne Schnittstelle mit Token): Die Pipeline legt nach dem erfolgreichen
-Deployment das geprüfte Manifest in den Manifest-Ordner auf der VM. Das Portal übernimmt es von selbst, ohne Neustart.
+Einfache Stufe der Registry (03 §4 bis §8, ohne SQLite und ohne Schnittstelle mit Token): Nach dem Deployment kopiert ein Admin das
+Manifest per `scp` auf die VM und legt es dort mit `portal-deploy` geprüft in den Manifest-Ordner. Das Portal übernimmt es von selbst, ohne Neustart.
 
 ```text
-Pipeline --ssh deploy@VM check/register--> portal-deploy --docker run--> python -m portal.registry
-                                                                           |  schreibt <slug>.json + owners.json
+scp manifest.json --> VM: sudo portal-deploy check/register --docker run--> python -m portal.registry
+                                                                            |  schreibt <slug>.json + owners.json
 Portal (Hintergrundaufgabe): Ordner alle 5 s prüfen --> registering --3 x /healthz 200--> healthy --> Menü
 ```
 
@@ -125,7 +125,7 @@ registry:
   owners_file: /var/lib/portal/registry/owners.json   # nur der Befehl benutzt die Datei
 ```
 
-Einrichtung auf der VM, Schlüssel je App-Repository und Testanleitungen: [`extras/compose/vm/deploy/README.md`](../extras/compose/vm/deploy/README.md).
+Einrichtung auf der VM, Ablauf je App und Testanleitungen: [`extras/compose/vm/deploy/README.md`](../extras/compose/vm/deploy/README.md).
 
 ## Menü und Zugriff
 

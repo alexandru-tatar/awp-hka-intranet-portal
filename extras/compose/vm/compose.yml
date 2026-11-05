@@ -53,7 +53,7 @@ services:
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
-      # Manifeste der Apps, von der Pipeline abgelegt (deploy/README.md). Der Ordner muss vor "up" existieren.
+      # Manifeste der Apps, von Hand mit portal-deploy abgelegt (deploy/README.md). Der Ordner muss vor "up" existieren.
       - /srv/portal/manifests:/var/lib/portal/manifests:ro
     depends_on:
       redis:

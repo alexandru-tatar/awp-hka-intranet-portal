@@ -1,10 +1,12 @@
 #!/bin/bash
-# Festes Kommando des Benutzers "deploy" auf der Test-VM (HKA-53, AK5).
+# Manuelle Registrierung einer App auf der Test-VM (HKA-53).
 #
-# Die Pipeline ruft per SSH nur "check" oder "register" auf und schickt das Manifest auf der Standardeingabe.
-# Der Schlüssel in authorized_keys erlaubt nichts anderes (restrict,command="sudo -n … --owner <owner/repo>"),
-# also keine Shell. Das Skript läuft über sudo als root, nur damit es docker starten darf, ohne dass "deploy" in der
-# Gruppe docker (= root) sein muss. Es vertraut deshalb nichts aus der Umgebung außer SSH_ORIGINAL_COMMAND.
+# Aufruf als sadmin, nachdem das Manifest per scp auf die VM kopiert wurde (README.md in diesem Ordner):
+#   sudo portal-deploy check    --owner <owner/repo> < ~/manifests/<slug>.json   # prüft nur, schreibt nichts
+#   sudo portal-deploy register --owner <owner/repo> < ~/manifests/<slug>.json   # legt das Manifest im Portal ab
+#
+# Das Skript startet das Portal-Image mit festen Argumenten: ohne Netz, schreibgeschützt, ohne Capabilities. Prüfung und
+# Ablage macht "python -m portal.registry" im Container (PF-104, PF-202, PF-204).
 #
 # Installation: sudo install -m 0755 -o root -g root portal-deploy /usr/local/sbin/portal-deploy
 # Einstellungen: /etc/portal/deploy.env (README.md in diesem Ordner)
@@ -18,20 +20,22 @@ else
   ENV_FILE=${PORTAL_DEPLOY_ENV:-/etc/portal/deploy.env}
 fi
 
+usage="Aufruf: sudo portal-deploy check|register --owner <owner/repo> < manifest.json"
 log() { command -v logger >/dev/null 2>&1 && logger -t portal-deploy -- "$*" || true; }
-refuse() { log "abgelehnt: $1 (owner=${OWNER:-?})"; echo "portal-deploy: $1" >&2; exit 2; }
+refuse() { log "abgelehnt: $1 (owner=${OWNER:-?})"; echo "portal-deploy: $1" >&2; echo "$usage" >&2; exit 2; }
 
 OWNER=
-if [ "$#" -ne 2 ] || [ "$1" != "--owner" ]; then refuse "Aufruf ohne --owner"; fi
-OWNER=$2
-if ! [[ "$OWNER" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9._-]+$ ]]; then refuse "ungültiger Besitzer"; fi
-
-COMMAND=${SSH_ORIGINAL_COMMAND:-}
+if [ "$#" -ne 3 ]; then refuse "falsche Anzahl Argumente"; fi
+COMMAND=$1
 case "$COMMAND" in
   check) WRITABLE=ro ;;
   register) WRITABLE=rw ;;
   *) refuse "nur check oder register erlaubt" ;;
 esac
+if [ "$2" != "--owner" ]; then refuse "Aufruf ohne --owner"; fi
+OWNER=$3
+if ! [[ "$OWNER" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9._-]+$ ]]; then refuse "ungültiger Besitzer"; fi
+if [ -t 0 ]; then refuse "Manifest fehlt auf der Standardeingabe"; fi
 
 # shellcheck source=/dev/null
 . "$ENV_FILE"
@@ -40,7 +44,7 @@ esac
 : "${REGISTRY_DIR:?REGISTRY_DIR fehlt in $ENV_FILE}"
 PORTAL_CONFIG_IN_IMAGE=${PORTAL_CONFIG_IN_IMAGE:-/opt/app/dev/gateway.vm.yml}
 
-log "$COMMAND owner=$OWNER"
+log "$COMMAND owner=$OWNER user=${SUDO_USER:-$(id -un)}"
 exec docker run --rm -i \
   --network none --read-only --tmpfs /tmp \
   --cap-drop ALL --security-opt no-new-privileges \

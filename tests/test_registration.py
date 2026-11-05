@@ -1,4 +1,4 @@
-"""Registrierung aus der Pipeline: ``python -m portal.registry check|register`` (HKA-53, AK3 und AK4)."""
+"""Registrierung: ``python -m portal.registry check|register`` (HKA-53, AK3 und AK4)."""
 
 import io
 import json

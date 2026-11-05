@@ -1,27 +1,25 @@
 # Registrierung von Apps auf der Test-VM (HKA-53)
 
-Die Pipeline einer App legt nach dem Deployment das Manifest auf der VM ab. Das Portal übernimmt es nach wenigen Sekunden von selbst,
-prüft `/healthz` der App und zeigt sie im Menü. Wie das im Portal funktioniert, steht in
-[`docs/07-registry-und-apps.md`](../../../../docs/07-registry-und-apps.md#registrierung-durch-die-pipeline-hka-53). Dieser Ordner enthält,
-was auf der VM dafür eingerichtet wird.
+Apps werden von Hand registriert: Das Manifest wird per `scp` auf die VM kopiert und dort mit `portal-deploy` geprüft und abgelegt. Das
+Portal übernimmt es nach wenigen Sekunden von selbst, prüft `/healthz` der App und zeigt sie im Menü. Wie das im Portal funktioniert,
+steht in [`docs/07-registry-und-apps.md`](../../../../docs/07-registry-und-apps.md#registrierung-hka-53). Dieser Ordner enthält, was auf der
+VM dafür eingerichtet wird.
 
 ```text
-GitHub Actions --ssh deploy@VM check|register < manifest.json-->  sshd (Benutzer deploy, Schlüssel mit festem Kommando)
-   --> sudo portal-deploy --owner <owner/repo>  (nur check oder register, sonst Exit 2)
-   --> docker run --network none --read-only … hka/portal python -m portal.registry register
-   --> /srv/portal/manifests/<slug>.json + /srv/portal/registry/owners.json
+Mac:  scp manifest.json sadmin@VM:~/manifests/<slug>.json
+VM:   sudo portal-deploy check|register --owner <owner/repo> < ~/manifests/<slug>.json
+        --> docker run --network none --read-only … hka/portal python -m portal.registry register
+        --> /srv/portal/manifests/<slug>.json + /srv/portal/registry/owners.json
 Portal (Container backend) liest /srv/portal/manifests schreibgeschützt, prüft alle 5 s auf Neues und /healthz der Apps.
 ```
 
 | Datei | Zweck | Ziel auf der VM |
 |---|---|---|
-| `portal-deploy` | festes Kommando: erlaubt nur `check` und `register` | `/usr/local/sbin/portal-deploy` (root, 0755) |
-| `sudoers.portal-deploy` | `deploy` darf genau dieses Skript als root starten | `/etc/sudoers.d/portal-deploy` (0440) |
-| `authorized_keys.example` | Schlüssel je App-Repository mit festem Kommando | `/home/deploy/.ssh/authorized_keys` (0600) |
+| `portal-deploy` | prüft (`check`) oder registriert (`register`) ein Manifest mit festen Docker-Argumenten | `/usr/local/sbin/portal-deploy` (root, 0755) |
 | `deploy.env.example` | Image und Ordner für das Skript | `/etc/portal/deploy.env` |
 
-Warum `sudo`: `docker` darf nur root und die Gruppe `docker` (gleichbedeutend mit root). `deploy` ist in keiner Gruppe und kann nur dieses
-Skript mit festen Argumenten starten. Das Skript traut als root nichts aus der Umgebung außer `SSH_ORIGINAL_COMMAND`.
+Das Manifest wird nicht direkt nach `/srv/portal/manifests` kopiert: `portal-deploy` prüft es vorher (Schema, Rollen, Kategorien, Besitzer)
+und schreibt atomar. Ein abgelehntes Manifest ändert nichts am Menü.
 
 ## Einrichtung (einmal, als `sadmin`)
 
@@ -31,61 +29,47 @@ Skript mit festen Argumenten starten. Das Skript traut als root nichts aus der U
    ```bash
    UID_IMAGE=$(sudo docker run --rm --entrypoint python hka/portal:0.1.0-hardened -c "import os; print(os.getuid())")
    sudo install -d -m 0755 -o "$UID_IMAGE" -g "$UID_IMAGE" /srv/portal/manifests /srv/portal/registry
+   install -d -m 0700 ~/manifests          # Ablage für die per scp kopierten Manifeste
    ```
 3. **Portal neu starten:** `sudo docker compose -f ~/compose.yml up -d --no-build`. Das Menü ist danach leer, bis die erste App registriert ist.
-4. **Benutzer `deploy`** ohne Passwort und ohne Gruppen:
-   ```bash
-   sudo adduser --disabled-password --gecos "" deploy
-   sudo install -d -m 0700 -o deploy -g deploy /home/deploy/.ssh
-   ```
-5. **Skript und Einstellungen:**
+4. **Skript und Einstellungen** (vorher `portal-deploy` und `deploy.env.example` per `scp` nach `~` kopieren):
    ```bash
    sudo install -m 0755 -o root -g root portal-deploy /usr/local/sbin/portal-deploy
    sudo install -d -m 0755 /etc/portal
    sudo install -m 0644 deploy.env.example /etc/portal/deploy.env      # Image und Ordner prüfen
-   sudo install -m 0440 sudoers.portal-deploy /etc/sudoers.d/portal-deploy
-   sudo visudo -cf /etc/sudoers.d/portal-deploy
    ```
-6. **Schlüssel je App-Repository.** Auf dem eigenen Rechner: `ssh-keygen -t ed25519 -N "" -C deploy-<repo> -f deploy-<repo>`. Den öffentlichen
-   Teil mit dem Besitzer des Repositorys in `/home/deploy/.ssh/authorized_keys` eintragen (Muster in `authorized_keys.example`), den
-   privaten Teil als Secret `DEPLOY_SSH_KEY` im Environment `test-vm` des App-Repositorys ablegen und danach lokal löschen. Der Besitzer
-   (`owner/repo`) steht fest im Schlüssel. Eine Pipeline kann deshalb keinen Namen für ein fremdes Repository beanspruchen.
 
-## Schritte im Workflow (kommen mit HKA-50 in die Golden Master)
+## App registrieren (je App und Version)
 
-```yaml
-      - name: SSH vorbereiten
-        run: |
-          install -m 0700 -d ~/.ssh
-          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519 && chmod 600 ~/.ssh/id_ed25519
-          printf '%s\n' "${{ vars.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-      - name: Manifest prüfen (vor dem Deployment)
-        run: ssh -T deploy@iwi-hean-05.hs-karlsruhe.de check < manifest.json
-      # … Container bauen und einspielen (HKA-46), Healthcheck …
-      - name: App registrieren (nach grünem Healthcheck)
-        run: ssh -T deploy@iwi-hean-05.hs-karlsruhe.de register < manifest.json
+Voraussetzung: Der Container `app-<slug>` läuft im Docker-Netz des Portals (Image ebenfalls per `docker save`/`scp`/`docker load`).
+
+```bash
+# Mac
+scp manifest.json sadmin@iwi-hean-05.hs-karlsruhe.de:~/manifests/<slug>.json
+
+# VM
+sudo portal-deploy check    --owner <owner/repo> < ~/manifests/<slug>.json   # prüft nur, schreibt nichts
+sudo portal-deploy register --owner <owner/repo> < ~/manifests/<slug>.json   # nach grünem Healthcheck der App
 ```
 
-Wird das Manifest abgelehnt, steht der Fehlerblock (`PF-104`, `PF-202`, `PF-204`) im Log, der Schritt ist rot, und nichts ändert sich.
+`--owner` ist das Repository der App (`owner/repo`). Der erste Besitzer eines Namens bleibt es (TOFU, 03 §6); dieselbe App immer mit
+demselben `--owner` registrieren. Wird das Manifest abgelehnt, steht der Fehlerblock (`PF-104`, `PF-202`, `PF-204`) in der Ausgabe, der
+Exit-Code ist 1, und nichts ändert sich. `sudo journalctl -t portal-deploy` zeigt jeden Aufruf mit Benutzer.
 
 ## Testanleitungen
 
-**AK5, kein Zugang zur Shell** (vom eigenen Rechner mit dem Schlüssel eines App-Repositorys):
+**Aufruf:** falsche Befehle und Argumente scheitern mit Exit 2, ohne dass Docker startet:
 
 ```bash
-ssh deploy@iwi-hean-05.hs-karlsruhe.de bash            # muss scheitern: portal-deploy: nur check oder register erlaubt (Exit 2)
-ssh deploy@iwi-hean-05.hs-karlsruhe.de 'check; id'     # ebenso
-ssh deploy@iwi-hean-05.hs-karlsruhe.de                 # ohne Befehl: ebenso, kein Terminal
-ssh deploy@iwi-hean-05.hs-karlsruhe.de check < manifest.json         # erlaubt: prüft nur, schreibt nichts
+sudo portal-deploy bash --owner a/b < manifest.json           # nur check oder register erlaubt
+sudo portal-deploy check --owner 'a/b;id' < manifest.json     # ungültiger Besitzer
+sudo portal-deploy check --owner a/b                          # Manifest fehlt auf der Standardeingabe
 ```
 
-Dazu Code-Review der `authorized_keys`: Jede Zeile beginnt mit `restrict,command="sudo -n /usr/local/sbin/portal-deploy --owner …"`. Auf
-der VM zeigt `sudo journalctl -t portal-deploy` jeden Aufruf und jede Ablehnung.
-
-**AK1, App erscheint im Menü** (braucht einen laufenden Container `app-<slug>` im Docker-Netz des Portals, HKA-46 und HKA-50):
+**AK1, App erscheint im Menü:**
 
 ```bash
-date +%T; ssh -T deploy@iwi-hean-05.hs-karlsruhe.de register < manifest.json; date +%T
+date +%T; sudo portal-deploy register --owner <owner/repo> < ~/manifests/<slug>.json; date +%T
 ```
 
 Danach als Person mit der Rolle aus dem Manifest im Browser neu laden und die Zeit bis zum Menüeintrag messen. Ziel: höchstens 60 s,
@@ -100,8 +84,8 @@ sudo docker compose -f ~/compose.yml logs backend | grep registry_change
 ```
 
 **AK3 und AK4, abgelehnte Manifeste:** `manifest.json` mit unbekannter Rolle (`"roles": ["dean"]`) oder Kategorie (`"category": "Freizeit"`)
-einspielen: Der Aufruf endet mit `FEHLER PF-104` und nennt das Feld, das Menü bleibt gleich. Dasselbe Manifest mit einem Schlüssel eines
-anderen Repositorys einspielen: `FEHLER PF-202`.
+registrieren: Der Aufruf endet mit `FEHLER PF-104` und nennt das Feld, das Menü bleibt gleich. Dasselbe Manifest mit einem anderen
+`--owner` registrieren: `FEHLER PF-202`.
 
 ## Lokal ohne VM ausprobieren
 
@@ -113,7 +97,9 @@ anderen Repositorys einspielen: `FEHLER PF-202`.
 
 ## Grenzen
 
-- Die VM ist nur im Hochschulnetz erreichbar. Wie die Pipeline sie erreicht (selbst gehosteter Runner o. Ä.), entscheidet HKA-46.
+- Registrieren kann nur, wer als `sadmin` (mit `sudo`) auf der VM ist. Den Wert von `--owner` prüft niemand gegen das Repository; er
+  dient nur dazu, dass zwei Apps nicht denselben Namen bekommen.
+- Die VM ist nur im Hochschulnetz erreichbar (VPN für `scp`).
 - Der Signaturschlüssel des Gateways ist auf der VM flüchtig (`env: dev`); nach einem Neustart des Portals bekommen Apps neue Tokens.
 - Nach einem Neustart des Portals beginnen alle Apps bei `registering` und sind nach etwa 5 s wieder im Menü.
 - Nicht enthalten: Abmelden einer App, Zurücksetzen auf eine alte Version, Prüfung auf Versionsrückschritt (Phase 3, SQLite-Registry).

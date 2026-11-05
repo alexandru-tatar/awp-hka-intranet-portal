@@ -1,4 +1,4 @@
-"""Festes Kommando des Benutzers ``deploy`` auf der VM (HKA-53, AK5): erlaubt nur ``check`` und ``register``."""
+"""Manuelle Registrierung auf der VM mit ``portal-deploy`` (HKA-53): nur ``check`` und ``register``, feste Docker-Argumente."""
 
 import os
 import shutil
@@ -41,12 +41,8 @@ def box(tmp_path):
         log_file = Path(base["LOG_FILE"])
 
         @staticmethod
-        def run(command: str | None, *args: str, stdin: bytes = b'{"slug": "x"}'):
-            env = dict(base)
-            if command is not None:
-                env["SSH_ORIGINAL_COMMAND"] = command
-            return subprocess.run([str(SCRIPT), *(args or ("--owner", OWNER))], env=env, input=stdin,
-                                  capture_output=True, timeout=30)
+        def run(*args: str, stdin: bytes = b'{"slug": "x"}'):
+            return subprocess.run([str(SCRIPT), *args], env=dict(base), input=stdin, capture_output=True, timeout=30)
 
         @staticmethod
         def docker_args() -> list[str]:
@@ -56,35 +52,30 @@ def box(tmp_path):
 
 
 @pytest.mark.parametrize("command", [
-    "bash", "sh -c id", "check; id", "check && id", "check bash", "register extra", "check\nbash", "$(id)", "`id`",
-    "CHECK", "Register", "", " check", "check ", "../check", "rm -rf /", "scp -t /", "sftp",
+    "bash", "sh -c id", "check; id", "check bash", "$(id)", "`id`", "CHECK", "Register", "", " check", "check ", "../check",
 ])
-def test_ak5_everything_but_check_and_register_is_refused(box, command):
-    result = box.run(command)
+def test_everything_but_check_and_register_is_refused(box, command):
+    result = box.run(command, "--owner", OWNER)
     assert result.returncode == 2
     assert b"nur check oder register erlaubt" in result.stderr
     assert not box.args_file.exists()                          # docker wurde nicht aufgerufen
     assert "abgelehnt" in box.log_file.read_text()
 
 
-def test_ak5_login_without_command_is_refused(box):
-    result = box.run(None)
-    assert result.returncode == 2 and not box.args_file.exists()
-
-
 @pytest.mark.parametrize("args", [
-    (), ("--owner",), ("--owner", ""), ("--owner", "ohne-schrägstrich"), ("--owner", "a/b c"), ("--owner", "a/b;id"),
-    ("--owner", "a/b$(id)"), ("--owner", "../x/y"), ("--owner", "/b"), ("--owner", "a/"), ("--owner", OWNER, "extra"),
-    ("--eigentuemer", OWNER), ("--owner=a/b",),
+    (), ("check",), ("check", "--owner"), ("check", "--owner", ""), ("check", "--owner", "ohne-schrägstrich"),
+    ("check", "--owner", "a/b c"), ("check", "--owner", "a/b;id"), ("check", "--owner", "a/b$(id)"),
+    ("check", "--owner", "../x/y"), ("check", "--owner", "/b"), ("check", "--owner", "a/"),
+    ("check", "--owner", OWNER, "extra"), ("check", "--eigentuemer", OWNER), ("check", "--owner=a/b"),
+    ("--owner", OWNER, "check"),
 ])
-def test_ak5_owner_is_checked_before_anything_runs(box, args):
-    result = box.run("check", *args) if args else subprocess.run(
-        [str(SCRIPT)], env={"PATH": os.environ["PATH"], "SSH_ORIGINAL_COMMAND": "check"}, capture_output=True)
+def test_arguments_are_checked_before_anything_runs(box, args):
+    result = box.run(*args)
     assert result.returncode == 2 and not box.args_file.exists()
 
 
 def test_check_runs_the_container_read_only_without_network(box):
-    result = box.run("check", stdin=b'{"slug": "noten"}')
+    result = box.run("check", "--owner", OWNER, stdin=b'{"slug": "noten"}')
     assert result.returncode == 0, result.stderr
     args = box.docker_args()
     assert args[:2] == ["run", "--rm"] and "-i" in args
@@ -100,32 +91,23 @@ def test_check_runs_the_container_read_only_without_network(box):
 
 
 def test_register_mounts_the_folders_writable(box):
-    assert box.run("register").returncode == 0
+    assert box.run("register", "--owner", OWNER).returncode == 0
     args = box.docker_args()
     assert "/srv/m:/var/lib/portal/manifests:rw" in args and "/srv/r:/var/lib/portal/registry:rw" in args
     assert args[-5:-2] == ["register", "--config", "/opt/app/dev/gateway.vm.yml"]
 
 
-def test_owner_comes_from_the_key_not_from_the_command(box):
-    result = box.run("register --owner fremd/repo")
-    assert result.returncode == 2 and not box.args_file.exists()
-
-
 def test_missing_settings_stop_the_script(box, tmp_path):
     (tmp_path / "deploy.env").write_text("PORTAL_IMAGE=hka/portal:test\n")
-    result = box.run("check")
+    result = box.run("check", "--owner", OWNER)
     assert result.returncode != 0 and b"MANIFESTS_DIR" in result.stderr and not box.args_file.exists()
 
 
-def test_script_is_executable_and_files_for_the_vm_are_complete():
+def test_script_is_executable_and_settings_example_is_complete():
     assert SCRIPT.stat().st_mode & stat.S_IXUSR
     assert SCRIPT.read_text().startswith("#!/bin/bash\n")
-    sudoers = (DEPLOY / "sudoers.portal-deploy").read_text()
-    assert "deploy ALL=(root) NOPASSWD: /usr/local/sbin/portal-deploy --owner *" in sudoers
-    assert 'env_keep += "SSH_ORIGINAL_COMMAND"' in sudoers and "env_reset" in sudoers
-    keys = (DEPLOY / "authorized_keys.example").read_text()
-    assert 'restrict,command="sudo -n /usr/local/sbin/portal-deploy --owner ' in keys
-    assert "ALL" not in [line.split()[0] for line in sudoers.splitlines() if line and not line.startswith(("#", "Defaults"))]
+    settings = (DEPLOY / "deploy.env.example").read_text()
+    assert all(key in settings for key in ("PORTAL_IMAGE=", "MANIFESTS_DIR=", "REGISTRY_DIR="))
 
 
 def test_script_passes_bash_syntax_check():

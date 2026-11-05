@@ -1,4 +1,4 @@
-"""Befehl der Pipeline: ``python -m portal.registry check|register --config <yml> --owner <owner/repo>``.
+"""Befehl zum Registrieren (auf der VM über ``portal-deploy``): ``python -m portal.registry check|register --config <yml> --owner <owner/repo>``.
 
 Das Manifest kommt auf der Standardeingabe. ``check`` prüft nur, ``register`` legt das Manifest zusätzlich im
 Manifest-Ordner ab (``registration.py``). Exit-Code 0 = in Ordnung, 1 = abgelehnt (Fehlerblock PF-nnn auf der

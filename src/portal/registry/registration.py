@@ -1,7 +1,7 @@
-"""Registrierung einer App aus der Pipeline: Manifest prüfen, Besitzer binden, Manifest ablegen (HKA-53).
+"""Registrierung einer App: Manifest prüfen, Besitzer binden, Manifest ablegen (HKA-53).
 
-Einfache Stufe der Registry (03 §4 bis §6): Statt einer Schnittstelle mit Token legt die Pipeline das Manifest über
-``python -m portal.registry`` in den Manifest-Ordner. Das Portal lädt den Ordner selbst nach und prüft ``/healthz``
+Einfache Stufe der Registry (03 §4 bis §6): Statt einer Schnittstelle mit Token legt ein Admin das Manifest auf der VM über
+``portal-deploy`` (``python -m portal.registry``) in den Manifest-Ordner. Das Portal lädt den Ordner selbst nach und prüft ``/healthz``
 (``prober.py``). Der Besitzer einer App ist das Repository, aus dem sie kommt. Der erste Besitzer eines Namens bleibt
 es (TOFU, 03 §6); ein anderes Repository mit demselben Namen wird abgelehnt.
 
@@ -234,7 +234,7 @@ class Registrar:
                 raise _name_taken(slug, f"Der Name „{slug}\" steht schon in einer anderen Manifest-Datei.",
                                   [f"Datei {path.name}"])
         if bound is None and target.exists():
-            raise _name_taken(slug, f"Der Name „{slug}\" ist von Hand eingerichtet und gehört niemandem aus der Pipeline.",
+            raise _name_taken(slug, f"Der Name „{slug}\" ist von Hand eingerichtet und hat keinen Besitzer.",
                               [f"Datei {target.name} ohne Eintrag in der Besitzerdatei"])
 
     @staticmethod
@@ -294,7 +294,7 @@ class Registrar:
                             "PF-204", "Bereitstellung gesperrt",
                             "Eine andere Registrierung läuft gerade.",
                             "Zwei Registrierungen gleichzeitig könnten sich gegenseitig überschreiben.",
-                            ["Warten Sie einige Minuten, dann starten Sie die Pipeline erneut."],
+                            ["Warten Sie einige Sekunden, dann starten Sie die Registrierung erneut."],
                         ) from None
                     time.sleep(0.1)
             yield

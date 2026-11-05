@@ -38,7 +38,7 @@ roles_file: roles.yml
 grants_file: grants.yml
 
 # Registry (docs/07-registry-und-apps.md): Manifest-Ordner alle 5 s auf Änderungen prüfen und /healthz jeder App prüfen.
-# owners_file benutzt nur der Befehl "python -m portal.registry" der Pipeline (portal-deploy), nicht das Portal.
+# owners_file benutzt nur der Befehl "python -m portal.registry" (über portal-deploy), nicht das Portal.
 registry:
   refresh_seconds: 5
   probe: true

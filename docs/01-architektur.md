@@ -37,7 +37,7 @@ docs/              diese Dokumentation (Markdown); docs/api/ = Sphinx-Konfigurat
 | neue Geschäftsregel | `service/<entity>_service.py` (lesen) bzw. `<entity>_write_service.py` (schreiben) |
 | neue Rückgabestruktur eines Services | `service/<entity>_dto.py`, Export in `service/__init__.py` |
 | neue fachliche Exception | `service/exceptions.py` und Statuscode in `web/errors.py` (`SERVICE_ERROR_STATUS`) |
-| neue App im Menü | lokal `dev/manifests/<slug>.json`, Status in `dev/state.yml`; auf der VM legt die Pipeline das Manifest ab (`python -m portal.registry register`), der Prober setzt den Status |
+| neue App im Menü | lokal `dev/manifests/<slug>.json`, Status in `dev/state.yml`; auf der VM per `scp` kopiert und mit `sudo portal-deploy register` abgelegt (`python -m portal.registry`), der Prober setzt den Status |
 | Manifest-Regel oder -Feld | `registry/validation.py` und `schemas/manifest.schema.json` |
 | neue Registry-Quelle | Klasse in `registry/sources.py` mit `load()` und `fingerprint()` (`RegistrySource`) |
 | Konfigurationswert | `core/config.py` (unbekannte Keys sind Fehler) und die Dateien in `dev/` |

@@ -1,6 +1,0 @@
-# /etc/sudoers.d/portal-deploy (Rechte 0440, Prüfen: sudo visudo -cf /etc/sudoers.d/portal-deploy)
-# Der Benutzer "deploy" darf genau ein Skript als root starten und gibt nur SSH_ORIGINAL_COMMAND weiter.
-# env_reset bleibt an: Alles andere aus der Umgebung des SSH-Aufrufs wird verworfen.
-Defaults:deploy env_reset
-Defaults:deploy env_keep += "SSH_ORIGINAL_COMMAND"
-deploy ALL=(root) NOPASSWD: /usr/local/sbin/portal-deploy --owner *
