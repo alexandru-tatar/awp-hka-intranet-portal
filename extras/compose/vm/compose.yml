@@ -9,6 +9,8 @@
 #         sudo docker compose -f ~/compose.yml up -d --no-build
 #
 # Alle Ports nur an 127.0.0.1; von außen erreichbar ist nur nginx (80/443).
+# Zwei Netze (HKA-60): "intern" für Redis, Keycloak und Backend; "hka-portal-apps" nur für Backend und Apps (make deploy).
+# Apps erreichen so nur das Backend, nicht Redis (Sessions) und nicht Keycloak.
 # Keycloak läuft im Dev-Modus mit bekannten Test-Passwörtern (hka-realm.json): nur für Tests mit Testdaten.
 name: hka-portal-vm
 
@@ -23,6 +25,7 @@ services:
       interval: 5s
       timeout: 2s
       retries: 10
+    networks: [intern]
 
   keycloak:
     image: hka/portal-keycloak:0.1.0
@@ -40,6 +43,7 @@ services:
       KC_PROXY_HEADERS: xforwarded
     ports:
       - "127.0.0.1:8180:8080"
+    networks: [intern]
     restart: unless-stopped
 
   backend:
@@ -55,7 +59,13 @@ services:
     volumes:
       # Manifeste der Apps, von Hand mit portal-deploy abgelegt (deploy/README.md). Der Ordner muss vor "up" existieren.
       - /srv/portal/manifests:/var/lib/portal/manifests:ro
+    networks: [intern, apps]
     depends_on:
       redis:
         condition: service_healthy
     restart: unless-stopped
+
+networks:
+  intern: {}
+  apps:
+    name: hka-portal-apps   # fester Name, den tools/deploy.sh im Golden Master benutzt (PORTAL_NETZ)

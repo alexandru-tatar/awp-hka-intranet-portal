@@ -41,7 +41,8 @@ und schreibt atomar. Ein abgelehntes Manifest ändert nichts am Menü.
 
 ## App registrieren (je App und Version)
 
-Voraussetzung: Der Container `app-<slug>` läuft im Docker-Netz des Portals (Image ebenfalls per `docker save`/`scp`/`docker load`).
+Voraussetzung: Der Container `app-<slug>` läuft im Docker-Netz `hka-portal-apps` (HKA-60). Am einfachsten mit `make deploy VM=<host>` im
+App-Repository (Golden Master, HKA-50): Das erledigt Image, Container, `check` und `register` in einem Schritt. Von Hand geht es so:
 
 ```bash
 # Mac
@@ -86,6 +87,18 @@ sudo docker compose -f ~/compose.yml logs backend | grep registry_change
 **AK3 und AK4, abgelehnte Manifeste:** `manifest.json` mit unbekannter Rolle (`"roles": ["dean"]`) oder Kategorie (`"category": "Freizeit"`)
 registrieren: Der Aufruf endet mit `FEHLER PF-104` und nennt das Feld, das Menü bleibt gleich. Dasselbe Manifest mit einem anderen
 `--owner` registrieren: `FEHLER PF-202`.
+
+**HKA-60, Netztrennung:** Das Portal-Image liegt auf der VM und dient als Prüf-Container im Netz der Apps.
+
+```bash
+P='sudo docker run --rm --network hka-portal-apps --entrypoint python hka/portal:0.1.0-hardened -c'
+$P "import socket; socket.create_connection(('backend', 8000), 2); print('backend ok')"   # AK2: ok
+$P "import socket; socket.create_connection(('redis', 6379), 2)"                          # AK3: Fehler (Name unbekannt)
+$P "import socket; socket.create_connection(('keycloak', 8080), 2)"                       # AK3: Fehler (Name unbekannt)
+```
+
+**Umstellung auf HKA-60 (einmal):** `compose.yml` per `scp` kopieren, `sudo docker compose -f ~/compose.yml up -d --no-build`, danach jede
+App einmal neu mit `make deploy` einspielen (sie hängen sonst noch im alten Netz `hka-portal-vm_default`).
 
 ## Lokal ohne VM ausprobieren
 

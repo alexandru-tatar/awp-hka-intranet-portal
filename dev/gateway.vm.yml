@@ -44,7 +44,7 @@ registry:
   probe: true
   owners_file: /var/lib/portal/registry/owners.json
 
-# Weiterleitung /apps/<slug>/ an den Container "app-<slug>" im selben Docker-Netz (HKA-52); der Prober fragt dort /healthz.
+# Weiterleitung /apps/<slug>/ an den Container "app-<slug>" im Docker-Netz hka-portal-apps (HKA-52, HKA-60); der Prober fragt dort /healthz.
 # env dev: Der Signaturschlüssel ist flüchtig und ändert sich bei jedem Start des Portals.
 assertion:
   issuer: https://iwi-hean-05.hs-karlsruhe.de/
