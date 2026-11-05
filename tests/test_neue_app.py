@@ -6,6 +6,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -27,8 +28,10 @@ VORLAGE_MANIFEST = """{
   "version": "0.1.0"
 }
 """
-GEHEIMER_SCHLUESSEL = "TOPSECRET-KEY-4711"
-GEHEIMER_HOST_EINTRAG = "TOPSECRET-KNOWN-HOSTS-4712"
+# Zugangsdaten, die im Testlauf in der Umgebung stehen. Sie dürfen nirgends im Log landen (AK4).
+# Aufbau wie ein echtes GitHub-Token; der Wert ist erfunden.
+ERFUNDENES_TOKEN = "ghp_" + "Zx3Qw9Lm2Vb7Nc5Kd8Fh1Jg4Ts6Ra0Pe9Yu"
+GITLEAKS = "zricethezav/gitleaks:v8.30.1"
 
 
 def manifest(slug: str) -> str:
@@ -53,21 +56,15 @@ def umgebung(tmp_path):
     }
     state_pfad = tmp_path / "state.json"
     log_pfad = tmp_path / "log.jsonl"
-    schluessel = tmp_path / "id_deploy"
-    schluessel.write_text(GEHEIMER_SCHLUESSEL + "\n")
-    hosts = tmp_path / "known_hosts"
-    hosts.write_text(GEHEIMER_HOST_EINTRAG + "\n")
     state_pfad.write_text(json.dumps(zustand))
     env = {
         **os.environ,
         "PATH": f"{FAKE_BIN}{os.pathsep}{os.environ['PATH']}",
         "FAKE_GH_STATE": str(state_pfad),
         "FAKE_GH_LOG": str(log_pfad),
-        "DEPLOY_SSH_KEY_FILE": str(schluessel),
-        "DEPLOY_KNOWN_HOSTS_FILE": str(hosts),
         "NEUE_APP_WARTEN": "0",
     }
-    for name in ("OWNER", "VORLAGE_OWNER", "PORTAL_REPO", "DEPLOY_HOST"):
+    for name in ("OWNER", "VORLAGE_OWNER", "PORTAL_REPO"):
         env.pop(name, None)
 
     class Umgebung:
@@ -104,7 +101,7 @@ def umgebung(tmp_path):
 
 def veraendernde_aufrufe(log):
     """Aufrufe, die etwas anlegen oder ändern (alles außer lesenden GET-Abfragen)."""
-    return [e for e in log if e.get("aktion") in ("repo create", "repo edit", "secret")
+    return [e for e in log if e.get("aktion") in ("repo create", "repo edit")
             or (e.get("aktion") == "api" and e["methode"] != "GET")]
 
 
@@ -205,17 +202,6 @@ def test_falscher_gh_benutzer(umgebung):
     assert veraendernde_aufrufe(umgebung.log()) == []
 
 
-@pytest.mark.parametrize("variable", ["DEPLOY_SSH_KEY_FILE", "DEPLOY_KNOWN_HOSTS_FILE"])
-def test_geheimnisdatei_fehlt_oder_leer(umgebung, tmp_path, variable):
-    leer = tmp_path / "leer"
-    leer.write_text("")
-    for wert in ("", str(tmp_path / "gibt-es-nicht"), str(leer)):
-        r = umgebung.starte("meine-noten", "js", **{variable: wert})
-        assert r.returncode == 1
-        assert variable in r.stderr
-    assert veraendernde_aufrufe(umgebung.log()) == []
-
-
 def test_anlegen_komplett(umgebung):
     r = umgebung.starte("noten-uebersicht", "js")
     assert r.returncode == 0, r.stderr
@@ -242,12 +228,7 @@ def test_anlegen_komplett(umgebung):
     assert eingeladen == {"thanhxt", "krya1012"}
     assert all("permission=push" in e["argv"] for e in log if e.get("aktion") == "api" and "/collaborators/" in e["endpunkt"])
 
-    # 4. Environment und Secrets
-    assert any(e.get("aktion") == "api" and e["endpunkt"] == f"repos/{repo}/environments/test-vm" for e in log)
-    secrets = {(s["name"], s["env"]) for s in zustand["secrets"]}
-    assert secrets == {("DEPLOY_SSH_KEY", "test-vm"), ("DEPLOY_KNOWN_HOSTS", "test-vm"), ("DEPLOY_HOST", "test-vm")}
-
-    # 5. Ruleset: 1 Freigabe, Pflicht-Check "check", keine Ausnahme
+    # 4. Ruleset: 1 Freigabe, Pflicht-Check "check", keine Ausnahme
     ruleset = next(e for e in log if e.get("aktion") == "api" and e["endpunkt"].endswith("/rulesets"))
     payload = json.loads(ruleset["stdin"])
     assert payload["enforcement"] == "active"
@@ -273,8 +254,7 @@ def test_ohne_team_keine_einladungen(umgebung):
     log = umgebung.log()
     assert not any(e.get("aktion") == "api" and "collaborators" in e["endpunkt"] for e in log)
     assert "--ohne-team" in r.stdout
-    # Alles andere bleibt: develop, Environment, Secrets, Ruleset.
-    assert len(umgebung.zustand()["secrets"]) == 3
+    # Alles andere bleibt: develop und Ruleset.
     reihenfolge(log, "POST", "/rulesets")
     assert umgebung.zustand()["repos"]["app-noten-uebersicht"]["branches"] == ["main", "develop"]
 
@@ -296,18 +276,49 @@ def test_portal_owner_getrennt_vom_owner(umgebung):
     assert portal and all(p.startswith("repos/alexandru-tatar/") for p in portal)
 
 
-def test_geheimnisse_nirgends_sichtbar(umgebung):
+def test_kein_secret_und_kein_environment(umgebung):
+    # Das Deployment läuft von Hand per scp (HKA-50, HKA-53): keine Secrets, keine Environments, keine DEPLOY_*-Pflicht.
     r = umgebung.starte("noten-uebersicht", "python")
     assert r.returncode == 0, r.stderr
-    log_text = umgebung.log_pfad.read_text()
-    for geheimnis in (GEHEIMER_SCHLUESSEL, GEHEIMER_HOST_EINTRAG):
-        assert geheimnis not in r.stdout
-        assert geheimnis not in r.stderr
-        assert geheimnis not in log_text
-    # Die Werte kamen über die Standardeingabe (Prüfsumme im Log), nie als Argument.
-    secrets = [e for e in umgebung.log() if e.get("aktion") == "secret"]
-    assert len(secrets) == 3
-    assert all("--body" not in e["argv"] and "-b" not in e["argv"] for e in secrets)
+    log = umgebung.log()
+    assert not any(e["argv"][:1] == ["secret"] for e in log)
+    assert not any("environments" in e.get("endpunkt", "") for e in log)
+    assert "DEPLOY" not in r.stdout + r.stderr
+    assert "secret" not in r.stdout.lower()
+
+
+def test_ak4_log_ohne_zugangsdaten_gitleaks(umgebung):
+    """AK4: Weder die Ausgabe noch das Log des Skripts enthält Zugangsdaten (Gitleaks)."""
+    if shutil.which("docker") is None or subprocess.run(["docker", "info"], capture_output=True).returncode != 0:
+        pytest.skip("Docker läuft nicht: Gitleaks-Prüfung nicht möglich")
+    # Das Token steht in der Umgebung des Skripts, wie bei einem angemeldeten gh. Es darf nirgends ausgegeben werden.
+    r = umgebung.starte("noten-uebersicht", "js", GH_TOKEN=ERFUNDENES_TOKEN, GITHUB_TOKEN=ERFUNDENES_TOKEN)
+    assert r.returncode == 0, r.stderr
+    # Unter dem Repository, nicht unter /private/tmp: Colima teilt nur das Home-Verzeichnis mit der VM.
+    basis = ROOT / ".pytest_cache"
+    basis.mkdir(exist_ok=True)
+    ordner = Path(tempfile.mkdtemp(prefix="gitleaks-", dir=basis))
+    try:
+        (ordner / "ausgabe.log").write_text(r.stdout + "\n--- stderr ---\n" + r.stderr, encoding="utf-8")
+        shutil.copy(umgebung.log_pfad, ordner / "gh-aufrufe.jsonl")
+        # Schutz gegen eine Prüfung, die nichts liest: ein absichtlich eingebautes Token muss gefunden werden.
+        probe = ordner / "probe"
+        probe.mkdir()
+        (probe / "probe.txt").write_text(f"token = {ERFUNDENES_TOKEN}\n", encoding="utf-8")
+        scan = ["docker", "run", "--rm", "-v", f"{ordner}:/repo:ro", GITLEAKS, "dir"]
+        # Die Probe muss anschlagen, sonst ist der Scanner blind.
+        gefunden = subprocess.run([*scan, "/repo/probe", "--no-banner", "--no-color", "--redact"], capture_output=True, text=True)
+        assert gefunden.returncode != 0, "Gitleaks hat das Probe-Token nicht gefunden: Prüfung ungültig"
+        assert "leaks found" in gefunden.stdout + gefunden.stderr
+        shutil.rmtree(probe)
+        sauber = subprocess.run([*scan, "/repo", "--no-banner", "--no-color", "--redact"], capture_output=True, text=True)
+        ausgabe = sauber.stdout + sauber.stderr
+        assert sauber.returncode == 0, ausgabe
+        assert "no leaks found" in ausgabe
+        assert "scanned ~0 bytes" not in ausgabe, "Gitleaks hat nichts gelesen: Prüfung ungültig"
+    finally:
+        shutil.rmtree(ordner, ignore_errors=True)
+    assert ERFUNDENES_TOKEN not in r.stdout + r.stderr + umgebung.log_pfad.read_text()
 
 
 def test_wartet_auf_kopierte_vorlage(umgebung):

@@ -2,8 +2,8 @@
 """Attrappe für die GitHub-CLI (gh), nur für tests/test_neue_app.py.
 
 Antwortet aus einer JSON-Datei ($FAKE_GH_STATE) und schreibt jeden Aufruf als JSON-Zeile in
-$FAKE_GH_LOG: Argumente, Methode, Endpunkt und den SHA-256 der Standardeingabe. Der Inhalt der
-Standardeingabe steht nur im Log, wenn es kein Geheimnis ist (``gh api --input``).
+$FAKE_GH_LOG: Argumente, Methode, Endpunkt und den SHA-256 der Standardeingabe. Die Standardeingabe
+steht im Log (``gh api --input``); das Skript gibt keine Zugangsdaten hinein.
 Anlegen und Ändern verändern den Zustand, damit spätere Aufrufe es sehen.
 """
 
@@ -16,7 +16,7 @@ import sys
 
 STATE_PATH = os.environ["FAKE_GH_STATE"]
 LOG_PATH = os.environ["FAKE_GH_LOG"]
-MIT_WERT = {"-H", "-X", "-f", "-F", "--jq", "-q", "--input", "--env", "--repo", "--template", "--description", "--add-topic", "-R"}
+MIT_WERT = {"-H", "-X", "-f", "-F", "--jq", "-q", "--input", "--repo", "--template", "--description", "--add-topic", "-R"}
 
 
 def lade():
@@ -72,27 +72,16 @@ def main():
     positionen, opt = zerlege(argv)
     eintrag = {"argv": argv}
 
-    liest_stdin = ("--input" in opt and "-" in opt["--input"]) or positionen[:2] == ["secret", "set"]
-    if liest_stdin:
+    if "--input" in opt and "-" in opt["--input"]:
         daten = sys.stdin.buffer.read()
         eintrag["stdin_sha256"] = hashlib.sha256(daten).hexdigest()
-        if "--input" in opt:
-            eintrag["stdin"] = daten.decode("utf-8")
+        eintrag["stdin"] = daten.decode("utf-8")
     jq = (opt.get("--jq") or opt.get("-q") or [None])[0]
 
     kommando = positionen[0] if positionen else ""
 
     if kommando == "auth":
         protokolliere(eintrag)
-        sys.exit(0)
-
-    if kommando == "secret":
-        eintrag["aktion"] = "secret"
-        eintrag["name"] = positionen[2]
-        eintrag["env"] = opt.get("--env", [None])[0]
-        protokolliere(eintrag)
-        state.setdefault("secrets", []).append({"name": positionen[2], "env": eintrag["env"], "sha256": eintrag["stdin_sha256"]})
-        speichere(state)
         sys.exit(0)
 
     if kommando == "repo":
@@ -199,8 +188,6 @@ def main():
         antwort({"ref": felder["ref"]}, jq)
     if rest.startswith("collaborators/") and methode == "PUT":
         antwort({}, jq)
-    if rest.startswith("environments/") and methode == "PUT":
-        antwort({"name": rest.split("/", 1)[1]}, jq)
     if rest == "rulesets" and methode == "POST":
         antwort({"id": 1}, jq)
     nicht_gefunden()

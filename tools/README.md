@@ -2,12 +2,11 @@
 
 ## neue-app.sh: neue App aus dem Golden Master anlegen (HKA-54)
 
-Ein Befehl legt das GitHub-Repository `app-<slug>` an. Danach funktionieren Prüf-Pipeline, Review-Pflicht und Deployment
-ohne eigene Einrichtung.
+Ein Befehl legt das GitHub-Repository `app-<slug>` an. Danach funktionieren Prüf-Pipeline und Review-Pflicht ohne eigene
+Einrichtung. Das Deployment läuft von Hand per `scp` (HKA-50, HKA-53; Ablauf in Confluence „CI/CD und Deployment“): Das
+Skript legt dafür keine Secrets und keine Environments an.
 
 ```sh
-export DEPLOY_SSH_KEY_FILE=~/.ssh/hka-deploy          # privater Schlüssel des Deploy-Benutzers (nur Datei, nie Argument)
-export DEPLOY_KNOWN_HOSTS_FILE=~/.ssh/hka-known-hosts # Zeile(n) aus known_hosts für die Test-VM
 tools/neue-app.sh noten-uebersicht python --pruefen   # nur prüfen
 tools/neue-app.sh noten-uebersicht python             # anlegen
 tools/neue-app.sh test-abc js --ohne-team             # anlegen, ohne das Team einzuladen (Testlauf)
@@ -20,11 +19,8 @@ tools/neue-app.sh test-abc js --ohne-team             # anlegen, ohne das Team e
 | Repository | `alexandru-tatar/app-<slug>`, öffentlich, Inhalt von `awp-hka-gold-js` bzw. `awp-hka-gold-python` |
 | Zweige | `main` und `develop`; im `manifest.json` auf `main` steht der Slug |
 | Ruleset `main-schutz` | Pull Request mit 1 Freigabe (die Autorin kann nicht selbst freigeben, der letzte Push zählt nicht), Pflicht-Check `check`, kein Löschen, kein Force-Push, **keine Ausnahme** (`bypass_actors: []`) |
-| Environment `test-vm` | Secrets `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS`, `DEPLOY_HOST` |
 | Collaborators | alle Mitglieder von `awp-hka-intranet-portal` mit Push-Recht (jede Person nimmt die Einladung an); mit `--ohne-team` entfällt dieser Schritt, es gehen keine Einladungen raus |
 | Thema | `hka-app`; damit prüft das Skript später, ob ein Slug schon vergeben ist |
-
-Die Secret-Namen gelten auch für HKA-46 (Deployment) und HKA-53 (Registrierung): beide nutzen denselben Deploy-Benutzer.
 
 ### Prüfungen vor dem Anlegen (Teil A, auch mit `--pruefen`)
 
@@ -36,12 +32,12 @@ Der Slug muss `^[a-z][a-z0-9-]{2,30}$` erfüllen (wie `schemas/manifest.schema.j
 ### Umgebungsvariablen
 
 `OWNER` (Standard `alexandru-tatar`), `VORLAGE_OWNER` (Standard `$OWNER`), `PORTAL_OWNER` (Konto des Portals,
-Standard `$OWNER`), `PORTAL_REPO` (Standard `awp-hka-intranet-portal`), `DEPLOY_HOST` (Standard `iwi-hean-05.hs-karlsruhe.de`), `NEUE_APP_WARTEN`
-(Sekunden zwischen Abfragen nach dem Anlegen, Standard 2).
+Standard `$OWNER`), `PORTAL_REPO` (Standard `awp-hka-intranet-portal`), `NEUE_APP_WARTEN` (Sekunden zwischen Abfragen nach
+dem Anlegen, Standard 2). Zugangsdaten braucht das Skript nicht; es liest nur die Anmeldung von `gh`.
 
 ### Voraussetzungen und Grenzen
 
-- `gh` und `jq`, `gh` angemeldet als **Konto-Inhaber** (`alexandru-tatar`). Nur er kann Rulesets und Secrets setzen. Das
+- `gh` und `jq`, `gh` angemeldet als **Konto-Inhaber** (`alexandru-tatar`). Nur er kann Rulesets setzen. Das
   reicht für die Demo, nicht für den Betrieb (Organisation oder GitLab-Gruppe: Phase 3, HKA-23).
 - Beide Golden Master einmalig als Vorlage markieren:
   `gh repo edit alexandru-tatar/awp-hka-gold-js --template` und `… awp-hka-gold-python --template`.
@@ -57,7 +53,10 @@ Standard `$OWNER`), `PORTAL_REPO` (Standard `awp-hka-intranet-portal`), `DEPLOY_
    zeigt `main` und `develop`, `manifest.json` trägt den Slug.
 2. AK2: `gh api repos/alexandru-tatar/app-<slug>/rules/branches/main` zeigt Pull-Request-Pflicht mit 1 Freigabe und `check`.
 3. AK3: `git push origin HEAD:main` wird abgelehnt; den eigenen Pull Request freigeben ist nicht möglich.
-4. AK4: `gh secret list --env test-vm --repo alexandru-tatar/app-<slug>` nennt die drei Secrets; Werte stehen nicht im Log.
+4. AK4: Gitleaks über das neue Repository und über das Log des Skripts: `git clone https://github.com/alexandru-tatar/app-<slug>.git`,
+   darin `gitleaks git .` (ohne Fund); das Log mit `tools/neue-app.sh … 2>&1 | tee neue-app.log` aufnehmen und `gitleaks dir neue-app.log`
+   prüfen. Automatisch für das Log: `uv run pytest tests/test_neue_app.py -k ak4` (braucht Docker; die Probe mit einem eingebauten
+   Token muss anschlagen, sonst gilt die Prüfung als ungültig).
 5. AK5: auf `develop` pushen und einen Pull Request nach `main` öffnen: die Pipeline `Prüfung` läuft ohne weitere Einrichtung
    (setzt HKA-47 in der Vorlage voraus).
 6. AK6: `tools/neue-app.sh meine-app js --pruefen` und ein schon vergebener Slug brechen vor dem Anlegen ab.

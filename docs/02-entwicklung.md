@@ -131,5 +131,5 @@ docker run --rm --publish 8000:8000 hka/portal:0.1.0-trixie
 ## Neue App anlegen
 
 `tools/neue-app.sh <slug> js|python` legt aus einem Golden Master ein fertig eingerichtetes App-Repository an
-(Zweige, Branchschutz, Secrets, Team). Aufruf, Voraussetzungen und Prüfanleitung: `tools/README.md`. Die Tests laufen
+(Zweige, Branchschutz, Team). Aufruf, Voraussetzungen und Prüfanleitung: `tools/README.md`. Die Tests laufen
 mit `make test` (`tests/test_neue_app.py`, mit einer Attrappe für `gh`).

@@ -7,11 +7,11 @@
 #   - Inhalt des Golden Master (Vorlage awp-hka-gold-js bzw. awp-hka-gold-python)
 #   - Zweige main und develop, der Slug steht im manifest.json
 #   - Ruleset "main-schutz" auf main: Pull Request mit 1 Freigabe, Pflicht-Check "check", keine Ausnahme
-#   - Environment test-vm mit den Secrets DEPLOY_SSH_KEY, DEPLOY_HOST, DEPLOY_KNOWN_HOSTS
 #   - Mitglieder des Portal-Repositories als Collaborators (Push-Recht), außer mit --ohne-team
 #
 # Voraussetzungen: gh (angemeldet als Konto-Inhaber) und jq.
-# Nur der Konto-Inhaber (OWNER) kann Rulesets und Secrets setzen: Das Skript gilt für die Demo.
+# Nur der Konto-Inhaber (OWNER) kann Rulesets setzen: Das Skript gilt für die Demo.
+# Das Deployment läuft von Hand per scp (HKA-50, HKA-53): Das Skript legt keine Secrets und keine Environments an.
 #
 # Mit --pruefen läuft nur Teil A (alle Prüfungen vor dem Anlegen), es wird nichts angelegt.
 # Mit --ohne-team werden keine Collaborators eingetragen, es gehen also keine Einladungen raus (für Testläufe).
@@ -21,12 +21,9 @@
 #   VORLAGE_OWNER            Konto der Golden Master               (Standard: $OWNER)
 #   PORTAL_OWNER             Konto des Portal-Repositories         (Standard: $OWNER)
 #   PORTAL_REPO              Portal-Repository (Slugs, Team)       (Standard: awp-hka-intranet-portal)
-#   DEPLOY_SSH_KEY_FILE      Datei mit dem privaten Deploy-Schlüssel   (Pflicht)
-#   DEPLOY_KNOWN_HOSTS_FILE  Datei mit dem known_hosts-Eintrag der VM  (Pflicht)
-#   DEPLOY_HOST              Rechner der Test-VM                   (Standard: iwi-hean-05.hs-karlsruhe.de)
 #   NEUE_APP_WARTEN          Sekunden zwischen Abfragen nach dem Anlegen (Standard: 2)
 #
-# Geheimnisse gehen nur über Dateien und Standardeingabe, nie als Argument und nie ins Log.
+# Das Skript liest und schreibt keine Zugangsdaten. Weder das Repository noch das Log enthalten welche (Gitleaks, AK4).
 
 set -euo pipefail
 
@@ -34,9 +31,6 @@ OWNER="${OWNER:-alexandru-tatar}"
 VORLAGE_OWNER="${VORLAGE_OWNER:-$OWNER}"
 PORTAL_OWNER="${PORTAL_OWNER:-$OWNER}"
 PORTAL_REPO="${PORTAL_REPO:-awp-hka-intranet-portal}"
-DEPLOY_HOST="${DEPLOY_HOST:-iwi-hean-05.hs-karlsruhe.de}"
-DEPLOY_SSH_KEY_FILE="${DEPLOY_SSH_KEY_FILE:-}"
-DEPLOY_KNOWN_HOSTS_FILE="${DEPLOY_KNOWN_HOSTS_FILE:-}"
 WARTEN="${NEUE_APP_WARTEN:-2}"
 
 # Gleiche Liste wie RESERVED_SLUGS in src/portal/registry/models.py (ein Test prüft den Gleichlauf).
@@ -45,7 +39,6 @@ RESERVIERT="_portal admin api auth static apps portal adapters gateway traefik r
 GESPERRT="meine-app andere-app"
 SLUG_MUSTER='^[a-z][a-z0-9-]{2,30}$' # wie schemas/manifest.schema.json
 GITHUB_ACTIONS_ID=15368
-UMGEBUNG="test-vm"
 RULESET_NAME="main-schutz"
 
 ANGELEGT=0
@@ -61,7 +54,7 @@ Aufruf: tools/neue-app.sh <slug> js|python [--pruefen] [--ohne-team]
   --pruefen  nur prüfen, nichts anlegen
   --ohne-team  keine Collaborators eintragen (keine Einladungen an das Team), z. B. für Testläufe
 
-Pflicht: DEPLOY_SSH_KEY_FILE und DEPLOY_KNOWN_HOSTS_FILE (Dateien mit den Werten). Mehr in tools/README.md.
+Mehr in tools/README.md.
 TEXT
 }
 
@@ -157,15 +150,9 @@ pruefungen() {
     [ "$SLUG" != "$wort" ] || fehler "Slug '$SLUG' ist ein Platzhalter aus der Vorlage oder den Tests. Bitte einen eigenen Namen wählen."
   done
 
-  [ -n "$DEPLOY_SSH_KEY_FILE" ] && [ -s "$DEPLOY_SSH_KEY_FILE" ] \
-    || fehler "DEPLOY_SSH_KEY_FILE fehlt oder die Datei ist leer."
-  [ -n "$DEPLOY_KNOWN_HOSTS_FILE" ] && [ -s "$DEPLOY_KNOWN_HOSTS_FILE" ] \
-    || fehler "DEPLOY_KNOWN_HOSTS_FILE fehlt oder die Datei ist leer."
-  [ -n "$DEPLOY_HOST" ] || fehler "DEPLOY_HOST ist leer."
-
   login=$(gh api user --jq .login) || fehler "Angemeldeten gh-Benutzer nicht ermittelt."
   [ "$(printf '%s' "$login" | tr '[:upper:]' '[:lower:]')" = "$(printf '%s' "$OWNER" | tr '[:upper:]' '[:lower:]')" ] \
-    || fehler "Angemeldet als '$login'. Rulesets und Secrets setzt nur der Konto-Inhaber '$OWNER' (gh auth switch)."
+    || fehler "Angemeldet als '$login'. Rulesets setzt nur der Konto-Inhaber '$OWNER' (gh auth switch)."
 
   local ist_vorlage
   ist_vorlage=$(gh api "repos/$VORLAGE_OWNER/$VORLAGE" --jq .is_template 2> /dev/null) \
@@ -241,14 +228,6 @@ $mitglieder
 EOF
   fi
 
-  schritt "Environment $UMGEBUNG anlegen"
-  gh api -X PUT "repos/$REPO/environments/$UMGEBUNG" > /dev/null
-
-  schritt "Secrets im Environment $UMGEBUNG setzen"
-  gh secret set DEPLOY_SSH_KEY --env "$UMGEBUNG" --repo "$REPO" < "$DEPLOY_SSH_KEY_FILE" > /dev/null
-  gh secret set DEPLOY_KNOWN_HOSTS --env "$UMGEBUNG" --repo "$REPO" < "$DEPLOY_KNOWN_HOSTS_FILE" > /dev/null
-  printf '%s' "$DEPLOY_HOST" | gh secret set DEPLOY_HOST --env "$UMGEBUNG" --repo "$REPO" > /dev/null
-
   schritt "Ruleset $RULESET_NAME auf main setzen"
   gh api -X POST "repos/$REPO/rulesets" --input - > /dev/null <<JSON
 {
@@ -290,7 +269,7 @@ JSON
   fi
   echo "Prüfen:"
   echo "  gh api repos/$REPO/rules/branches/main"
-  echo "  gh secret list --env $UMGEBUNG --repo $REPO"
+  echo "  gitleaks git <Klon von $REPO>   # AK4: keine Zugangsdaten im Repository"
   echo "  git clone https://github.com/$REPO.git && cd $REPO_NAME && git switch develop"
 }
 
@@ -329,7 +308,6 @@ if [ "$PRUEFEN" = 1 ]; then
   echo "Geplant (mit --pruefen nicht ausgeführt):"
   echo "  Repository $REPO (öffentlich) aus $VORLAGE_OWNER/$VORLAGE, Slug '$SLUG', Zweige main und develop"
   echo "  Ruleset $RULESET_NAME: Pull Request mit 1 Freigabe, Pflicht-Check 'check', keine Ausnahme"
-  echo "  Environment $UMGEBUNG mit DEPLOY_SSH_KEY, DEPLOY_KNOWN_HOSTS, DEPLOY_HOST"
   if [ "$OHNE_TEAM" = 1 ]; then
     echo "  Keine Collaborators (--ohne-team)"
   else
