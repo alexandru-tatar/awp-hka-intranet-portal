@@ -1,0 +1,89 @@
+# Prüfung für Pull Requests und Pushes auf develop (HKA-47)
+#
+# Der Job heißt "check". Diesen Namen trägt der Branchschutz auf main als Pflicht-Check ein.
+# Ablauf: Code holen, Secret-Scan (Gitleaks), Lint (Ruff), Tests (make test: Kontrast, Portal-SDK in
+# Python und JavaScript, pytest).
+
+name: Prüfung
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pruefung-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GITLEAKS_VERSION: "8.30.1"
+  GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+  RUFF_VERSION: "0.17.3"
+
+jobs:
+  check:
+    name: check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      UV_LOCKED: "1" # uv ändert uv.lock nie, ein veralteter Stand ist ein Fehler
+
+    steps:
+      # Bei einem Pull Request wird dessen letzter Commit geprüft, nicht der Merge-Commit.
+      - name: Code holen
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      # Läuft zuerst und bricht die Prüfung nicht ab: das Ergebnis wird erst am Ende ausgewertet,
+      # damit Lint und Tests auch bei einem Fund laufen.
+      - name: Secret-Scan (Gitleaks)
+        id: gitleaks
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl --fail --silent --show-error --location \
+            --output "$RUNNER_TEMP/$archive" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${archive}"
+          echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/$archive" | sha256sum --check --status
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" gitleaks
+          "$RUNNER_TEMP/gitleaks" git . --log-opts="HEAD" --redact --no-banner --verbose
+
+      - name: uv einrichten
+        uses: astral-sh/setup-uv@v10.3.3
+        with:
+          python-version: "3.14" # wie im Container (Dockerfile.trixie)
+          enable-cache: true
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: sdk/javascript/package-lock.json
+
+      - name: Abhängigkeiten installieren (uv sync)
+        id: sync
+        run: uv sync
+
+      - name: Lint (Ruff)
+        run: uvx "ruff@${RUFF_VERSION}" check src tests sdk/python
+
+      # Läuft auch, wenn Ruff rot ist: eine Prüfung soll nicht die andere verdecken.
+      - name: Tests (make test)
+        if: ${{ !cancelled() && steps.sync.conclusion == 'success' }}
+        run: make test
+
+      - name: Ergebnis des Secret-Scans
+        if: ${{ !cancelled() && steps.gitleaks.outcome == 'failure' }}
+        run: |
+          echo "::error::Gitleaks hat ein Geheimnis im Verlauf gefunden oder konnte nicht laufen. Siehe Schritt 'Secret-Scan (Gitleaks)'."
+          exit 1

@@ -2,6 +2,7 @@
 
 from .app_dto import AppDTO, NavGroupDTO
 from .app_service import AppService
+from .assertion_service import AssertionService
 from .exceptions import (
     ForbiddenError,
     InvalidCsrfError,
@@ -17,7 +18,7 @@ from .session_service import SessionService
 from .session_write_service import SessionWriteService
 
 __all__ = [
-    "AppDTO", "NavGroupDTO", "AppService",
+    "AppDTO", "NavGroupDTO", "AppService", "AssertionService",
     "SessionDTO", "SessionService", "SessionWriteService",
     "LoginService", "StartedLogin", "FinishedLogin",
     "ForbiddenError", "InvalidCsrfError", "LoginFailedError", "LoginRequiredError",

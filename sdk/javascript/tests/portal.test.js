@@ -4,6 +4,7 @@
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
+const http = require("node:http");
 const os = require("node:os");
 const path = require("node:path");
 const { after, before, test } = require("node:test");
@@ -26,6 +27,32 @@ after(async () => {
 });
 
 const student = () => ({ "X-Portal-Assertion": makeToken() });
+
+test("Menü vom Portal: Authorization Bearer statt X-Portal-Assertion (S6)", async () => {
+  const seen = [];
+  const fakePortal = http.createServer((req, res) => {
+    seen.push({ url: req.url, headers: req.headers });
+    res.writeHead(200, { "Content-Type": "text/html", "X-Portal-Kit": "kit-abc" });
+    res.end('<nav aria-label="Hauptnavigation">Menü vom Portal</nav>');
+  });
+  await new Promise((resolve) => fakePortal.listen(0, "127.0.0.1", resolve));
+  const app = await serve(makeApp(makePortal({ apiUrl: `http://127.0.0.1:${fakePortal.address().port}` })));
+  try {
+    const token = makeToken();
+    const response = await fetch(`${app.base}/`, { headers: { "X-Portal-Assertion": token } });
+    const html = await response.text();
+    assert.equal(response.status, 200);
+    assert.ok(html.includes("Menü vom Portal"));
+    assert.ok(html.includes("/_portal/static/kit-abc.css"));
+    assert.equal(seen.length, 1);
+    assert.equal(seen[0].url, "/nav");
+    assert.equal(seen[0].headers.authorization, `Bearer ${token}`);
+    assert.equal(seen[0].headers["x-portal-assertion"], undefined);
+  } finally {
+    await app.close();
+    await new Promise((resolve) => fakePortal.close(resolve));
+  }
+});
 
 test("/healthz ist offen", async () => {
   assert.equal((await fetch(`${prod.base}/healthz`)).status, 200);

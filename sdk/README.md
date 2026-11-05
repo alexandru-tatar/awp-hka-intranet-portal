@@ -26,7 +26,7 @@ In einem Starter holt `make sdk-update` die gebaute Kopie nach `platform_sdk/` (
 
 ## Stand
 
-Version `1.0.0-dev`, vorläufig, in Python und JavaScript. Umgesetzt (in beiden Fassungen): Prüfung der Assertion (§5), JWKS-Zwischenspeicher (§6), Middleware mit `/healthz` (§4), `layout()` mit Ersatz-Menü, Test-Anmeldung im Entwicklungsmodus (§7), Noten-Client mit Testdaten (§8), Prüfsumme (§10), JSON-Log (§11).
+Version `1.0.1-dev` (holt das Menü mit `Authorization: Bearer`, 02 §3; `1.0.0-dev` schickte `X-Portal-Assertion`), vorläufig, in Python und JavaScript. Umgesetzt (in beiden Fassungen): Prüfung der Assertion (§5), JWKS-Zwischenspeicher (§6), Middleware mit `/healthz` (§4), `layout()` mit Ersatz-Menü, Test-Anmeldung im Entwicklungsmodus (§7), Noten-Client mit Testdaten (§8), Prüfsumme (§10), JSON-Log (§11).
 
 Offen:
 

@@ -7,7 +7,9 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, Response
 from loguru import logger
 
+from portal.auth.assertion_keys import InvalidAssertion
 from portal.router.constants import (
+    AUTHORIZATION,
     CACHE_CONTROL,
     ETAG,
     IF_NONE_MATCH,
@@ -15,7 +17,9 @@ from portal.router.constants import (
     UNAUTHORIZED,
     X_PORTAL_KIT,
 )
+from portal.context import Portal
 from portal.web.deps import OptionalSession, PortalDep
+from portal.web.proxy import ASSERTION_HEADER
 
 router: Final = APIRouter(tags=["Navigation"])
 
@@ -29,21 +33,27 @@ def nav(
 ) -> Response:
     """Menü-Fragment mit ETag und If-None-Match.
 
-    Im echten Gateway kommt die Anfrage über den Apps-Listener mit
-    `Authorization: Bearer <assertion>`; in Dev ersetzt das Session-Cookie die Assertion.
+    Apps schicken das Token ihrer Anfrage als ``Authorization: Bearer <token>`` (02 §3, ``aud`` enthält
+    ``portal``); das Menü richtet sich nach den Rollen im Token. Übergangsweise gilt auch ``X-Portal-Assertion``
+    (SDK bis 1.0.0-dev). Ohne Token gilt das Session-Cookie.
 
     :param request: Injiziertes Request-Objekt von FastAPI bzw. Starlette
     :param portal: Injizierter Portal-Kontext
     :param session: Angemeldete Session oder None
     :param current: Pfad der aktuellen Seite zum Markieren des Menüeintrags
-    :return: Response mit dem Fragment, 304 bei passendem ETag, 401 ohne Session
+    :return: Response mit dem Fragment, 304 bei passendem ETag, 401 ohne Session bzw. mit ungültigem Token
     :rtype: Response
     """
     logger.debug("current={}", current)
-    if session is None:
+    token: Final = _token_of(request)
+    if token is not None:
+        roles = _roles_of(portal, token)
+    else:
+        roles = session.roles if session is not None else None
+    if roles is None:
         return Response(UNAUTHORIZED, status_code=401, media_type="application/problem+json")
 
-    body: Final = str(portal.views.nav_html(session, current))
+    body: Final = str(portal.views.nav_html_for_roles(roles, current))
     etag: Final = _etag_for(portal.kit.id, body)
     headers: Final = {
         ETAG: etag,
@@ -53,6 +63,35 @@ def nav(
     if request.headers.get(IF_NONE_MATCH) == etag:
         return Response(status_code=304, headers=headers)
     return HTMLResponse(body, headers=headers)
+
+
+def _token_of(request: Request) -> str | None:
+    """Token der App aus ``Authorization: Bearer`` oder, übergangsweise, aus ``X-Portal-Assertion``.
+
+    :param request: Anfrage
+    :return: Das Token, ``None`` ohne Token
+    :rtype: str | None
+    """
+    scheme, _, value = request.headers.get(AUTHORIZATION, "").partition(" ")
+    if scheme.lower() == "bearer" and value.strip():
+        return value.strip()
+    return request.headers.get(ASSERTION_HEADER)  # Übergang für SDK bis 1.0.0-dev
+
+
+def _roles_of(portal: Portal, token: str) -> frozenset[str] | None:
+    """Rollen aus einem Token des Portals für die Zielgruppe ``portal``.
+
+    :param portal: Portal-Kontext
+    :param token: Wert von ``X-Portal-Assertion``
+    :return: Die Rollen, ``None`` bei ungültigem Token oder ohne Schlüssel
+    :rtype: frozenset[str] | None
+    """
+    if portal.keys is None:
+        return None
+    try:
+        return frozenset(portal.keys.verify(token, "portal")["roles"])
+    except InvalidAssertion:
+        return None
 
 
 def _etag_for(kit_id: str, body: str) -> str:
