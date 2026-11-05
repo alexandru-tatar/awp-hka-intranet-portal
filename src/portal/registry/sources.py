@@ -7,13 +7,14 @@ die SQLite-Registry wird dasselbe ``RegistrySource`` erfüllen.
 from __future__ import annotations
 
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Hashable, Protocol
 
 import yaml
 from loguru import logger
 
-from .models import STATUSES, AppView
+from .models import STATUSES, AppView, format_time
 from .validation import ManifestInvalid, ManifestValidator
 
 
@@ -42,19 +43,23 @@ class ManifestDirectorySource:
     Der Dateiname ist egal, es zählt der ``slug`` im Manifest. Ungültige oder doppelte Manifeste werden
     protokolliert und übersprungen (die echte Registry lehnt sie beim PUT ab). Die Statusdatei (YAML) hat die
     Form ``{slug: {status, last_probe_at, last_deployed_at}}``; Apps ohne Eintrag sind ``healthy``, solange es
-    keinen Prober gibt.
+    keinen Prober gibt. Mit ``probe`` setzt der Prober den Status: Jede App beginnt bei ``registering``, und als
+    Zeitpunkt der Bereitstellung gilt die Änderungszeit der Manifest-Datei.
     """
 
-    def __init__(self, manifests_dir: Path, validator: ManifestValidator, state_file: Path | None = None):
+    def __init__(self, manifests_dir: Path, validator: ManifestValidator, state_file: Path | None = None,
+                 *, probe: bool = False):
         """Konstruktor mit Ordner, Validator und Statusdatei.
 
         :param manifests_dir: Ordner mit den Manifesten
         :param validator: Prüft jedes Manifest
         :param state_file: Statusdatei, optional
+        :param probe: ``True``, wenn der Prober den Status setzt (dann ohne Statusdatei)
         """
         self.manifests_dir = manifests_dir
         self.state_file = state_file
         self.validator = validator
+        self.probe = probe
 
     def load(self) -> dict[str, AppView]:
         """Alle gültigen Manifeste als Apps laden.
@@ -72,7 +77,7 @@ class ManifestDirectorySource:
             if slug in apps:
                 logger.error("manifest_rejected file={} reason=duplicate slug '{}'", path.name, slug)
                 continue
-            app = self._app_view(manifest, state.get(slug, {}))
+            app = self._app_view(manifest, self._state_of(path, state.get(slug, {})))
             if app is not None:
                 apps[slug] = app
         return apps
@@ -86,7 +91,13 @@ class ManifestDirectorySource:
         files = self._manifest_files()
         if self.state_file and self.state_file.exists():
             files.append(self.state_file)
-        return tuple((f.name, f.stat().st_mtime_ns) for f in files)
+        stamps = []
+        for f in files:
+            try:
+                stamps.append((f.name, f.stat().st_mtime_ns))
+            except OSError:  # Datei in diesem Moment ersetzt oder gelöscht: gilt als Änderung beim nächsten Lauf
+                stamps.append((f.name, -1))
+        return tuple(stamps)
 
     def _manifest_files(self) -> list[Path]:
         """Manifest-Dateien sortiert auflisten.
@@ -106,7 +117,7 @@ class ManifestDirectorySource:
         try:
             manifest = json.loads(path.read_text(encoding="utf-8"))
             self.validator.validate(manifest)
-        except (json.JSONDecodeError, ManifestInvalid) as exc:
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError, ManifestInvalid) as exc:
             logger.error("manifest_rejected file={} reason={}", path.name, exc)
             return None
         return manifest
@@ -121,6 +132,22 @@ class ManifestDirectorySource:
             return {}
         data = yaml.safe_load(self.state_file.read_text(encoding="utf-8")) or {}
         return {slug: (v if isinstance(v, dict) else {"status": v}) for slug, v in data.items()}
+
+    def _state_of(self, path: Path, state: dict) -> dict:
+        """Status einer App: der Eintrag der Statusdatei, mit Prober die Startwerte.
+
+        :param path: Pfad der Manifest-Datei
+        :param state: Eintrag der Statusdatei
+        :return: Status, letzte Prüfung und Zeitpunkt der Bereitstellung
+        :rtype: dict
+        """
+        if not self.probe:
+            return state
+        try:
+            deployed = format_time(datetime.fromtimestamp(path.stat().st_mtime))
+        except OSError:  # Datei in diesem Moment ersetzt oder gelöscht; der nächste Lauf holt es nach
+            deployed = None
+        return {"status": "registering", "last_deployed_at": deployed}
 
     @staticmethod
     def _app_view(manifest: dict, state: dict) -> AppView | None:

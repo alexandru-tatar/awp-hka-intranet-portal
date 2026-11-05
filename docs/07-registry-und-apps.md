@@ -44,7 +44,11 @@ es zählt der `slug` im Manifest.
 
 ## Status
 
-`dev/state.yml` ersetzt den Prober (03 §7). Apps ohne Eintrag sind `healthy`.
+Der Status einer App kommt aus einer von zwei Quellen:
+
+- **Statusdatei** (`state_file`, lokal): `dev/state.yml` ersetzt den Prober von Hand. Apps ohne Eintrag sind `healthy`.
+- **Prober** (`registry.probe: true`, VM): Das Portal fragt `/healthz` jeder App und setzt den Status selbst. Dann gibt es keine
+  Statusdatei (die Konfiguration lehnt beides zusammen ab).
 
 ```yaml
 noten:        { status: healthy,   last_probe_at: "2026-10-26 09:14:02", last_deployed_at: "2026-10-20 16:03" }
@@ -54,14 +58,78 @@ raumbuchung:  { status: unhealthy, last_probe_at: "…",                   last_
 | Status | Menü | `/apps/<slug>/` |
 |---|---|---|
 | `healthy` | ja, für passende Rollen | erreichbar |
-| `unhealthy` | nein | 503 (für Benutzer mit passender Rolle) |
+| `unhealthy` | ja, mit dem Hinweis „nicht verfügbar“ | 503 (für Benutzer mit passender Rolle) |
 | `registering`, `failed`, `retired` | nein | 404 |
 
 Ein unbekannter Status wird ins Log geschrieben (`state_rejected`) und die App übersprungen.
 
+## Registrierung (HKA-53)
+
+Einfache Stufe der Registry (03 §4 bis §8, ohne SQLite und ohne Schnittstelle mit Token): Nach dem Deployment kopiert ein Admin das
+Manifest per `scp` auf die VM und legt es dort mit `portal-deploy` geprüft in den Manifest-Ordner. Das Portal übernimmt es von selbst, ohne Neustart.
+
+```text
+scp manifest.json --> VM: sudo portal-deploy check/register --docker run--> python -m portal.registry
+                                                                            |  schreibt <slug>.json + owners.json
+Portal (Hintergrundaufgabe): Ordner alle 5 s prüfen --> registering --3 x /healthz 200--> healthy --> Menü
+```
+
+**Befehl** (`registry/__main__.py`, `registry/registration.py`): `python -m portal.registry {check|register} --config <yml> --owner <owner/repo>`,
+das Manifest auf der Standardeingabe (höchstens 64 KiB).
+
+| Schritt | Prüfung | Fehler |
+|---|---|---|
+| 1 | JSON, Schema, reservierter Slug, Rollen aus `role_vocabulary`, Adapter-Scopes aus `adapter_scopes` (derselbe `ManifestValidator` wie im Portal) | **PF-104** mit Pointer, Meldung, erlaubten Rollen und Kategorien |
+| 2 | Besitzer: Der erste `--owner` eines Namens bleibt es (`registry.owners_file`, `{slug: owner}`); ein Name, der von Hand eingerichtet wurde oder in einer zweiten Datei steht, ist belegt | **PF-202** |
+| 3 | Nur `register`: Sperre (`owners.json.lock`, `flock`, wartet bis 10 s) | **PF-204** |
+| 4 | Nur `register`: erst `owners.json`, dann `<slug>.json`, beide atomar (Hilfsdatei + `os.replace`, Rechte 0644) | Exit 3 bei Schreibfehler |
+
+`check` macht die Schritte 1 und 2 und schreibt nichts. Bei jeder Ablehnung bleibt jede Datei unverändert, also auch das Menü. Die
+Fehlerblöcke stehen im Format des Katalogs der Pipeline (`.agents/skills/pipeline-fehler/fehlercodes.md`) auf der Fehlerausgabe.
+Exit-Codes: 0 in Ordnung, 1 abgelehnt, 2 falscher Aufruf, 3 Fehler im Betrieb (Konfiguration, Besitzerdatei, Schreibrechte).
+
+**Nachladen:** Eine Hintergrundaufgabe des Portals ruft alle `registry.refresh_seconds` (Standard 5) `Registry.refresh()` auf, in jeder
+Umgebung. Wird dieselbe Datei neu geschrieben (anderer Inhalt oder neue Änderungszeit), gilt das als neue Registrierung, und die App
+beginnt wieder bei `registering`.
+
+**Prober** (`registry/prober.py`): `GET <apps.upstream>/healthz` mit 2 s Zeitlimit, ohne Token, ohne Cookie, ohne Weiterleitung; nur
+200 zählt, der Body wird nicht gelesen. Höchstens 4 Prüfungen gleichzeitig.
+
+| Von | Nach | Bedingung | Abstand danach |
+|---|---|---|---|
+| `registering` | `healthy` | 3 Erfolge in Folge | 30 s |
+| `registering` | `failed` | 60 s ohne 3 Erfolge | 30 s |
+| `healthy` | `unhealthy` | 3 Fehler in Folge | 10 s |
+| `unhealthy` | `healthy` | 1 Erfolg | 30 s |
+| `failed` | `registering` | 1 Erfolg | 2 s |
+
+In `registering` wird alle 2 s geprüft. Gemessen lokal (Python-App aus dem Golden Master, Portal mit Prober): neues Manifest bis
+Menüeintrag 5 s, Container gestoppt bis „nicht verfügbar“ 42 s, Container wieder da bis zurück im Menü ohne Hinweis 7 s.
+
+**Abweichungen von 03 §7:**
+
+- Unhealthy-Apps stehen **im Menü** mit dem Hinweis „nicht verfügbar“ (Text und Farbe, `badge--unhealthy`), nicht versteckt. So verlangt es
+  HKA-53 (AK2). Der Link führt auf die 503-Seite.
+- Nach einem Fehler in `healthy` folgt die nächste Prüfung nach 10 s statt nach 30 s. `unhealthy` steht dann nach etwa einer halben
+  Minute da, nicht erst nach eineinhalb.
+- `failed` wird alle 30 s weiter geprüft (03: keine Prüfung mehr). So kommt eine App nach einem Neustart der VM von selbst zurück.
+- Kein Jitter. Nach einem Neustart des Portals beginnen alle Apps bei `registering` und sind nach etwa 5 s wieder im Menü.
+- Nicht geprüft: Versionsrückschritt (03 §5, 422), `rollback`, Abmelden, Sperrfrist für Namen (Phase 3).
+
+**Konfiguration** (`dev/gateway.vm.yml` ist das Beispiel): 
+
+```yaml
+registry:
+  refresh_seconds: 5          # Abstand, in dem der Manifest-Ordner geprüft wird (mindestens 1)
+  probe: true                 # Prober an: verlangt den Abschnitt apps, schließt state_file aus
+  owners_file: /var/lib/portal/registry/owners.json   # nur der Befehl benutzt die Datei
+```
+
+Einrichtung auf der VM, Ablauf je App und Testanleitungen: [`extras/compose/vm/deploy/README.md`](../extras/compose/vm/deploy/README.md).
+
 ## Menü und Zugriff
 
-- **Menü** (`AppService.find_nav_groups`): nur gesunde Apps, die mindestens eine Rolle mit dem Benutzer teilen; Kategorien in fester
+- **Menü** (`AppService.find_nav_groups`): gesunde und gestörte Apps (`unhealthy`, mit „nicht verfügbar“), die mindestens eine Rolle mit dem Benutzer teilen; Kategorien in fester
   Reihenfolge (Studium, Verwaltung, Kommunikation, Sonstiges), Einträge alphabetisch (Umlaute wie Grundbuchstaben); leere
   Kategorien entfallen.
 - **Zugriff auf eine App** (`AppService.find_authorized`): Reihenfolge und Fehlerseiten siehe
@@ -75,13 +143,16 @@ Eine Quelle erfüllt das Protocol `RegistrySource` (`registry/sources.py`):
 - `load() -> dict[str, AppView]`: alle Apps laden,
 - `fingerprint() -> Hashable`: ändert sich, sobald `load()` etwas anderes liefern würde.
 
-`ManifestDirectorySource` (Ordner mit JSON-Dateien plus `state.yml`) ist der Ersatz für die SQLite-Registry. Eine neue Quelle wird in
+`ManifestDirectorySource` (Ordner mit JSON-Dateien plus `state.yml`, oder mit `probe` plus Prober) ist der Ersatz für die SQLite-Registry. Eine neue Quelle wird in
 `context.py` (`_build_registry`) verdrahtet; Menü, Zugriff und Statusseite ändern sich dadurch nicht.
 
 ## Snapshot
 
 `Registry` hält den aktuellen `Snapshot` (laufende Nummer plus Apps nach Slug). Leser sperren nie; `reload()` tauscht die Referenz
 unter einem Lock aus (`snapshot_swapped version=… apps=…` im Log). `refresh()` lädt nur, wenn sich der `fingerprint()` geändert hat.
+Mit Prober (`keep_status`) behält eine App beim Neuladen Status und letzte Prüfung, solange ihre Registrierung (Manifest und Zeitpunkt der
+Bereitstellung) gleich ist; `set_status()` tauscht den Snapshot für den Prober und ignoriert eine Prüfung, die zu einer älteren
+Registrierung gehört.
 
 ## Weiterleitung an die App (`apps`)
 

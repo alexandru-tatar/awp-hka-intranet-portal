@@ -57,7 +57,7 @@ src/portal/
 dev/
   gateway.dev.yml              Konfiguration für lokal
   manifests/*.json             ein Manifest pro App  ← hier neue Apps anlegen
-  state.yml                    Status je App (healthy/unhealthy/…), bis es den Prober gibt
+  state.yml                    Status je App (healthy/unhealthy/…) von Hand; mit registry.probe setzt ihn der Prober
   users.yml                    Testpersonen mit Rollen
   gateway.oidc.yml             Konfiguration für Anmeldung über Keycloak + Redis
   roles.yml · grants.yml       IdP-Claims → Rollen (02 §8), zusätzliche Rollen je Subject
@@ -99,7 +99,7 @@ und passender Rolle; Kategorien in fester Reihenfolge, Einträge alphabetisch.
 |---|---|---|
 | Seiten, Kit, Texte, `/nav` mit ETag + `X-Portal-Kit` | wie spezifiziert | — |
 | Registry | `ManifestDirectorySource` liest JSON-Dateien | SQLite-Registry implementiert `RegistrySource.load()` (03 §2) |
-| Status / Probe | `dev/state.yml` | Prober im Gateway (03 §7) |
+| Status / Probe | lokal `dev/state.yml`; auf der VM der Prober (`registry.probe`) | Prober als Teil der SQLite-Registry (03 §7) |
 | Anmeldung | `auth_mode: dev`: Testpersonen-Auswahl; `auth_mode: oidc`: Keycloak, Authorization Code + PKCE, ID-Token-Prüfung nach 02 §5 | Shibboleth-OIDC: `issuer`, Client und `roles.yml` tauschen |
 | Sessions | Redis (`RedisSessionStore`), wenn `redis_url` gesetzt ist; sonst im Speicher | — |
 | `/nav`-Auth | Session-Cookie | `Authorization: Bearer <assertion>` auf :8001 |
