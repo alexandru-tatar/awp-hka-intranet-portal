@@ -7,7 +7,13 @@ from conftest import login, write_manifest
 
 def nav_labels(html: str) -> list[str]:
     wide = html.split('class="portal-nav__wide"', 1)[1].split("</nav>", 1)[0]
-    return re.findall(r"</svg>([^<]+)</a>", wide)
+    return [label.strip() for label in re.findall(r"</svg>([^<]+)(?:<span[^>]*>[^<]*</span>)?</a>", wide)]
+
+
+def nav_unavailable(html: str) -> list[str]:
+    wide = html.split('class="portal-nav__wide"', 1)[1].split("</nav>", 1)[0]
+    return [label.strip() for label in re.findall(
+        r'</svg>([^<]+)<span class="badge badge--unhealthy small">nicht verfügbar</span></a>', wide)]
 
 
 def nav_groups(html: str) -> list[str]:
@@ -41,12 +47,21 @@ def test_ui2_user_without_roles_sees_empty_text(client):
     assert 'class="nav__group"' not in html
 
 
-def test_ui3_unhealthy_and_registering_apps_absent_from_menu(client):
+def test_ui3_unhealthy_app_marked_unavailable_and_registering_app_absent(client):
     html = login(client, "neumann").get("/").text
     labels = nav_labels(html)
-    assert "Raum buchen" not in labels          # unhealthy
+    assert "Raum buchen" in labels              # unhealthy: bleibt im Menü, als nicht verfügbar gekennzeichnet (HKA-53, AK2)
+    assert nav_unavailable(html) == ["Raum buchen"]
     assert "Abschlussarbeiten" not in labels    # registering
     assert "Anträge" in labels
+
+
+def test_ui3_home_tile_of_unhealthy_app_says_not_available(client):
+    html = login(client, "neumann").get("/").text
+    tile = html.split('<span class="app-card__name">Raum buchen</span>', 1)[1].split("</a>", 1)[0]
+    assert 'class="badge badge--unhealthy small">nicht verfügbar</span>' in tile
+    antraege = html.split('<span class="app-card__name">Anträge</span>', 1)[1].split("</a>", 1)[0]
+    assert "nicht verfügbar" not in antraege
 
 
 def test_ui4_error_pages_have_title_body_request_id_and_home_link(client):

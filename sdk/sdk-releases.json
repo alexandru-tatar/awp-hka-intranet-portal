@@ -6,5 +6,13 @@
       1
     ],
     "released": "2026-10-31"
+  },
+  "1.0.1-dev": {
+    "python": "sha256:69b42db3b704c982b213d204dcff10894950cdbd6509ac3d7eb204e65ed706a5",
+    "javascript": "sha256:fc332bfc40beeedb7eafa996fac6540f418203b16ea4b8ae0b60acab01984a4e",
+    "assertion_versions": [
+      1
+    ],
+    "released": "2026-11-04"
   }
 }

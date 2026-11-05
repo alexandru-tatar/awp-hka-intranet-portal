@@ -242,6 +242,7 @@ dialog h2 { font-size: var(--fs-2); }
   background: var(--accent);
   color: var(--accent-ink);
 }
+.app-card:hover .badge { color: var(--accent-ink); }
 
 /* ── Error pages ────────────────────────────────────────────── */
 .error-page { max-width: var(--measure); }

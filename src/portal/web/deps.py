@@ -10,6 +10,7 @@ from starlette.exceptions import HTTPException
 from ..context import Portal
 from ..service import (
     AppService,
+    AssertionService,
     LoginRequiredError,
     LoginService,
     NotFoundError,
@@ -40,6 +41,19 @@ def get_app_service(portal: PortalDep) -> AppService:
     :rtype: AppService
     """
     return portal.app_service
+
+
+def get_assertion_service(portal: PortalDep) -> AssertionService:
+    """Service, der Identitäts-Tokens ausstellt.
+
+    :param portal: Portal-Kontext
+    :return: Der Service
+    :rtype: AssertionService
+    :raises HTTPException: 404, falls der Abschnitt ``assertion`` fehlt
+    """
+    if portal.assertion_service is None:
+        raise HTTPException(404)
+    return portal.assertion_service
 
 
 def get_session_service(portal: PortalDep) -> SessionService:
@@ -122,6 +136,7 @@ def require_role(role: str) -> Callable[..., SessionDTO]:
 
 LoginServiceDep = Annotated[LoginService, Depends(get_login_service)]
 AppServiceDep = Annotated[AppService, Depends(get_app_service)]
+AssertionServiceDep = Annotated[AssertionService, Depends(get_assertion_service)]
 SessionWriteServiceDep = Annotated[SessionWriteService, Depends(get_session_write_service)]
 OptionalSession = Annotated[SessionDTO | None, Depends(optional_session)]
 CurrentSession = Annotated[SessionDTO, Depends(require_session)]

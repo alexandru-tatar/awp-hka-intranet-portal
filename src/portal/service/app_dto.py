@@ -21,6 +21,8 @@ class AppDTO:
     last_probe_at: str | None
     last_deployed_at: str | None
     path: str
+    adapters: tuple[str, ...]
+    available: bool
 
     def __init__(self, app: AppView) -> None:
         """Initialisierung von AppDTO durch ein AppView-Objekt der Registry.
@@ -37,6 +39,8 @@ class AppDTO:
         self.last_probe_at = app.last_probe_at
         self.last_deployed_at = app.last_deployed_at
         self.path = app.path
+        self.adapters = tuple(app.adapters)
+        self.available = app.status == "healthy"
 
 
 @dataclass(eq=False, slots=True, kw_only=True)

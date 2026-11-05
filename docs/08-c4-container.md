@@ -59,6 +59,6 @@ Mit `make dev` läuft nur das Backend auf dem Host: Testpersonen aus `dev/users.
 |---|---|---|
 | Reverse Proxy | Browser spricht das Backend direkt an | Traefik mit `/auth/verify` und `errors`-Middleware (`claude-proposal/02-gateway.md`) |
 | Registry | Dateien in `dev/manifests/` | SQLite-Registry (`claude-proposal/03-registry.md` §2) |
-| Status | `dev/state.yml` | Prober im Gateway (03 §7) |
+| Status | lokal `dev/state.yml`; auf der VM der Prober im Portal (`registry.probe`, HKA-53) | Prober der SQLite-Registry (03 §7) |
 | Apps | Platzhalter-Seite `/apps/<slug>/` | eigene Container hinter Traefik, `/nav` mit Identity-Assertion auf :8001 |
 | Adapter-Service | – | `claude-proposal/05-adapter-service.md` |

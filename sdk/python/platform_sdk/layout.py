@@ -65,7 +65,7 @@ class Layout:
             return None
         try:
             async with httpx.AsyncClient(timeout=2) as client:
-                response = await client.get(f"{self.config.api_url}/nav", headers={"X-Portal-Assertion": token})
+                response = await client.get(f"{self.config.api_url}/nav", headers={"Authorization": f"Bearer {token}"})
                 response.raise_for_status()
         except httpx.HTTPError as exc:
             log.warning("Menü nicht abrufbar, Ersatz-Menü: %s", type(exc).__name__)

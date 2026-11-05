@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
+from datetime import datetime, timezone
 from typing import Mapping
 
 CATEGORIES = ("Studium", "Verwaltung", "Kommunikation", "Sonstiges")
@@ -11,6 +12,16 @@ RESERVED_SLUGS = frozenset({
     "_portal", "admin", "api", "auth", "static", "apps", "portal", "adapters", "gateway",
     "traefik", "redis", "registry", "health", "healthz", "login", "logout", "oidc",
 })
+
+
+def format_time(moment: datetime) -> str:
+    """Zeitpunkt für die Anzeige auf der Statusseite.
+
+    :param moment: Zeitpunkt, mit oder ohne Zeitzone (ohne gilt die Ortszeit des Rechners)
+    :return: UTC, z. B. ``2026-11-04 09:14:02 UTC``
+    :rtype: str
+    """
+    return moment.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
 
 @dataclass(frozen=True)
@@ -70,6 +81,19 @@ class AppView:
             last_deployed_at=last_deployed_at,
         )
 
+    def same_registration(self, other: "AppView") -> bool:
+        """Ob beide Ansichten dieselbe Registrierung zeigen: gleiches Manifest und gleicher Zeitpunkt der Bereitstellung.
+
+        Status und letzte Prüfung zählen nicht. Eine neue Registrierung derselben App (neue Datei, neuer Zeitpunkt)
+        ist deshalb nicht dieselbe und beginnt wieder bei ``registering``.
+
+        :param other: Die andere Ansicht
+        :return: ``True``, falls nur Status und letzte Prüfung abweichen dürfen
+        :rtype: bool
+        """
+        blank = {"status": "", "last_probe_at": None}
+        return replace(self, **blank) == replace(other, **blank)
+
     @property
     def path(self) -> str:
         """Adresse der App im Portal.
@@ -93,7 +117,7 @@ class AppView:
 class Snapshot:
     """Unveränderlicher Stand aller Apps.
 
-    :ivar version: Laufende Nummer, steigt bei jedem Laden
+    :ivar version: Laufende Nummer, steigt bei jedem Laden und jeder Statusänderung
     :ivar apps: Apps nach Slug
     """
     version: int

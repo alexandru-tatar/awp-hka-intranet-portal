@@ -9,6 +9,7 @@ skip.link: Zum Inhalt springen
 nav.label: Hauptnavigation
 nav.menu_button: Menü
 nav.empty: Für Sie ist im Moment keine Anwendung freigeschaltet. Wenn Sie eine erwarten, melden Sie sich bei {kontakt}.
+nav.unavailable: nicht verfügbar
 
 header.logout: Abmelden
 header.signed_in_as: Angemeldet als

@@ -1,0 +1,56 @@
+#!/bin/bash
+# Manuelle Registrierung einer App auf der Test-VM (HKA-53).
+#
+# Aufruf als sadmin, nachdem das Manifest per scp auf die VM kopiert wurde (README.md in diesem Ordner):
+#   sudo portal-deploy check    --owner <owner/repo> < ~/manifests/<slug>.json   # prüft nur, schreibt nichts
+#   sudo portal-deploy register --owner <owner/repo> < ~/manifests/<slug>.json   # legt das Manifest im Portal ab
+#
+# Das Skript startet das Portal-Image mit festen Argumenten: ohne Netz, schreibgeschützt, ohne Capabilities. Prüfung und
+# Ablage macht "python -m portal.registry" im Container (PF-104, PF-202, PF-204).
+#
+# Installation: sudo install -m 0755 -o root -g root portal-deploy /usr/local/sbin/portal-deploy
+# Einstellungen: /etc/portal/deploy.env (README.md in diesem Ordner)
+set -euo pipefail
+
+if [ "$(id -u)" -eq 0 ]; then
+  PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+  ENV_FILE=/etc/portal/deploy.env
+else
+  # Nur für Tests ohne root: Ersatz-docker im PATH und eigene Einstellungen.
+  ENV_FILE=${PORTAL_DEPLOY_ENV:-/etc/portal/deploy.env}
+fi
+
+usage="Aufruf: sudo portal-deploy check|register --owner <owner/repo> < manifest.json"
+log() { command -v logger >/dev/null 2>&1 && logger -t portal-deploy -- "$*" || true; }
+refuse() { log "abgelehnt: $1 (owner=${OWNER:-?})"; echo "portal-deploy: $1" >&2; echo "$usage" >&2; exit 2; }
+
+OWNER=
+if [ "$#" -ne 3 ]; then refuse "falsche Anzahl Argumente"; fi
+COMMAND=$1
+case "$COMMAND" in
+  check) WRITABLE=ro ;;
+  register) WRITABLE=rw ;;
+  *) refuse "nur check oder register erlaubt" ;;
+esac
+if [ "$2" != "--owner" ]; then refuse "Aufruf ohne --owner"; fi
+OWNER=$3
+if ! [[ "$OWNER" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9._-]+$ ]]; then refuse "ungültiger Besitzer"; fi
+if [ -t 0 ]; then refuse "Manifest fehlt auf der Standardeingabe"; fi
+
+# shellcheck source=/dev/null
+. "$ENV_FILE"
+: "${PORTAL_IMAGE:?PORTAL_IMAGE fehlt in $ENV_FILE}"
+: "${MANIFESTS_DIR:?MANIFESTS_DIR fehlt in $ENV_FILE}"
+: "${REGISTRY_DIR:?REGISTRY_DIR fehlt in $ENV_FILE}"
+PORTAL_CONFIG_IN_IMAGE=${PORTAL_CONFIG_IN_IMAGE:-/opt/app/dev/gateway.vm.yml}
+
+log "$COMMAND owner=$OWNER user=${SUDO_USER:-$(id -un)}"
+exec docker run --rm -i \
+  --network none --read-only --tmpfs /tmp \
+  --cap-drop ALL --security-opt no-new-privileges \
+  --memory 256m --pids-limit 64 \
+  -v "$MANIFESTS_DIR:/var/lib/portal/manifests:$WRITABLE" \
+  -v "$REGISTRY_DIR:/var/lib/portal/registry:$WRITABLE" \
+  --entrypoint python \
+  "$PORTAL_IMAGE" \
+  -m portal.registry "$COMMAND" --config "$PORTAL_CONFIG_IN_IMAGE" --owner "$OWNER"

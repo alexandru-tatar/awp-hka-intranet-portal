@@ -37,7 +37,7 @@ docs/              diese Dokumentation (Markdown); docs/api/ = Sphinx-Konfigurat
 | neue Geschäftsregel | `service/<entity>_service.py` (lesen) bzw. `<entity>_write_service.py` (schreiben) |
 | neue Rückgabestruktur eines Services | `service/<entity>_dto.py`, Export in `service/__init__.py` |
 | neue fachliche Exception | `service/exceptions.py` und Statuscode in `web/errors.py` (`SERVICE_ERROR_STATUS`) |
-| neue App im Menü | `dev/manifests/<slug>.json`, Status in `dev/state.yml` |
+| neue App im Menü | lokal `dev/manifests/<slug>.json`, Status in `dev/state.yml`; auf der VM per `scp` kopiert und mit `sudo portal-deploy register` abgelegt (`python -m portal.registry`), der Prober setzt den Status |
 | Manifest-Regel oder -Feld | `registry/validation.py` und `schemas/manifest.schema.json` |
 | neue Registry-Quelle | Klasse in `registry/sources.py` mit `load()` und `fingerprint()` (`RegistrySource`) |
 | Konfigurationswert | `core/config.py` (unbekannte Keys sind Fehler) und die Dateien in `dev/` |
@@ -63,8 +63,9 @@ docs/              diese Dokumentation (Markdown); docs/api/ = Sphinx-Konfigurat
 | `/_portal/status` | `platform-admin` | Status aller Apps |
 | `/_portal/connections` | Session | „Meine Verbindungen" |
 | `/_portal/error/{code}` | – | Fehlerseite (HTML) mit dem angefragten Status 400–599, für die `errors`-Middleware von Traefik |
-| `/nav` | Session | Menü-Fragment (ETag, `X-Portal-Kit`); ohne Session 401 als JSON für das SDK |
+| `/nav` | Session oder `Authorization: Bearer <Token>` (übergangsweise `X-Portal-Assertion`) | Menü-Fragment (ETag, `X-Portal-Kit`); ohne beides 401 als JSON für das SDK |
+| `/.well-known/jwks.json` | – | öffentliche Schlüssel des Identitäts-Tokens (nur mit Abschnitt `assertion`) |
 | `/login`, `/oidc/callback` | – | Anmeldung (OIDC) bzw. Testpersonen-Auswahl |
 | `/logout` | Session | GET Bestätigung, POST mit CSRF-Token |
 | `/readyz` | – | 200, oder 503 (JSON) wenn Redis nicht antwortet |
-| `/apps/<slug>/` | Session + Rolle | Platzhalter-Seite (nur Dev) |
+| `/apps/<slug>/…` | Session + Rolle | Weiterleitung an den App-Container mit `X-Portal-Assertion` (Abschnitt `apps`, [07](07-registry-und-apps.md)); ohne Abschnitt Platzhalter-Seite (nur Dev) |
