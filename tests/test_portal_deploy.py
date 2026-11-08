@@ -1,4 +1,5 @@
-"""Manuelle Registrierung auf der VM mit ``portal-deploy`` (HKA-53): nur ``check`` und ``register``, feste Docker-Argumente."""
+"""Manuelle Registrierung auf der VM mit ``portal-deploy`` (HKA-53, HKA-56): nur ``check``, ``register``, ``list`` und
+``remove``, feste Docker-Argumente."""
 
 import os
 import shutil
@@ -30,7 +31,7 @@ def box(tmp_path):
     for tool in bin_dir.iterdir():
         tool.chmod(0o755)
     settings = tmp_path / "deploy.env"
-    settings.write_text("PORTAL_IMAGE=hka/portal:test\nMANIFESTS_DIR=/srv/m\nREGISTRY_DIR=/srv/r\n")
+    settings.write_text("PORTAL_IMAGE=hka/portal:test\nMANIFESTS_DIR=/srv/m\nREGISTRY_DIR=/srv/r\nSTATUS_DIR=/srv/s\n")
     base = {"PATH": f"{bin_dir}:/usr/bin:/bin", "PORTAL_DEPLOY_ENV": str(settings),
             "DOCKER_ARGS": str(tmp_path / "docker.args"), "DOCKER_STDIN": str(tmp_path / "docker.stdin"),
             "LOG_FILE": str(tmp_path / "log")}
@@ -54,10 +55,10 @@ def box(tmp_path):
 @pytest.mark.parametrize("command", [
     "bash", "sh -c id", "check; id", "check bash", "$(id)", "`id`", "CHECK", "Register", "", " check", "check ", "../check",
 ])
-def test_everything_but_check_and_register_is_refused(box, command):
+def test_everything_but_the_four_commands_is_refused(box, command):
     result = box.run(command, "--owner", OWNER)
     assert result.returncode == 2
-    assert b"nur check oder register erlaubt" in result.stderr
+    assert "nur check, register, list oder remove erlaubt" in result.stderr.decode()
     assert not box.args_file.exists()                          # docker wurde nicht aufgerufen
     assert "abgelehnt" in box.log_file.read_text()
 
@@ -68,6 +69,11 @@ def test_everything_but_check_and_register_is_refused(box, command):
     ("check", "--owner", "../x/y"), ("check", "--owner", "/b"), ("check", "--owner", "a/"),
     ("check", "--owner", OWNER, "extra"), ("check", "--eigentuemer", OWNER), ("check", "--owner=a/b"),
     ("--owner", OWNER, "check"),
+    ("list", "extra"), ("list", "--owner", OWNER),
+    ("remove",), ("remove", "noten"), ("remove", "noten", "--owner"), ("remove", "--owner", OWNER, "noten"),
+    ("remove", "noten", "--owner", "a/b;id"), ("remove", "../x", "--owner", OWNER), ("remove", "Noten", "--owner", OWNER),
+    ("remove", "no", "--owner", OWNER), ("remove", "noten;id", "--owner", OWNER), ("remove", "$(id)", "--owner", OWNER),
+    ("remove", "noten", "--owner", OWNER, "extra"),
 ])
 def test_arguments_are_checked_before_anything_runs(box, args):
     result = box.run(*args)
@@ -95,6 +101,36 @@ def test_register_mounts_the_folders_writable(box):
     args = box.docker_args()
     assert "/srv/m:/var/lib/portal/manifests:rw" in args and "/srv/r:/var/lib/portal/registry:rw" in args
     assert args[-5:-2] == ["register", "--config", "/opt/app/dev/gateway.vm.yml"]
+
+
+def test_list_mounts_everything_read_only_with_the_status_folder(box):
+    result = box.run("list", stdin=b"")
+    assert result.returncode == 0, result.stderr
+    args = box.docker_args()
+    assert args[args.index("--network") + 1] == "none" and "--read-only" in args
+    assert "/srv/m:/var/lib/portal/manifests:ro" in args and "/srv/r:/var/lib/portal/registry:ro" in args
+    assert "/srv/s:/var/lib/portal/status:ro" in args
+    assert args[args.index("hka/portal:test") + 1:] == ["-m", "portal.registry", "list", "--config",
+                                                        "/opt/app/dev/gateway.vm.yml"]
+    assert "list owner=-" in box.log_file.read_text()
+
+
+def test_list_without_status_folder_still_runs(box, tmp_path):
+    (tmp_path / "deploy.env").write_text("PORTAL_IMAGE=hka/portal:test\nMANIFESTS_DIR=/srv/m\nREGISTRY_DIR=/srv/r\n")
+    result = box.run("list", stdin=b"")
+    assert result.returncode == 0, result.stderr
+    assert not any(":/var/lib/portal/status" in arg for arg in box.docker_args())
+
+
+def test_remove_mounts_writable_and_passes_slug_and_owner(box):
+    result = box.run("remove", "noten", "--owner", OWNER, stdin=b"")
+    assert result.returncode == 0, result.stderr
+    args = box.docker_args()
+    assert "/srv/m:/var/lib/portal/manifests:rw" in args and "/srv/r:/var/lib/portal/registry:rw" in args
+    assert not any(":/var/lib/portal/status" in arg for arg in args)
+    assert args[args.index("hka/portal:test") + 1:] == ["-m", "portal.registry", "remove", "noten", "--config",
+                                                        "/opt/app/dev/gateway.vm.yml", "--owner", OWNER]
+    assert f"remove slug=noten owner={OWNER}" in box.log_file.read_text()
 
 
 def test_missing_settings_stop_the_script(box, tmp_path):
