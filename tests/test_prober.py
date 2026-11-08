@@ -345,3 +345,29 @@ def test_end_to_end_with_lifespan_manifest_to_menu(probe_cfg, env, apps, monkeyp
 
 def test_portal_builds_a_prober_with_probe(gw):
     assert isinstance(gw.app.state.portal.prober, Prober)
+
+
+def test_hka56_prober_writes_the_status_file_after_each_round(gw, env, apps, clock):
+    """Der Prober schreibt den Status in die Statusdatei, die ``list`` liest (HKA-56, AK1)."""
+    from portal.registry import StatusWriter, read_status
+
+    path = env / "status.json"
+    portal = gw.app.state.portal
+    prober = Prober(portal.registry, portal.cfg.apps, httpx.MockTransport(apps), monotonic=clock, wall=lambda: NOW,
+                    status_writer=StatusWriter(path, monotonic=clock, wall=lambda: NOW))
+    add(gw, env)
+    drive(prober, clock, 1)
+    assert read_status(path).apps["pruefung"]["status"] == "registering"
+    drive(prober, clock, 4)
+    report = read_status(path)
+    assert report.apps["pruefung"] == {"status": "healthy", "version": "1.0.0", "last_probe_at": "2026-11-04 09:00:00 UTC"}
+    assert report.written_at == NOW
+
+
+def test_hka56_portal_wires_the_status_file_from_the_config(probe_cfg, apps):
+    path = probe_cfg.read_text(encoding="utf-8").replace("registry:\n  probe: true\n",
+                                                          "registry:\n  probe: true\n  status_file: status.json\n")
+    probe_cfg.write_text(path, encoding="utf-8")
+    portal = create_app(probe_cfg, app_transport=httpx.MockTransport(apps)).state.portal
+    assert portal.prober._status_writer is not None
+    assert portal.cfg.registry.status_file == (probe_cfg.parent / "status.json").resolve()

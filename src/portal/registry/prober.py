@@ -24,6 +24,7 @@ from loguru import logger
 
 from ..core.config import AppsConfig
 from .models import AppView, format_time
+from .status_file import StatusWriter
 from .store import Registry
 
 PROBE_TIMEOUT_SECONDS: Final = 2.0
@@ -65,6 +66,7 @@ class Prober:
         apps: AppsConfig,
         transport: httpx.AsyncBaseTransport | None = None,
         *,
+        status_writer: StatusWriter | None = None,
         monotonic: Callable[[], float] = time.monotonic,
         wall: Callable[[], datetime] = datetime.now,
     ) -> None:
@@ -73,11 +75,13 @@ class Prober:
         :param registry: Registry, deren Status gesetzt wird
         :param apps: Weiterleitung an die App-Container, liefert die Adresse jeder App
         :param transport: Transport statt des Netzwerks, für Tests
+        :param status_writer: Schreibt nach jeder Runde den Status in die Statusdatei (HKA-56), ``None`` ohne Datei
         :param monotonic: Uhr für die Abstände
         :param wall: Uhr für die Anzeige der letzten Prüfung
         """
         self._registry = registry
         self._apps = apps
+        self._status_writer = status_writer
         self._monotonic = monotonic
         self._wall = wall
         self._tracks: dict[str, _Track] = {}
@@ -102,7 +106,7 @@ class Prober:
             await asyncio.sleep(TICK_SECONDS)
 
     async def tick(self) -> None:
-        """Alle fälligen Apps prüfen und den Status setzen."""
+        """Alle fälligen Apps prüfen, den Status setzen und ihn in die Statusdatei schreiben."""
         now = self._monotonic()
         snapshot = self._registry.snapshot()
         for slug in set(self._tracks) - set(snapshot.apps):
@@ -122,6 +126,8 @@ class Prober:
             self._apply(app, track, ok, self._monotonic())
 
         await asyncio.gather(*(probe_one(app, track) for app, track in due))
+        if self._status_writer is not None:
+            self._status_writer.write(self._registry.snapshot())
 
     async def _probe(self, app: AppView) -> bool:
         """``GET /healthz`` an den Container der App, ohne Token und ohne Weiterleitung.

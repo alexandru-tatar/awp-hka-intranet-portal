@@ -39,10 +39,12 @@ grants_file: grants.yml
 
 # Registry (docs/07-registry-und-apps.md): Manifest-Ordner alle 5 s auf Änderungen prüfen und /healthz jeder App prüfen.
 # owners_file benutzt nur der Befehl "python -m portal.registry" (über portal-deploy), nicht das Portal.
+# status_file schreibt der Prober; "portal-deploy list" liest daraus den Status (HKA-56).
 registry:
   refresh_seconds: 5
   probe: true
   owners_file: /var/lib/portal/registry/owners.json
+  status_file: /var/lib/portal/status/status.json
 
 # Weiterleitung /apps/<slug>/ an den Container "app-<slug>" im selben Docker-Netz (HKA-52); der Prober fragt dort /healthz.
 # env dev: Der Signaturschlüssel ist flüchtig und ändert sich bei jedem Start des Portals.

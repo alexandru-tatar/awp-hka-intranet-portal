@@ -18,7 +18,7 @@ from .auth.sessions import MemorySessionStore, SessionStore
 from .core.config import Config
 from .core.i18n import Messages
 from .core.kit import Kit
-from .registry import ManifestDirectorySource, ManifestValidator, Prober, Registry
+from .registry import ManifestDirectorySource, ManifestValidator, Prober, Registry, StatusWriter
 from .service import AppService, AssertionService, LoginService, SessionService, SessionWriteService
 from .web.proxy import AppProxy
 from .web.views import Views
@@ -129,7 +129,11 @@ def build_portal(
             AssertionService(keys, cfg.assertion, cfg.role_vocabulary) if keys is not None and cfg.assertion else None
         ),
         proxy=AppProxy(cfg.apps, app_transport) if cfg.apps is not None else None,
-        prober=Prober(registry, cfg.apps, app_transport) if cfg.registry.probe and cfg.apps is not None else None,
+        prober=(
+            Prober(registry, cfg.apps, app_transport,
+                   status_writer=StatusWriter(cfg.registry.status_file) if cfg.registry.status_file else None)
+            if cfg.registry.probe and cfg.apps is not None else None
+        ),
     )
 
 
