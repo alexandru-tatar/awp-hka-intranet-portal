@@ -179,8 +179,10 @@ def test_exit_codes_for_wrong_call_and_broken_operation(cfg_path, env, tmp_path)
 
 
 def test_config_without_owners_file_is_a_broken_operation(env):
+    cfg = env / "gateway.dev.yml"
+    cfg.write_text(cfg.read_text(encoding="utf-8").split("\nregistry:")[0] + "\n", encoding="utf-8")  # ohne registry
     err = io.StringIO()
-    code = main(["register", "--config", str(env / "gateway.dev.yml"), "--owner", OWNER], io.BytesIO(b"{}"),
+    code = main(["register", "--config", str(cfg), "--owner", OWNER], io.BytesIO(b"{}"),
                 io.StringIO(), err)
     assert code == 3 and "owners_file" in err.getvalue()
 
@@ -204,12 +206,14 @@ def test_vm_config_loads_with_probe_registry_and_gateway(env, kit_dist):
     (env / "vm-manifests").mkdir()
     text = (env / "gateway.vm.yml").read_text(encoding="utf-8")
     text = text.replace("/var/lib/portal/manifests", str(env / "vm-manifests"))
+    text = text.replace("/var/lib/portal/registry/grants.yml", str(env / "grants-vm.yml"))  # fehlt: erlaubt mit admin_write
     text = text.replace("../schemas/manifest.schema.json", str(ROOT / "schemas" / "manifest.schema.json"))
     text = text.replace("../kit/dist", str(kit_dist))
     (env / "gateway.vm.yml").write_text(text, encoding="utf-8")
     cfg = load_config(env / "gateway.vm.yml")
     assert cfg.registry.probe and cfg.registry.refresh_seconds == 5
     assert cfg.registry.owners_file == Path("/var/lib/portal/registry/owners.json").resolve()
+    assert cfg.registry.admin_write and cfg.grants_file == (env / "grants-vm.yml").resolve()
     assert cfg.state_file is None and cfg.apps.upstream_for("noten") == "http://app-noten:8080"
     assert cfg.assertion.issuer == "https://iwi-hean-05.hs-karlsruhe.de/"
 

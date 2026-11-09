@@ -33,7 +33,7 @@ except ImportError:  # Windows: keine Sperre, die Registrierung läuft dort nur 
     fcntl = None  # type: ignore[assignment]
 
 from .models import CATEGORIES
-from .validation import ManifestValidator
+from .validation import ManifestInvalid, ManifestValidator
 
 MAX_MANIFEST_BYTES: Final = 64 * 1024
 OWNER_RE: Final = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9._-]+$")
@@ -87,6 +87,18 @@ class RegistryError(Exception):
 
 class NotRegistered(Exception):
     """``remove`` für einen Namen, zu dem keine aktive App gehört (unbekannt oder schon stillgelegt)."""
+
+
+class InvalidRoles(ValueError):
+    """``set_roles`` mit keiner Rolle oder einer Rolle außerhalb des Vokabulars.
+
+    :ivar unknown: Die unbekannten Rollen
+    """
+
+    def __init__(self, unknown: list[str]) -> None:
+        """:param unknown: Die unbekannten Rollen, oder ein Platzhalter bei leerer Liste"""
+        super().__init__(f"Ungültige Rollen: {', '.join(unknown)}")
+        self.unknown = unknown
 
 
 @dataclass(frozen=True)
@@ -261,14 +273,73 @@ class Registrar:
         :raises Rejected: PF-202 bei fremdem Besitzer, PF-204 bei laufender Registrierung
         :raises RegistryError: Falls Dateien kaputt sind oder nicht geschrieben werden können
         """
+        self._retire(slug, owner)
+
+    def remove_as_admin(self, slug: str) -> None:
+        """Eine App als Plattform-Admin stilllegen, ohne den Besitzer zu kennen (Verwaltungsseite).
+
+        Wirkt wie :meth:`remove`; die Bindung an einen Besitzer bleibt, falls es eine gibt. Auch von Hand eingerichtete
+        Apps ohne Besitzer lassen sich so entfernen.
+
+        :param slug: Name der App
+        :raises NotRegistered: Falls es zu dem Namen keine aktive App gibt
+        :raises Rejected: PF-204 bei laufender Registrierung
+        :raises RegistryError: Falls Dateien kaputt sind oder nicht geschrieben werden können
+        """
+        self._retire(slug, None)
+
+    def set_roles(self, slug: str, roles: list[str] | tuple[str, ...] | frozenset[str]) -> None:
+        """Die Rollen einer aktiven App ändern: ``roles`` im Manifest ersetzen und erneut prüfen.
+
+        Besitzer und alle anderen Felder bleiben. Registriert die Pipeline das Manifest danach erneut, gilt wieder
+        die Liste aus dem Repository der App.
+
+        :param slug: Name der App
+        :param roles: Neue Rollen, mindestens eine, alle aus dem Vokabular
+        :raises NotRegistered: Falls es zu dem Namen keine aktive App gibt
+        :raises InvalidRoles: Falls keine oder eine unbekannte Rolle übergeben wird
+        :raises Rejected: PF-204 bei laufender Registrierung
+        :raises RegistryError: Falls Dateien kaputt sind oder nicht geschrieben werden können
+        """
+        wanted = sorted(set(roles))
+        unknown = [role for role in wanted if role not in self._roles]
+        if not wanted or unknown:
+            raise InvalidRoles(unknown or ["(keine Rolle)"])
+        with self._locked():
+            retired = self._read_retired()
+            path = self._path_of(slug)
+            if path is None or slug in retired:
+                raise NotRegistered(slug)
+            manifest = self._read_json(path)
+            if not isinstance(manifest, dict):
+                raise RegistryError(f"Datei {path} nicht lesbar")
+            manifest["roles"] = wanted
+            try:
+                self._validator.validate(manifest)
+            except ManifestInvalid as exc:
+                raise RegistryError(f"Manifest {path.name} wäre danach ungültig: {exc}") from exc
+            try:
+                atomic_write(path, json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+            except OSError as exc:
+                raise RegistryError(f"Schreiben nicht möglich: {exc}") from exc
+
+    def _retire(self, slug: str, owner: str | None) -> None:
+        """Eine App stilllegen, mit Besitzerprüfung (``owner``) oder ohne (``None``, Plattform-Admin).
+
+        :param slug: Name der App
+        :param owner: Erwarteter Besitzer oder ``None``
+        :raises NotRegistered: Falls es zu dem Namen keine aktive App gibt
+        :raises Rejected: PF-202 bei fremdem Besitzer, PF-204 bei laufender Registrierung
+        :raises RegistryError: Falls Dateien kaputt sind oder nicht geschrieben werden können
+        """
         with self._locked():
             owners = self._read_owners()
             retired = self._read_retired()
             target = self._dir / f"{slug}.json"
             bound = owners.get(slug)
-            if bound is None or slug in retired or not target.exists():
+            if slug in retired or not target.exists() or (owner is not None and bound is None):
                 raise NotRegistered(slug)
-            if bound != owner:
+            if owner is not None and bound != owner:
                 raise Rejected(
                     "PF-202", "Entfernen abgelehnt", f"Die App „{slug}\" gehört zu einem anderen Repository.",
                     "Nur der Besitzer darf eine App entfernen, sonst könnte jemand eine fremde App abschalten.",
@@ -280,6 +351,18 @@ class Registrar:
                 self._write_retired({**retired, slug: self._now()})
             except OSError as exc:
                 raise RegistryError(f"Schreiben nicht möglich: {exc}") from exc
+
+    def _path_of(self, slug: str) -> Path | None:
+        """Die Manifest-Datei zu einem Namen: ``<slug>.json`` oder die Datei, in der dieser ``slug`` steht.
+
+        :param slug: Name der App
+        :return: Pfad oder ``None``, falls es keine Datei gibt
+        :rtype: Path | None
+        """
+        target = self._dir / f"{slug}.json"
+        if target.exists():
+            return target
+        return next((path for path in sorted(self._dir.glob("*.json")) if self._slug_of(path) == slug), None)
 
     def _parse(self, raw: bytes) -> dict:
         """Das Manifest lesen und prüfen (Schema, reservierter Name, Rolle, Adapter).

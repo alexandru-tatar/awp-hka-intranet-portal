@@ -126,11 +126,14 @@ class RegistryConfig:
     :ivar probe: ``True``, wenn das Portal ``/healthz`` jeder App prüft und den Status selbst setzt
     :ivar owners_file: JSON-Datei ``{slug: owner}``, die nur der Befehl ``python -m portal.registry`` schreibt
     :ivar status_file: JSON-Datei, in die der Prober den Status schreibt und die ``list`` liest (HKA-56)
+    :ivar admin_write: ``True``, wenn die Verwaltungsseite Apps entfernen, Rollen ändern und Grants schreiben darf.
+        Braucht ``owners_file`` und beschreibbare Ordner für Manifeste und Grants; sonst zeigt die Seite nur an.
     """
     refresh_seconds: float = 5.0
     probe: bool = False
     owners_file: Path | None = None
     status_file: Path | None = None
+    admin_write: bool = False
 
 
 @dataclass(frozen=True)
@@ -208,7 +211,7 @@ _KEYS = {
     "touch_min_interval_seconds", "login_state_ttl_seconds", "oidc", "logging", "roles_file", "grants_file",
     "assertion", "apps", "registry",
 }
-_REGISTRY_KEYS = {"refresh_seconds", "probe", "owners_file", "status_file"}
+_REGISTRY_KEYS = {"refresh_seconds", "probe", "owners_file", "status_file", "admin_write"}
 _ASSERTION_KEYS = {"issuer", "ttl_seconds", "signing_key_current", "signing_key_next", "signing_key_previous"}
 _APPS_KEYS = {"upstream", "connect_timeout_seconds", "read_timeout_seconds", "max_body_bytes"}
 _OIDC_KEYS = {
@@ -307,7 +310,9 @@ def load_config(path: Path) -> Config:
         if not (cfg.roles_file and cfg.roles_file.exists()):
             raise ConfigError(f"{path}: auth_mode oidc needs an existing roles_file")
         if cfg.grants_file and not cfg.grants_file.exists():
-            raise ConfigError(f"{path}: grants_file does not exist: {cfg.grants_file}")
+            # Mit admin_write legt die Verwaltungsseite die Datei bei der ersten Änderung an; dann genügt der Ordner.
+            if not (cfg.registry.admin_write and cfg.grants_file.parent.is_dir()):
+                raise ConfigError(f"{path}: grants_file does not exist: {cfg.grants_file}")
     return cfg
 
 
@@ -462,6 +467,10 @@ def _load_registry(path: Path, base: Path, raw: dict | None) -> RegistryConfig:
         raise ConfigError(f"{path}: unknown registry key(s) {', '.join(sorted(unknown))}")
     if not isinstance(raw.get("probe", False), bool):
         raise ConfigError(f"{path}: registry probe must be true or false")
+    if not isinstance(raw.get("admin_write", False), bool):
+        raise ConfigError(f"{path}: registry admin_write must be true or false")
+    if raw.get("admin_write") and not raw.get("owners_file"):
+        raise ConfigError(f"{path}: registry admin_write needs owners_file")
     refresh = float(raw.get("refresh_seconds", 5))
     if refresh < 1:
         raise ConfigError(f"{path}: registry refresh_seconds must be at least 1")
@@ -470,4 +479,5 @@ def _load_registry(path: Path, base: Path, raw: dict | None) -> RegistryConfig:
         probe=raw.get("probe", False),
         owners_file=(base / raw["owners_file"]).resolve() if raw.get("owners_file") else None,
         status_file=(base / raw["status_file"]).resolve() if raw.get("status_file") else None,
+        admin_write=bool(raw.get("admin_write", False)),
     )

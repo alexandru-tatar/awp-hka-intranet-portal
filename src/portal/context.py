@@ -13,13 +13,15 @@ from .auth.assertion_keys import SigningKeys
 from .auth.dev_users import DevUser, load_dev_users
 from .auth.oidc import OidcClient
 from .auth.redis_sessions import RedisLoginStore, RedisSessionStore
+from .auth.grants import GrantStore
 from .auth.roles import load_role_mapper
 from .auth.sessions import MemorySessionStore, SessionStore
 from .core.config import Config
 from .core.i18n import Messages
 from .core.kit import Kit
 from .registry import ManifestDirectorySource, ManifestValidator, Prober, Registry, StatusWriter
-from .service import AppService, AssertionService, LoginService, SessionService, SessionWriteService
+from .registry.registration import Registrar
+from .service import AdminService, AppService, AssertionService, LoginService, SessionService, SessionWriteService
 from .web.proxy import AppProxy
 from .web.views import Views
 
@@ -37,6 +39,7 @@ class Portal:
     :ivar t: UI-Texte
     :ivar registry: Registry mit dem aktuellen Snapshot der Apps
     :ivar app_service: Service für Apps
+    :ivar admin_service: Service der Verwaltungsseite für platform-admin
     :ivar session_service: Lesender Service für Sessions
     :ivar session_write_service: Schreibender Service für Sessions
     :ivar login_service: Service für die OIDC-Anmeldung, ``None`` bei ``auth_mode: dev``
@@ -53,6 +56,7 @@ class Portal:
     t: Messages
     registry: Registry
     app_service: AppService
+    admin_service: AdminService
     session_service: SessionService
     session_write_service: SessionWriteService
     login_service: LoginService | None
@@ -101,6 +105,13 @@ def build_portal(
     )
     dev_users = load_dev_users(cfg.dev_users_file) if cfg.auth_mode == "dev" else {}
     app_service = AppService(registry)
+    grants = GrantStore(cfg.grants_file) if cfg.grants_file is not None else None
+    registrar = (
+        Registrar(cfg.manifests_dir, cfg.registry.owners_file,
+                  ManifestValidator(cfg.schema_path, cfg.role_vocabulary, cfg.adapter_scopes), cfg.role_vocabulary)
+        if cfg.registry.owners_file is not None else None
+    )
+    admin_service = AdminService(registry, registrar, grants, cfg.role_vocabulary, writable=cfg.registry.admin_write)
     session_write_service = SessionWriteService(sessions, dev_users)
     login_service = None
     if cfg.oidc is not None:
@@ -108,7 +119,7 @@ def build_portal(
         login_service = LoginService(
             OidcClient(cfg.oidc, http_client),
             RedisLoginStore(client, ttl_seconds=cfg.login_state_ttl_seconds),
-            load_role_mapper(cfg.roles_file, cfg.grants_file),
+            load_role_mapper(cfg.roles_file, cfg.grants_file, grants=grants),
             session_write_service,
         )
     keys = SigningKeys.load(cfg.assertion, dev=cfg.dev) if cfg.assertion is not None else None
@@ -118,6 +129,7 @@ def build_portal(
         t=t,
         registry=registry,
         app_service=app_service,
+        admin_service=admin_service,
         session_service=SessionService(sessions),
         session_write_service=session_write_service,
         login_service=login_service,

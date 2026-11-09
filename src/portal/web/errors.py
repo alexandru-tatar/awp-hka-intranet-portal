@@ -11,7 +11,9 @@ from starlette.exceptions import HTTPException
 
 from ..auth.redirects import login_url
 from ..core.kit import is_static_path
+from ..registry.registration import RegistryError, Rejected
 from ..service import (
+    AdminReadOnlyError,
     ForbiddenError,
     InvalidCsrfError,
     LoginFailedError,
@@ -50,6 +52,9 @@ SERVICE_ERROR_STATUS = {
     LoginFailedError: 400,
     RedisError: 503,  # fail closed (02 §10)
     UnknownUserError: 400,
+    AdminReadOnlyError: 403,
+    RegistryError: 503,  # Verwaltungsseite: Dateien nicht beschreibbar oder Registrierung läuft
+    Rejected: 503,
 }
 
 

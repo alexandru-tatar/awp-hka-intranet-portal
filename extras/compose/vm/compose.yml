@@ -54,9 +54,13 @@ services:
       - "127.0.0.1:8000:8000"
     volumes:
       # Manifeste der Apps, von Hand mit portal-deploy abgelegt (deploy/README.md). Der Ordner muss vor "up" existieren.
-      - /srv/portal/manifests:/var/lib/portal/manifests:ro
+      # :rw, weil die Verwaltungsseite /_portal/admin Apps entfernen und ihre Rollen ändern darf (registry.admin_write).
+      - /srv/portal/manifests:/var/lib/portal/manifests:rw
       # Status der Apps, schreibt der Prober, liest "portal-deploy list" (HKA-56). Der Ordner muss vor "up" existieren.
       - /srv/portal/status:/var/lib/portal/status:rw
+      # Besitzer (owners.json), Stilllegungen (retired.json), Sperrdatei und die Grants der Verwaltungsseite (grants.yml).
+      # Dieselben Dateien benutzt portal-deploy; beide sperren owners.json.lock.
+      - /srv/portal/registry:/var/lib/portal/registry:rw
     depends_on:
       redis:
         condition: service_healthy

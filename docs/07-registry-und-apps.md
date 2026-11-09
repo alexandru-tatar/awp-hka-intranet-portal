@@ -233,3 +233,29 @@ apps:
 2. `make dev-apps`, als `alexandru` anmelden, `http://localhost:8000/apps/noten/` öffnen: Die App zeigt Name und Rollen.
 3. App beenden und neu laden: Das Portal zeigt die 503-Seite.
 4. Als `gast` anmelden: 403, die App bekommt keine Anfrage.
+
+## Verwaltungsseite (`/_portal/admin`)
+
+Für Personen mit der Rolle `platform-admin` (Link „Verwaltung“ im Kopf). Die Seite zeigt alle Apps mit Besitzer, Version, Status und
+Rollen, listet stillgelegte Apps und die Grants je Person. Mit `registry.admin_write: true` kann sie außerdem ändern:
+
+| Aktion | Aufruf | Wirkung |
+|---|---|---|
+| App entfernen | Button „Entfernen …“, Rückfrage im Dialog | wie `portal-deploy remove`, aber ohne `--owner` (`Registrar.remove_as_admin`): Manifest weg, Name bleibt an den Besitzer gebunden, Menü sofort aktualisiert |
+| Rollen einer App | Haken je Rolle, „Speichern“ | `roles` im Manifest wird ersetzt und erneut geprüft (`Registrar.set_roles`), mindestens eine Rolle aus `role_vocabulary`, Menü sofort aktualisiert |
+| Grants je Person | Tabelle und Formular „Zusätzliche Rollen hinzufügen“ | schreibt `grants_file`; ohne Rolle entfällt der Eintrag. Gilt ab der nächsten Anmeldung der Person, weil die Rollen beim Login in die Session kommen |
+
+Alle Änderungen sind POST mit CSRF-Token der Session, laufen über `AdminService` (nicht in den Handlern) und stehen im Log
+(`admin_action action=… admin=<sub>`). Registriert die Pipeline ein Manifest später erneut, gelten wieder die Rollen aus dem Repository
+der App; eine Änderung auf der Seite ist also nur vorläufig. Ohne `admin_write`, ohne `owners_file` oder ohne `grants_file` zeigt die Seite
+nur an (Hinweis „nur lesend“); die Grants fehlen dann ganz.
+
+**Auf der VM** ist `admin_write: true` gesetzt (`dev/gateway.vm.yml`). Dafür bindet `extras/compose/vm/compose.yml` `/srv/portal/manifests` und
+`/srv/portal/registry` mit `:rw` ein, und die Grants liegen in `/srv/portal/registry/grants.yml` (fehlt die Datei, gilt „keine Grants“, die erste
+Änderung legt sie an). Die Ordner gehören der Benutzer-ID des Images, wie bei `portal-deploy`. `portal-deploy` und die Seite sperren dieselbe
+Datei `owners.json.lock`, es gibt also keine gleichzeitigen Schreibzugriffe. Das Portal hat damit Schreibrechte auf Manifeste und Besitzerdatei;
+das ist der Preis der Seite. Wer das nicht will, setzt `admin_write` auf `false` und die Mounts zurück auf `:ro`, die Seite zeigt dann nur an.
+
+**Lokal:** `gateway.dev.yml` hat `admin_write: true` und legt `owners.json` und `retired.json` neben die Konfiguration (in `.gitignore`).
+Entfernen löscht die Datei in `dev/manifests/`; `git restore dev/manifests` und das Löschen von `dev/owners.json` und `dev/retired.json` stellen den Stand wieder her.
+Die Grants wirken nur bei `auth_mode: oidc`; in dev kommen die Rollen aus `users.yml`.
