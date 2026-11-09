@@ -114,7 +114,7 @@ Menüeintrag 5 s, Container gestoppt bis „nicht verfügbar“ 42 s, Container 
   Minute da, nicht erst nach eineinhalb.
 - `failed` wird alle 30 s weiter geprüft (03: keine Prüfung mehr). So kommt eine App nach einem Neustart der VM von selbst zurück.
 - Kein Jitter. Nach einem Neustart des Portals beginnen alle Apps bei `registering` und sind nach etwa 5 s wieder im Menü.
-- Nicht geprüft: Versionsrückschritt (03 §5, 422), `rollback`, Abmelden, Sperrfrist für Namen (Phase 3).
+- Nicht geprüft: Versionsrückschritt (03 §5, 422), `rollback` (Phase 3). Abmelden und Sperrfrist: siehe „Verwalten (HKA-56)“.
 
 **Konfiguration** (`dev/gateway.vm.yml` ist das Beispiel): 
 
@@ -123,7 +123,42 @@ registry:
   refresh_seconds: 5          # Abstand, in dem der Manifest-Ordner geprüft wird (mindestens 1)
   probe: true                 # Prober an: verlangt den Abschnitt apps, schließt state_file aus
   owners_file: /var/lib/portal/registry/owners.json   # nur der Befehl benutzt die Datei
+  status_file: /var/lib/portal/status/status.json     # schreibt der Prober, liest "list" (HKA-56); ohne Wert keine Datei
 ```
+
+## Verwalten (HKA-56)
+
+Drei Aufgaben nach der Registrierung, alle über denselben Befehl (`portal-deploy` auf der VM, `python -m portal.registry` lokal):
+
+| Aufgabe | Aufruf | Ergebnis |
+|---|---|---|
+| Anzeigen | `list --config <yml>` | Tabelle mit Slug, Besitzer, Version, Status und letzter Prüfung, stillgelegte Apps mit Datum |
+| Aktualisieren | `register --config <yml> --owner <owner/repo>` mit geändertem Manifest | „Aktualisiert“; das Portal lädt nach 5 s nach, die App beginnt wieder bei `registering` |
+| Entfernen | `remove <slug> --config <yml> --owner <owner/repo>` | App wird stillgelegt und verschwindet nach 5 s aus dem Menü |
+
+**Status für `list`** (`registry/status_file.py`): Den Status kennt nur das laufende Portal. Der Befehl läuft in einem eigenen Container
+ohne Netz und kann es nicht fragen. Deshalb schreibt der Prober nach jeder Runde den Stand atomar nach `registry.status_file`, wenn sich
+etwas geändert hat, sonst spätestens alle 30 s. Ist die Datei älter als 120 s oder fehlt sie, zeigt `list` den Status als „unbekannt“
+mit einem Hinweis, dass das Portal vermutlich nicht läuft. Ein Fehler beim Schreiben landet im Log (`status_file_write_failed`), das
+Menü läuft weiter.
+
+**Stilllegen** (`Registrar.remove`, wie 03 §6): Unter derselben Sperre wie `register` wird `<slug>.json` gelöscht und der Zeitpunkt in
+`retired.json` (neben `owners.json`, `{slug: Zeitpunkt}`) gemerkt. Die Bindung an den Besitzer bleibt.
+
+| Fall | Ergebnis |
+|---|---|
+| Derselbe Besitzer registriert den Namen wieder | sofort erlaubt, der Eintrag in `retired.json` entfällt |
+| Anderes Repository innerhalb von 90 Tagen | **PF-202** mit dem Datum, ab dem der Name frei ist |
+| Anderes Repository nach 90 Tagen | erlaubt, der Name wird neu gebunden |
+| `remove` mit fremdem `--owner` | **PF-202**, nichts ändert sich |
+| `remove` mit unbekanntem oder schon stillgelegtem Namen | Exit 1, „ist nicht registriert“, nichts ändert sich |
+
+Reihenfolge beim Stilllegen: erst das Manifest löschen, dann `retired.json` schreiben. Scheitert das Schreiben, ist die App trotzdem aus
+dem Menü, und der Name bleibt an den Besitzer gebunden; nur die Sperrfrist fehlt dann.
+
+**Abweichungen von 03 §3 bis §6:** Dateien statt SQLite, kein Löschen nach der Sperrfrist (`purge`), keine Zuweisung durch einen Operator.
+Alle Zugriffe auf Manifest-Ordner, `owners.json` und `retired.json` laufen über `Registrar`; für die SQLite-Registry wird nur diese Klasse
+ersetzt, Befehle und Fehlercodes bleiben gleich.
 
 Einrichtung auf der VM, Ablauf je App und Testanleitungen: [`extras/compose/vm/deploy/README.md`](../extras/compose/vm/deploy/README.md).
 

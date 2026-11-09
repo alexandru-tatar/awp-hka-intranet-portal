@@ -1,9 +1,11 @@
 #!/bin/bash
-# Manuelle Registrierung einer App auf der Test-VM (HKA-53).
+# Manuelle Registrierung und Verwaltung von Apps auf der Test-VM (HKA-53, HKA-56).
 #
 # Aufruf als sadmin, nachdem das Manifest per scp auf die VM kopiert wurde (README.md in diesem Ordner):
 #   sudo portal-deploy check    --owner <owner/repo> < ~/manifests/<slug>.json   # prüft nur, schreibt nichts
 #   sudo portal-deploy register --owner <owner/repo> < ~/manifests/<slug>.json   # legt das Manifest im Portal ab
+#   sudo portal-deploy list                                                       # alle Apps mit Besitzer und Status
+#   sudo portal-deploy remove <slug> --owner <owner/repo>                         # legt die App still
 #
 # Das Skript startet das Portal-Image mit festen Argumenten: ohne Netz, schreibgeschützt, ohne Capabilities. Prüfung und
 # Ablage macht "python -m portal.registry" im Container (PF-104, PF-202, PF-204).
@@ -20,22 +22,42 @@ else
   ENV_FILE=${PORTAL_DEPLOY_ENV:-/etc/portal/deploy.env}
 fi
 
-usage="Aufruf: sudo portal-deploy check|register --owner <owner/repo> < manifest.json"
+usage="Aufruf: sudo portal-deploy check|register --owner <owner/repo> < manifest.json
+        sudo portal-deploy list
+        sudo portal-deploy remove <slug> --owner <owner/repo>"
 log() { command -v logger >/dev/null 2>&1 && logger -t portal-deploy -- "$*" || true; }
 refuse() { log "abgelehnt: $1 (owner=${OWNER:-?})"; echo "portal-deploy: $1" >&2; echo "$usage" >&2; exit 2; }
 
 OWNER=
-if [ "$#" -ne 3 ]; then refuse "falsche Anzahl Argumente"; fi
-COMMAND=$1
+SLUG=
+COMMAND=${1-}
 case "$COMMAND" in
-  check) WRITABLE=ro ;;
-  register) WRITABLE=rw ;;
-  *) refuse "nur check oder register erlaubt" ;;
+  check|register)
+    if [ "$#" -ne 3 ]; then refuse "falsche Anzahl Argumente"; fi
+    if [ "$2" != "--owner" ]; then refuse "Aufruf ohne --owner"; fi
+    OWNER=$3 ;;
+  list)
+    if [ "$#" -ne 1 ]; then refuse "falsche Anzahl Argumente"; fi ;;
+  remove)
+    if [ "$#" -ne 4 ]; then refuse "falsche Anzahl Argumente"; fi
+    SLUG=$2
+    if [ "$3" != "--owner" ]; then refuse "Aufruf ohne --owner"; fi
+    OWNER=$4
+    if ! [[ "$SLUG" =~ ^[a-z][a-z0-9-]{2,30}$ ]]; then refuse "ungültiger Name der App"; fi ;;
+  *)
+    if [ "$#" -lt 1 ] || [ "$#" -gt 4 ]; then refuse "falsche Anzahl Argumente"; fi
+    refuse "nur check, register, list oder remove erlaubt" ;;
 esac
-if [ "$2" != "--owner" ]; then refuse "Aufruf ohne --owner"; fi
-OWNER=$3
-if ! [[ "$OWNER" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9._-]+$ ]]; then refuse "ungültiger Besitzer"; fi
-if [ -t 0 ]; then refuse "Manifest fehlt auf der Standardeingabe"; fi
+if [ "$COMMAND" != list ]; then
+  if ! [[ "$OWNER" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9._-]+$ ]]; then refuse "ungültiger Besitzer"; fi
+fi
+case "$COMMAND" in
+  check|register) if [ -t 0 ]; then refuse "Manifest fehlt auf der Standardeingabe"; fi ;;
+esac
+case "$COMMAND" in
+  register|remove) WRITABLE=rw ;;
+  *) WRITABLE=ro ;;
+esac
 
 # shellcheck source=/dev/null
 . "$ENV_FILE"
@@ -44,13 +66,24 @@ if [ -t 0 ]; then refuse "Manifest fehlt auf der Standardeingabe"; fi
 : "${REGISTRY_DIR:?REGISTRY_DIR fehlt in $ENV_FILE}"
 PORTAL_CONFIG_IN_IMAGE=${PORTAL_CONFIG_IN_IMAGE:-/opt/app/dev/gateway.vm.yml}
 
-log "$COMMAND owner=$OWNER user=${SUDO_USER:-$(id -un)}"
+# Statusdatei des Portals (HKA-56): nur lesen, nur für list. Ohne STATUS_DIR zeigt list den Status als unbekannt.
+STATUS_MOUNT=()
+if [ "$COMMAND" = list ] && [ -n "${STATUS_DIR:-}" ]; then
+  STATUS_MOUNT=(-v "$STATUS_DIR:/var/lib/portal/status:ro")
+fi
+ARGS=("$COMMAND")
+if [ -n "$SLUG" ]; then ARGS+=("$SLUG"); fi
+ARGS+=(--config "$PORTAL_CONFIG_IN_IMAGE")
+if [ -n "$OWNER" ]; then ARGS+=(--owner "$OWNER"); fi
+
+log "$COMMAND ${SLUG:+slug=$SLUG }owner=${OWNER:--} user=${SUDO_USER:-$(id -un)}"
 exec docker run --rm -i \
   --network none --read-only --tmpfs /tmp \
   --cap-drop ALL --security-opt no-new-privileges \
   --memory 256m --pids-limit 64 \
   -v "$MANIFESTS_DIR:/var/lib/portal/manifests:$WRITABLE" \
   -v "$REGISTRY_DIR:/var/lib/portal/registry:$WRITABLE" \
+  ${STATUS_MOUNT[@]+"${STATUS_MOUNT[@]}"} \
   --entrypoint python \
   "$PORTAL_IMAGE" \
-  -m portal.registry "$COMMAND" --config "$PORTAL_CONFIG_IN_IMAGE" --owner "$OWNER"
+  -m portal.registry "${ARGS[@]}"

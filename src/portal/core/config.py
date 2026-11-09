@@ -125,10 +125,12 @@ class RegistryConfig:
     :ivar refresh_seconds: Abstand, in dem das Portal den Manifest-Ordner auf Änderungen prüft
     :ivar probe: ``True``, wenn das Portal ``/healthz`` jeder App prüft und den Status selbst setzt
     :ivar owners_file: JSON-Datei ``{slug: owner}``, die nur der Befehl ``python -m portal.registry`` schreibt
+    :ivar status_file: JSON-Datei, in die der Prober den Status schreibt und die ``list`` liest (HKA-56)
     """
     refresh_seconds: float = 5.0
     probe: bool = False
     owners_file: Path | None = None
+    status_file: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -206,7 +208,7 @@ _KEYS = {
     "touch_min_interval_seconds", "login_state_ttl_seconds", "oidc", "logging", "roles_file", "grants_file",
     "assertion", "apps", "registry",
 }
-_REGISTRY_KEYS = {"refresh_seconds", "probe", "owners_file"}
+_REGISTRY_KEYS = {"refresh_seconds", "probe", "owners_file", "status_file"}
 _ASSERTION_KEYS = {"issuer", "ttl_seconds", "signing_key_current", "signing_key_next", "signing_key_previous"}
 _APPS_KEYS = {"upstream", "connect_timeout_seconds", "read_timeout_seconds", "max_body_bytes"}
 _OIDC_KEYS = {
@@ -445,7 +447,7 @@ def _load_registry(path: Path, base: Path, raw: dict | None) -> RegistryConfig:
     """Den Abschnitt ``registry`` lesen und prüfen.
 
     :param path: Pfad der Konfigurationsdatei, für Fehlermeldungen
-    :param base: Ordner der Konfigurationsdatei, Basis für einen relativen ``owners_file``
+    :param base: Ordner der Konfigurationsdatei, Basis für relative ``owners_file`` und ``status_file``
     :param raw: Rohwerte des Abschnitts, ``None`` ohne Abschnitt
     :return: Die Einstellungen, ohne Abschnitt die Voreinstellung
     :rtype: RegistryConfig
@@ -467,4 +469,5 @@ def _load_registry(path: Path, base: Path, raw: dict | None) -> RegistryConfig:
         refresh_seconds=refresh,
         probe=raw.get("probe", False),
         owners_file=(base / raw["owners_file"]).resolve() if raw.get("owners_file") else None,
+        status_file=(base / raw["status_file"]).resolve() if raw.get("status_file") else None,
     )

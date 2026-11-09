@@ -38,6 +38,7 @@ docs/              diese Dokumentation (Markdown); docs/api/ = Sphinx-Konfigurat
 | neue Rückgabestruktur eines Services | `service/<entity>_dto.py`, Export in `service/__init__.py` |
 | neue fachliche Exception | `service/exceptions.py` und Statuscode in `web/errors.py` (`SERVICE_ERROR_STATUS`) |
 | neue App im Menü | lokal `dev/manifests/<slug>.json`, Status in `dev/state.yml`; auf der VM per `scp` kopiert und mit `sudo portal-deploy register` abgelegt (`python -m portal.registry`), der Prober setzt den Status |
+| App auf der VM anzeigen oder entfernen | `sudo portal-deploy list` bzw. `remove <slug> --owner <owner/repo>` (`registry/registration.py`, Klasse `Registrar`); Status aus `registry.status_file`, die der Prober schreibt (`registry/status_file.py`) |
 | Manifest-Regel oder -Feld | `registry/validation.py` und `schemas/manifest.schema.json` |
 | neue Registry-Quelle | Klasse in `registry/sources.py` mit `load()` und `fingerprint()` (`RegistrySource`) |
 | Konfigurationswert | `core/config.py` (unbekannte Keys sind Fehler) und die Dateien in `dev/` |
