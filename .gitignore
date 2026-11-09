@@ -14,3 +14,4 @@ secrets/
 dev/owners.json
 dev/owners.json.lock
 dev/retired.json
+*.tar.gz
