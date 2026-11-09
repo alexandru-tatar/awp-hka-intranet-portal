@@ -310,7 +310,9 @@ def load_config(path: Path) -> Config:
         if not (cfg.roles_file and cfg.roles_file.exists()):
             raise ConfigError(f"{path}: auth_mode oidc needs an existing roles_file")
         if cfg.grants_file and not cfg.grants_file.exists():
-            raise ConfigError(f"{path}: grants_file does not exist: {cfg.grants_file}")
+            # Mit admin_write legt die Verwaltungsseite die Datei bei der ersten Änderung an; dann genügt der Ordner.
+            if not (cfg.registry.admin_write and cfg.grants_file.parent.is_dir()):
+                raise ConfigError(f"{path}: grants_file does not exist: {cfg.grants_file}")
     return cfg
 
 

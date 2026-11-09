@@ -172,3 +172,17 @@ def test_removed_name_stays_bound_and_retired_is_listed(env, admin):
     import json
     retired = json.loads((env / "retired.json").read_text(encoding="utf-8"))
     assert "noten" in retired and datetime.fromisoformat(retired["noten"]).tzinfo is timezone.utc
+
+
+def test_missing_grants_file_is_allowed_with_admin_write_and_created_on_first_change(env):
+    client = make_client(env, grants=False)
+    cfg = env / "gateway.dev.yml"
+    cfg.write_text("grants_file: neu/grants.yml\n" + cfg.read_text(encoding="utf-8"), encoding="utf-8")
+    (env / "neu").mkdir()
+    client = login(TestClient(create_app(cfg), follow_redirects=False), "admin")
+    assert client.get(BASE).status_code == 200
+    token = csrf_of(client)
+    assert client.post(f"{BASE}/grants", data={"csrf": token, "sub": "x", "roles": ["student"]}).status_code == 303
+    assert yaml.safe_load((env / "neu" / "grants.yml").read_text(encoding="utf-8"))["grants"] == [
+        {"sub": "x", "roles": ["student"]}]
+

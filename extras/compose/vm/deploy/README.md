@@ -11,7 +11,7 @@ VM:   sudo portal-deploy check|register --owner <owner/repo> < ~/manifests/<slug
       sudo portal-deploy list | remove <slug> --owner <owner/repo>
         --> docker run --network none --read-only … hka/portal python -m portal.registry register
         --> /srv/portal/manifests/<slug>.json + /srv/portal/registry/owners.json
-Portal (Container backend) liest /srv/portal/manifests schreibgeschützt, prüft alle 5 s auf Neues und /healthz der Apps
+Portal (Container backend) liest /srv/portal/manifests, prüft alle 5 s auf Neues und /healthz der Apps
 und schreibt den Status nach /srv/portal/status/status.json (liest "list").
 ```
 
@@ -142,3 +142,17 @@ Im Browser neu laden und die Zeit messen, bis der Eintrag weg ist (Ziel höchste
 - Nach einem Neustart des Portals beginnen alle Apps bei `registering` und sind nach etwa 5 s wieder im Menü.
 - Nicht enthalten: Zurücksetzen auf eine alte Version, Prüfung auf Versionsrückschritt, Freigeben eines Namens vor Ablauf der 90 Tage
   (Phase 3, SQLite-Registry). Ein stillgelegter Name lässt sich bis dahin nur von Hand in `retired.json` und `owners.json` freigeben.
+
+## Verwaltungsseite im Portal (`/_portal/admin`)
+
+Personen mit der Rolle `platform-admin` sehen im Portal oben den Link „Verwaltung“: alle Apps mit Besitzer, Status und Rollen, Apps entfernen,
+Rollen einer App ändern und zusätzliche Rollen je Person vergeben. Das Portal schreibt dafür selbst in `/srv/portal/manifests` und
+`/srv/portal/registry` (`admin_write: true`, Mounts mit `:rw`). Einrichtung: nichts Zusätzliches, die Ordner aus Schritt 2 genügen.
+Die Grants-Datei `/srv/portal/registry/grants.yml` entsteht bei der ersten Änderung. Details: [`docs/07`](../../../../docs/07-registry-und-apps.md#verwaltungsseite-_portaladmin).
+
+**Prüfen nach dem Einspielen:**
+
+1. Als `platform-admin` anmelden (Keycloak-Nutzer mit Entitlement `urn:hka:portal:admin`), „Verwaltung“ öffnen: Apps mit Besitzer und Status, kein Hinweis „nur lesend“.
+2. Rollen einer App ändern, „Speichern“: Meldung, `sudo portal-deploy list` zeigt die App weiter, das Menü zeigt die neuen Rollen.
+3. Eine Test-App „Entfernen …“: nach der Rückfrage weg aus dem Menü, `list` zeigt „stillgelegt seit …“; mit `register` und demselben `--owner` kommt sie zurück.
+4. Grant für eine Person anlegen: `/srv/portal/registry/grants.yml` enthält den Eintrag, die Person hat die Rolle nach der nächsten Anmeldung.

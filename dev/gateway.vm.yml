@@ -35,17 +35,18 @@ oidc:
   clock_leeway_seconds: 60
 
 roles_file: roles.yml
-grants_file: grants.yml
+# Grants im beschreibbaren Registry-Ordner, damit die Verwaltungsseite sie ändern kann. Fehlt die Datei, gibt es keine Grants.
+grants_file: /var/lib/portal/registry/grants.yml
 
 # Registry (docs/07-registry-und-apps.md): Manifest-Ordner alle 5 s auf Änderungen prüfen und /healthz jeder App prüfen.
-# owners_file benutzt nur der Befehl "python -m portal.registry" (über portal-deploy), nicht das Portal.
+# owners_file lesen portal-deploy und die Verwaltungsseite des Portals.
 # status_file schreibt der Prober; "portal-deploy list" liest daraus den Status (HKA-56).
 registry:
   refresh_seconds: 5
   probe: true
   owners_file: /var/lib/portal/registry/owners.json
   status_file: /var/lib/portal/status/status.json
-  # admin_write: true   # Verwaltungsseite darf ändern; braucht :rw-Mounts, siehe docs/07 „Verwaltungsseite“
+  admin_write: true   # Verwaltungsseite /_portal/admin darf Apps entfernen, Rollen und Grants ändern (docs/07); braucht die :rw-Mounts
 
 # Weiterleitung /apps/<slug>/ an den Container "app-<slug>" im selben Docker-Netz (HKA-52); der Prober fragt dort /healthz.
 # env dev: Der Signaturschlüssel ist flüchtig und ändert sich bei jedem Start des Portals.

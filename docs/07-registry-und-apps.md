@@ -250,11 +250,11 @@ Alle Änderungen sind POST mit CSRF-Token der Session, laufen über `AdminServic
 der App; eine Änderung auf der Seite ist also nur vorläufig. Ohne `admin_write`, ohne `owners_file` oder ohne `grants_file` zeigt die Seite
 nur an (Hinweis „nur lesend“); die Grants fehlen dann ganz.
 
-**Einschalten auf der VM** (bewusst aus, weil das Portal dann schreibt): in `gateway.vm.yml` `admin_write: true` setzen, in
-`extras/compose/vm/compose.yml` `/srv/portal/manifests` und `/srv/portal/registry` auf `:rw` stellen und die Grants-Datei in einen
-eingebundenen, beschreibbaren Ordner legen (zum Beispiel `grants_file: /var/lib/portal/registry/grants.yml`; fehlt die Datei, gilt „keine
-Grants“). Der Ordner gehört der Benutzer-ID des Images (wie bei `portal-deploy`). `portal-deploy` und die Seite sperren dieselbe
-Datei `owners.json.lock`, es gibt also keine gleichzeitigen Schreibzugriffe.
+**Auf der VM** ist `admin_write: true` gesetzt (`dev/gateway.vm.yml`). Dafür bindet `extras/compose/vm/compose.yml` `/srv/portal/manifests` und
+`/srv/portal/registry` mit `:rw` ein, und die Grants liegen in `/srv/portal/registry/grants.yml` (fehlt die Datei, gilt „keine Grants“, die erste
+Änderung legt sie an). Die Ordner gehören der Benutzer-ID des Images, wie bei `portal-deploy`. `portal-deploy` und die Seite sperren dieselbe
+Datei `owners.json.lock`, es gibt also keine gleichzeitigen Schreibzugriffe. Das Portal hat damit Schreibrechte auf Manifeste und Besitzerdatei;
+das ist der Preis der Seite. Wer das nicht will, setzt `admin_write` auf `false` und die Mounts zurück auf `:ro`, die Seite zeigt dann nur an.
 
 **Lokal:** `gateway.dev.yml` hat `admin_write: true` und legt `owners.json` und `retired.json` neben die Konfiguration (in `.gitignore`).
 Entfernen löscht die Datei in `dev/manifests/`; `git restore dev/manifests` und das Löschen von `dev/owners.json` und `dev/retired.json` stellen den Stand wieder her.
