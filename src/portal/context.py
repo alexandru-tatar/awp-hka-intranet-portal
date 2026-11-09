@@ -9,6 +9,7 @@ from typing import Mapping
 import httpx
 from redis import Redis
 
+from .auth.assertion_keys import SigningKeys
 from .auth.dev_users import DevUser, load_dev_users
 from .auth.oidc import OidcClient
 from .auth.redis_sessions import RedisLoginStore, RedisSessionStore
@@ -17,8 +18,9 @@ from .auth.sessions import MemorySessionStore, SessionStore
 from .core.config import Config
 from .core.i18n import Messages
 from .core.kit import Kit
-from .registry import ManifestDirectorySource, ManifestValidator, Registry
-from .service import AppService, LoginService, SessionService, SessionWriteService
+from .registry import ManifestDirectorySource, ManifestValidator, Prober, Registry
+from .service import AppService, AssertionService, LoginService, SessionService, SessionWriteService
+from .web.proxy import AppProxy
 from .web.views import Views
 
 PACKAGE_DIR = Path(__file__).resolve().parent
@@ -41,6 +43,10 @@ class Portal:
     :ivar session_store: Session-Store (Redis oder Speicher), für ``/readyz``
     :ivar views: Rendert Seiten aus Templates
     :ivar dev_users: Testpersonen, leer bei ``auth_mode: oidc``
+    :ivar keys: Signaturschlüssel des Identitäts-Tokens, ``None`` ohne Abschnitt ``assertion``
+    :ivar assertion_service: Stellt Tokens aus, ``None`` ohne Abschnitt ``assertion``
+    :ivar proxy: Leitet an App-Container weiter, ``None`` ohne Abschnitt ``apps``
+    :ivar prober: Prüft ``/healthz`` der Apps und setzt den Status, ``None`` ohne ``registry.probe``
     """
     cfg: Config
     kit: Kit
@@ -53,10 +59,18 @@ class Portal:
     session_store: SessionStore
     views: Views
     dev_users: Mapping[str, DevUser]
+    keys: SigningKeys | None = None
+    assertion_service: AssertionService | None = None
+    proxy: AppProxy | None = None
+    prober: Prober | None = None
 
 
 def build_portal(
-    cfg: Config, *, redis_client: Redis | None = None, http_client: httpx.Client | None = None
+    cfg: Config,
+    *,
+    redis_client: Redis | None = None,
+    http_client: httpx.Client | None = None,
+    app_transport: httpx.AsyncBaseTransport | None = None,
 ) -> Portal:
     """Den Kontext aus der Konfiguration bauen.
 
@@ -66,6 +80,7 @@ def build_portal(
     :param cfg: Konfiguration
     :param redis_client: Redis-Client, sonst aus ``cfg.redis_url``
     :param http_client: HTTP-Client für den IdP, sonst ein Standardclient
+    :param app_transport: Transport zu den App-Containern statt des Netzwerks (Weiterleitung und Prober), für Tests
     :return: Der fertige Kontext
     :rtype: Portal
     """
@@ -96,6 +111,7 @@ def build_portal(
             load_role_mapper(cfg.roles_file, cfg.grants_file),
             session_write_service,
         )
+    keys = SigningKeys.load(cfg.assertion, dev=cfg.dev) if cfg.assertion is not None else None
     return Portal(
         cfg=cfg,
         kit=kit,
@@ -108,15 +124,24 @@ def build_portal(
         session_store=sessions,
         views=Views(TEMPLATES_DIR, apps=app_service, t=t, kit=kit, cfg=cfg),
         dev_users=dev_users,
+        keys=keys,
+        assertion_service=(
+            AssertionService(keys, cfg.assertion, cfg.role_vocabulary) if keys is not None and cfg.assertion else None
+        ),
+        proxy=AppProxy(cfg.apps, app_transport) if cfg.apps is not None else None,
+        prober=Prober(registry, cfg.apps, app_transport) if cfg.registry.probe and cfg.apps is not None else None,
     )
 
 
 def _build_registry(cfg: Config) -> Registry:
     """Registry mit Manifest-Ordner als Quelle bauen.
 
+    Mit ``registry.probe`` setzt der Prober den Status, die Registry behält ihn dann beim Neuladen.
+
     :param cfg: Konfiguration
     :return: Noch nicht geladene Registry
     :rtype: Registry
     """
     validator = ManifestValidator(cfg.schema_path, cfg.role_vocabulary, cfg.adapter_scopes)
-    return Registry(ManifestDirectorySource(cfg.manifests_dir, validator, cfg.state_file))
+    source = ManifestDirectorySource(cfg.manifests_dir, validator, cfg.state_file, probe=cfg.registry.probe)
+    return Registry(source, keep_status=cfg.registry.probe)

@@ -47,12 +47,12 @@ function makeToken(overrides = {}) {
   });
 }
 
-function makePortal({ dev = false } = {}) {
+function makePortal({ dev = false, apiUrl = "http://127.0.0.1:9" } = {}) {
   const config = new Config({
     env: "test",
     slug: "noten",
     basePath: "",
-    apiUrl: "http://127.0.0.1:9", // nicht erreichbar: layout() nimmt das Ersatz-Menü
+    apiUrl, // Standard nicht erreichbar: layout() nimmt das Ersatz-Menü
     adaptersUrl: null,
     issuer: ISSUER,
     dev,

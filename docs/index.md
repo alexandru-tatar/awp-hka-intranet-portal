@@ -27,7 +27,7 @@ make test
 
 ## Bekannte Lücken
 
-- Registry liest `dev/manifests/*.json` (statt SQLite), Status kommt aus `dev/state.yml` (statt Prober).
+- Registry liest `dev/manifests/*.json` (statt SQLite). Status: lokal aus `dev/state.yml`, auf der VM setzt ihn der Prober (`registry.probe`, [07](07-registry-und-apps.md#registrierung-hka-53)).
 - `/apps/<slug>/` ist eine Platzhalter-Seite; Traefik-Routing, `/auth/verify` und Identity-Assertion fehlen.
 - Kein Rate-Limit auf `/login`, kein `revoke-sessions` (02 §4, §9).
 - Keine Prod-Konfiguration (siehe [04 Anmeldung](04-anmeldung.md#umstieg-auf-prod)).

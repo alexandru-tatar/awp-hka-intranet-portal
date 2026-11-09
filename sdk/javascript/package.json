@@ -1,6 +1,6 @@
 {
   "name": "platform-sdk-javascript",
-  "version": "1.0.0-dev",
+  "version": "1.0.1-dev",
   "private": true,
   "description": "Portal-SDK für JavaScript (Quellcode und Tests); ausgeliefert wird nur platform_sdk/",
   "license": "UNLICENSED",

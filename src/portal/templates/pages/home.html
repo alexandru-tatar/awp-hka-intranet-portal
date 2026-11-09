@@ -16,6 +16,9 @@
           {%- if a.name != a.menu_label %}
           <span class="app-card__meta">{{ a.name }}</span>
           {%- endif %}
+          {%- if not a.available %}
+          <span class="badge badge--unhealthy small">{{ t('nav.unavailable') }}</span>
+          {%- endif %}
           <span class="app-card__cta cta" aria-hidden="true">{{ t('home.open') }}</span>
         </a>
       </li>

@@ -159,7 +159,6 @@ def test_g4_replayed_callback_fails(client, idp, redis_client):
 
 
 def test_g6_new_session_id_differs_and_old_one_is_deleted(client, idp, redis_client):
-    old = client.cookies  # nothing yet
     _, query = start_login(client, idp)
     finish_login(client, idp, query)
     first = client.cookies["portal_sid"]

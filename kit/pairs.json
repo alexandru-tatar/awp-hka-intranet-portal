@@ -17,6 +17,7 @@
     { "fg": "--accent",      "bg": "--accent-ink",  "kind": "ui", "note": "red button border on white" },
     { "fg": "--warn-ink",    "bg": "--warn-bg",     "kind": "text" },
     { "fg": "--warn-ink",    "bg": "--bg",          "kind": "text", "note": "status badge" },
+    { "fg": "--warn-ink",    "bg": "--bg-subtle",   "kind": "text", "note": "status badge on tiles and in the active menu entry" },
     { "fg": "--border-ui",   "bg": "--bg",          "kind": "ui" },
     { "fg": "--border-ui",   "bg": "--bg-subtle",   "kind": "ui" },
     { "fg": "--focus",       "bg": "--bg",          "kind": "ui" },

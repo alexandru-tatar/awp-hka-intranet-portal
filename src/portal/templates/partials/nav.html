@@ -8,7 +8,7 @@
   <h2 class="nav__group">{{ g.category }}</h2>
   <ul class="nav__list">
     {%- for a in g.items %}
-    <li><a href="{{ a.path }}"{% if a.slug == current_slug %} aria-current="page"{% endif %}><svg class="icon" aria-hidden="true" focusable="false"><use href="{{ kit.icons_url }}#i-{{ a.menu_icon }}"></use></svg>{{ a.menu_label }}</a></li>
+    <li><a href="{{ a.path }}"{% if a.slug == current_slug %} aria-current="page"{% endif %}><svg class="icon" aria-hidden="true" focusable="false"><use href="{{ kit.icons_url }}#i-{{ a.menu_icon }}"></use></svg>{{ a.menu_label }}{% if not a.available %} <span class="badge badge--unhealthy small">{{ t('nav.unavailable') }}</span>{% endif %}</a></li>
     {%- endfor %}
   </ul>
   {%- else %}

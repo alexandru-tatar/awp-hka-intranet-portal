@@ -1,6 +1,6 @@
 PORT ?= 8000
 
-.PHONY: setup kit contrast dev dev-oidc idp-up idp-down server-up server-down test docs sdk-test sdk-release
+.PHONY: setup kit contrast dev dev-apps dev-oidc idp-up idp-down server-up server-down test docs sdk-test sdk-release
 
 COMPOSE = extras/compose
 
@@ -15,6 +15,10 @@ contrast:
 
 dev: kit
 	uv run uvicorn portal.dev:app --reload --reload-dir src --reload-dir dev --port $(PORT)
+
+# Testpersonen-Login, /apps/<slug>/ geht an einen lokalen App-Container auf :8080 (docs/07-registry-und-apps.md).
+dev-apps: kit
+	PORTAL_CONFIG=dev/gateway.apps.yml uv run uvicorn portal.dev:app --reload --reload-dir src --reload-dir dev --port $(PORT)
 
 # Echte Anmeldung: Keycloak + Redis müssen laufen (make idp-up), PORT muss zur redirect_uri passen.
 dev-oidc: kit

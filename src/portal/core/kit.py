@@ -6,6 +6,8 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
+from starlette.staticfiles import StaticFiles
+
 STATIC_PREFIX = "/_portal/static"
 
 
@@ -49,6 +51,20 @@ class Kit:
         return cls(version=m["version"], css=m["kit.css"], js=m["kit.js"], icons=m["icons.svg"])
 
     @property
+    def aliases(self) -> dict[str, str]:
+        """Feste Namen, unter denen das SDK der Apps die Dateien anfragt (``kit.css``, ``icons.svg``, ``<id>.js`` …).
+
+        :return: Alias-Name zu Dateiname mit Hash
+        :rtype: dict[str, str]
+        """
+        return {
+            "kit.css": self.css,
+            "kit.js": self.js,
+            "icons.svg": self.icons,
+            f"{self.id}.js": self.js,
+        }
+
+    @property
     def id(self) -> str:
         """Wert des Headers ``X-Portal-Kit``: ``kit-<hash>`` (04 §8).
 
@@ -83,3 +99,25 @@ class Kit:
         :rtype: str
         """
         return f"{STATIC_PREFIX}/{self.icons}"
+
+
+class KitStaticFiles(StaticFiles):
+    """Static-Dateien des Kits; zusätzlich unter den festen Alias-Namen (:attr:`Kit.aliases`) erreichbar."""
+
+    def __init__(self, *, directory: Path, kit: Kit) -> None:
+        """Konstruktor.
+
+        :param directory: Ordner ``kit/dist``
+        :param kit: Das Kit, dessen Aliase gelten
+        """
+        super().__init__(directory=directory)
+        self.aliases = kit.aliases
+
+    async def get_response(self, path: str, scope):
+        """Datei liefern; ein Alias-Name wird durch den Dateinamen mit Hash ersetzt.
+
+        :param path: Pfad unterhalb von ``/_portal/static``
+        :param scope: ASGI-Scope
+        :return: Antwort der Datei
+        """
+        return await super().get_response(self.aliases.get(path, path), scope)

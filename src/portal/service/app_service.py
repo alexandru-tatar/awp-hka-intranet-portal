@@ -13,6 +13,7 @@ from .exceptions import ForbiddenError, LoginRequiredError, NotFoundError, Unava
 from .session_dto import SessionDTO
 
 NOT_ROUTED: Final = ("registering", "failed", "retired")
+IN_MENU: Final = ("healthy", "unhealthy")
 
 
 def _sort_key(label: str) -> str:
@@ -36,7 +37,8 @@ class AppService:
     def find_nav_groups(self, roles: frozenset[str]) -> list[NavGroupDTO]:
         """Menübaum für die Rollen: feste Kategorienreihenfolge, Einträge alphabetisch.
 
-        Im Menü stehen nur Apps, die gesund sind und mindestens eine Rolle des Benutzers teilen.
+        Im Menü stehen Apps, die gesund oder gestört sind und mindestens eine Rolle des Benutzers teilen. Gestörte
+        Apps tragen ``available = False``, das Menü kennzeichnet sie als nicht verfügbar.
 
         :param roles: Rollen des angemeldeten Benutzers (leer = niemand angemeldet)
         :return: Kategorien mit Apps, leere Kategorien entfallen
@@ -46,7 +48,7 @@ class AppService:
         apps: Final = [
             app
             for app in self.repo.snapshot().apps.values()
-            if app.status == "healthy" and app.visible_to(roles)
+            if app.status in IN_MENU and app.visible_to(roles)
         ]
         groups: Final[list[NavGroupDTO]] = []
         for category in CATEGORIES:

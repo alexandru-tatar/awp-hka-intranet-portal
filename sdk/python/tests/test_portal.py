@@ -2,11 +2,13 @@
 
 import shutil
 
+import httpx
 import pytest
 from conftest import make_token
 from platform_sdk.adapters.transport import FixtureTransport
 from platform_sdk.config import DEV_REFUSED, Config
 from platform_sdk.errors import AdapterError
+from platform_sdk import layout as layout_module
 from platform_sdk.verify_tree import tree_hash
 
 
@@ -35,6 +37,25 @@ def test_gueltige_assertion_layout(client):
     assert 'aria-label="Hauptnavigation"' in html  # Ersatz-Menü, weil das Portal nicht erreichbar ist
     assert "Erika Musterfrau" in html
     assert "/static/app.css" in html
+
+
+def test_menue_vom_portal_mit_bearer(client, monkeypatch):
+    """S6/S7: `layout()` holt das Menü mit `Authorization: Bearer <Token der Anfrage>` (02 §3), nicht mit `X-Portal-Assertion`."""
+    token = make_token()
+    seen: list[httpx.Request] = []
+
+    def portal_antwort(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        return httpx.Response(200, text='<nav aria-label="Hauptnavigation">Menü vom Portal</nav>', headers={"X-Portal-Kit": "kit-abc"})
+
+    real = httpx.AsyncClient
+    monkeypatch.setattr(layout_module.httpx, "AsyncClient", lambda **kw: real(transport=httpx.MockTransport(portal_antwort), **kw))
+    response = client.get("/", headers={"X-Portal-Assertion": token})
+    assert response.status_code == 200
+    assert "Menü vom Portal" in response.text and "/_portal/static/kit-abc.css" in response.text
+    assert len(seen) == 1 and seen[0].url.path == "/nav"
+    assert seen[0].headers["authorization"] == f"Bearer {token}"
+    assert "x-portal-assertion" not in seen[0].headers
 
 
 def test_requires_403(client):
