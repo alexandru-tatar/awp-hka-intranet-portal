@@ -51,11 +51,13 @@ class RoleMapper:
         return frozenset(roles)
 
 
-def load_role_mapper(roles_file: Path, grants_file: Path | None) -> RoleMapper:
+def load_role_mapper(roles_file: Path, grants_file: Path | None, *,
+                     grants: Mapping[str, frozenset[str]] | None = None) -> RoleMapper:
     """Zuordnung aus ``roles.yml`` und optional ``grants.yml`` laden.
 
     :param roles_file: Datei mit ``sources`` und ``default_roles``
     :param grants_file: Datei mit ``grants`` je Subject, optional
+    :param grants: Bereits geladene Grants, etwa ein :class:`~portal.auth.grants.GrantStore`; hat Vorrang vor der Datei
     :return: Der Mapper
     :rtype: RoleMapper
     """
@@ -63,11 +65,12 @@ def load_role_mapper(roles_file: Path, grants_file: Path | None) -> RoleMapper:
     sources = tuple(
         RoleSource(claim=s["claim"], mapping=dict(s.get("map") or {})) for s in raw.get("sources", ())
     )
-    grants: dict[str, frozenset[str]] = {}
-    if grants_file is not None:
-        graw = yaml.safe_load(grants_file.read_text(encoding="utf-8")) or {}
-        for g in graw.get("grants", ()):
-            grants[g["sub"]] = frozenset(g.get("roles") or ())
+    if grants is None:
+        grants = {}
+        if grants_file is not None:
+            graw = yaml.safe_load(grants_file.read_text(encoding="utf-8")) or {}
+            for g in graw.get("grants", ()):
+                grants[g["sub"]] = frozenset(g.get("roles") or ())
     return RoleMapper(
         sources=sources,
         default_roles=frozenset(raw.get("default_roles") or ()),

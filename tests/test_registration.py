@@ -179,8 +179,10 @@ def test_exit_codes_for_wrong_call_and_broken_operation(cfg_path, env, tmp_path)
 
 
 def test_config_without_owners_file_is_a_broken_operation(env):
+    cfg = env / "gateway.dev.yml"
+    cfg.write_text(cfg.read_text(encoding="utf-8").split("\nregistry:")[0] + "\n", encoding="utf-8")  # ohne registry
     err = io.StringIO()
-    code = main(["register", "--config", str(env / "gateway.dev.yml"), "--owner", OWNER], io.BytesIO(b"{}"),
+    code = main(["register", "--config", str(cfg), "--owner", OWNER], io.BytesIO(b"{}"),
                 io.StringIO(), err)
     assert code == 3 and "owners_file" in err.getvalue()
 

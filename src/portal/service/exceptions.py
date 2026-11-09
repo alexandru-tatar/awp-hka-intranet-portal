@@ -62,3 +62,23 @@ class LoginFailedError(Exception):
         """:param reason: Grund, nur für das Log"""
         super().__init__(f"Anmeldung fehlgeschlagen: {reason}")
         self.reason: str = reason
+
+
+class AdminReadOnlyError(Exception):
+    """Die Verwaltungsseite darf hier nichts ändern (``registry.admin_write`` aus oder Datei nicht konfiguriert)."""
+
+    def __init__(self) -> None:
+        """Konstruktor ohne Parameter."""
+        super().__init__("Verwaltung ist nur lesend")
+
+
+class InvalidInputError(Exception):
+    """Eingabe der Verwaltungsseite ist ungültig (keine Rolle, unbekannte Rolle, leeres Subject).
+
+    :ivar key: Schlüssel des Fehlertexts in ``messages.de.yml`` (``admin.error.<key>``)
+    """
+
+    def __init__(self, key: str) -> None:
+        """:param key: Schlüssel des Fehlertexts"""
+        super().__init__(f"Ungültige Eingabe: {key}")
+        self.key: str = key

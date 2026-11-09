@@ -13,6 +13,7 @@ nav.unavailable: nicht verfügbar
 
 header.logout: Abmelden
 header.signed_in_as: Angemeldet als
+header.admin: Verwaltung
 
 logout.title: Abmelden?
 logout.body: Möchten Sie sich vom Portal abmelden?
@@ -94,6 +95,48 @@ status.registering: wird geprüft
 status.retired: stillgelegt
 status.none: Es sind noch keine Anwendungen registriert.
 status.unknown: –
+
+admin.title: Verwaltung
+admin.intro: Hier sehen Sie alle Anwendungen im Portal. Sie können Rollen einer Anwendung ändern, Anwendungen entfernen und Personen zusätzliche Rollen geben.
+admin.read_only: Die Verwaltung ist hier nur lesend eingerichtet. Änderungen sind nicht möglich.
+admin.notice.app_removed: Die Anwendung wurde entfernt. Sie ist nicht mehr im Menü.
+admin.notice.app_roles: Die Rollen der Anwendung wurden gespeichert. Das Menü zeigt sie sofort.
+admin.notice.grant_set: Die zusätzlichen Rollen wurden gespeichert. Sie gelten ab der nächsten Anmeldung der Person.
+admin.notice.grant_deleted: Die zusätzlichen Rollen wurden gelöscht. Das gilt ab der nächsten Anmeldung der Person.
+admin.error.title: Ihre Eingabe konnte nicht gespeichert werden
+admin.error.app_roles_empty: Wählen Sie mindestens eine Rolle. Eine Anwendung ohne Rolle sieht niemand.
+admin.error.app_roles_unknown: Eine der gewählten Rollen gibt es nicht. Bitte laden Sie die Seite neu.
+admin.error.grant_sub: Geben Sie das Subject der Person an (höchstens 200 Zeichen).
+admin.error.grant_roles_unknown: Eine der gewählten Rollen gibt es nicht. Bitte laden Sie die Seite neu.
+admin.apps.heading: Anwendungen
+admin.apps.caption: Alle Anwendungen mit Besitzer, Status und Rollen
+admin.apps.note: Registriert die Pipeline ein Manifest erneut, gelten wieder die Rollen aus dem Repository der Anwendung.
+admin.col.app: Anwendung
+admin.col.owner: Besitzer
+admin.col.version: Version
+admin.col.status: Status
+admin.col.roles: Rollen
+admin.col.actions: Aktion
+admin.col.sub: Subject
+admin.owner.none: von Hand eingerichtet
+admin.retired_since: seit {date}
+admin.roles.legend: Rollen
+admin.roles.save: Speichern
+admin.remove.button: Entfernen
+admin.remove.title: „{name}“ entfernen?
+admin.remove.body: Die Anwendung „{slug}“ verschwindet sofort aus dem Menü. Dasselbe Repository kann den Namen später wieder registrieren.
+admin.remove.confirm: Entfernen
+admin.grants.heading: Zusätzliche Rollen je Person
+admin.grants.intro: Diese Rollen bekommt eine Person zusätzlich zu den Rollen aus der Anmeldung. Sie gelten ab der nächsten Anmeldung.
+admin.grants.caption: Zusätzliche Rollen je Person
+admin.grants.none: Es gibt noch keine zusätzlichen Rollen.
+admin.grants.add: Zusätzliche Rollen hinzufügen
+admin.grants.sub_hint: Das Subject steht im Anmeldesystem. Ohne Rolle wird der Eintrag gelöscht.
+admin.grants.save: Speichern
+admin.grants.delete: Löschen
+admin.grants.delete_title: Rollen von „{sub}“ löschen?
+admin.grants.delete_body: Die Person verliert ihre zusätzlichen Rollen ab der nächsten Anmeldung.
+admin.grants.delete_confirm: Löschen
 
 connections.title: Meine Verbindungen
 connections.intro: Für einige Systeme braucht das Portal einmal Ihr Passwort, damit Anwendungen dort für Sie lesen können. Das Passwort wird verschlüsselt und nur für diese Sitzung gespeichert.

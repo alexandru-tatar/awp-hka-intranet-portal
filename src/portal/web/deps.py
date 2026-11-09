@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import secrets
 from typing import Annotated, Callable
 
 from fastapi import Depends, Request
@@ -9,7 +10,9 @@ from starlette.exceptions import HTTPException
 
 from ..context import Portal
 from ..service import (
+    AdminService,
     AppService,
+    InvalidCsrfError,
     AssertionService,
     LoginRequiredError,
     LoginService,
@@ -41,6 +44,27 @@ def get_app_service(portal: PortalDep) -> AppService:
     :rtype: AppService
     """
     return portal.app_service
+
+
+def get_admin_service(portal: PortalDep) -> AdminService:
+    """Service der Verwaltungsseite.
+
+    :param portal: Portal-Kontext
+    :return: Der Service
+    :rtype: AdminService
+    """
+    return portal.admin_service
+
+
+def check_csrf(session: SessionDTO, token: str) -> None:
+    """CSRF-Token eines Formulars prüfen (zeitkonstanter Vergleich).
+
+    :param session: Angemeldete Session
+    :param token: Token aus dem Formular
+    :raises InvalidCsrfError: Falls das Token nicht passt
+    """
+    if not secrets.compare_digest(token.encode(), session.csrf.encode()):
+        raise InvalidCsrfError
 
 
 def get_assertion_service(portal: PortalDep) -> AssertionService:
@@ -135,6 +159,7 @@ def require_role(role: str) -> Callable[..., SessionDTO]:
 
 
 LoginServiceDep = Annotated[LoginService, Depends(get_login_service)]
+AdminServiceDep = Annotated[AdminService, Depends(get_admin_service)]
 AppServiceDep = Annotated[AppService, Depends(get_app_service)]
 AssertionServiceDep = Annotated[AssertionService, Depends(get_assertion_service)]
 SessionWriteServiceDep = Annotated[SessionWriteService, Depends(get_session_write_service)]

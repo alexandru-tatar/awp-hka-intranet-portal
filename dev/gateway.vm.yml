@@ -45,6 +45,7 @@ registry:
   probe: true
   owners_file: /var/lib/portal/registry/owners.json
   status_file: /var/lib/portal/status/status.json
+  # admin_write: true   # Verwaltungsseite darf ändern; braucht :rw-Mounts, siehe docs/07 „Verwaltungsseite“
 
 # Weiterleitung /apps/<slug>/ an den Container "app-<slug>" im selben Docker-Netz (HKA-52); der Prober fragt dort /healthz.
 # env dev: Der Signaturschlüssel ist flüchtig und ändert sich bei jedem Start des Portals.

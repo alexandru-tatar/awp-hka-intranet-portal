@@ -25,3 +25,9 @@ logging:
     redis: INFO
     httpcore: WARNING
     watchfiles: WARNING
+
+# Verwaltungsseite /_portal/admin (nur platform-admin): darf Manifeste im Ordner manifests/ löschen und ändern.
+# owners.json und retired.json entstehen dabei neben dieser Datei (in .gitignore); "git restore dev/manifests" stellt zurück.
+registry:
+  owners_file: owners.json
+  admin_write: true

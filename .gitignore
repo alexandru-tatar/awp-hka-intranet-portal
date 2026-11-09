@@ -9,3 +9,8 @@ docs/api/_build/
 sdk/dist/
 node_modules/
 secrets/
+
+# Von der Verwaltungsseite in dev geschrieben
+dev/owners.json
+dev/owners.json.lock
+dev/retired.json

@@ -21,6 +21,7 @@ from .context import build_portal
 from .core.config import Config, load_config
 from .core.kit import STATIC_PREFIX, KitStaticFiles
 from .router import (
+    admin_router,
     app_router,
     auth_router,
     dev_login_router,
@@ -82,6 +83,7 @@ def create_app(
     register_error_handlers(app)
 
     app.include_router(page_router)
+    app.include_router(admin_router)
     app.include_router(auth_router)
     app.include_router(nav_router)
     app.include_router(health_router)

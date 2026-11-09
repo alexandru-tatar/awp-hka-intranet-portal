@@ -171,6 +171,10 @@ dialog h2 { font-size: var(--fs-2); }
   margin-top: var(--s-8);
 }
 
+/* ── Checkbox groups (Verwaltung: Rollen wählen) ───────────── */
+.checks { border: 0; margin: 0 0 var(--s-3); padding: 0; }
+.checks label { display: inline-flex; align-items: center; gap: var(--s-2); margin-right: var(--s-4); }
+
 /* ── Notices and status badges ──────────────────────────────── */
 .notice {
   margin: 0 0 var(--s-8);

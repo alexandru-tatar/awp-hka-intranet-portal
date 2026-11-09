@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% from "macros/dialog.html" import dialog %}
+{% from "macros/fields.html" import error_summary %}
+
+{% macro role_checks(prefix, selected, disabled) -%}
+<fieldset class="checks">
+  <legend class="visually-hidden">{{ t('admin.roles.legend') }}</legend>
+  {%- for r in roles %}
+  <label><input type="checkbox" name="roles" value="{{ r }}"{% if r in selected %} checked{% endif %}{% if disabled %} disabled{% endif %}> {{ r }}</label>
+  {%- endfor %}
+</fieldset>
+{%- endmacro %}
+
+{% block content %}
+<h1>{{ t('admin.title') }}</h1>
+<p class="lead">{{ t('admin.intro') }}</p>
+
+{% if notice %}<div class="notice" role="status"><p>{{ t('admin.notice.' ~ notice) }}</p></div>{% endif %}
+{% if error %}{{ error_summary(t('admin.error.title'), [('apps-heading', t('admin.error.' ~ error))]) }}{% endif %}
+{% if not can_manage_apps %}<div class="notice notice--warn"><p>{{ t('admin.read_only') }}</p></div>{% endif %}
+
+<h2 id="apps-heading">{{ t('admin.apps.heading') }}</h2>
+{% if apps %}
+<div class="table-wrap" role="region" aria-labelledby="apps-caption" tabindex="0">
+  <table class="table">
+    <caption id="apps-caption">{{ t('admin.apps.caption') }}</caption>
+    <thead>
+      <tr>
+        <th scope="col">{{ t('admin.col.app') }}</th>
+        <th scope="col">{{ t('admin.col.owner') }}</th>
+        <th scope="col">{{ t('admin.col.version') }}</th>
+        <th scope="col">{{ t('admin.col.status') }}</th>
+        <th scope="col">{{ t('admin.col.roles') }}</th>
+        <th scope="col">{{ t('admin.col.actions') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for a in apps %}
+      <tr>
+        <th scope="row">{{ a.name }}{% if a.name != a.slug %} <span class="muted small">({{ a.slug }})</span>{% endif %}</th>
+        <td>{{ a.owner or t('admin.owner.none') }}</td>
+        <td>{{ a.version or t('status.unknown') }}</td>
+        <td>
+          <span class="badge badge--{{ a.status }}">{{ t('status.' ~ a.status) }}</span>
+          {%- if a.retired_at %} <span class="muted small">{{ t('admin.retired_since', date=a.retired_at) }}</span>{% endif %}
+        </td>
+        {%- if a.status == 'retired' %}
+        <td>{{ t('status.unknown') }}</td>
+        <td>{{ t('status.unknown') }}</td>
+        {%- else %}
+        <td>
+          <form id="roles-form-{{ a.slug }}" method="post" action="/_portal/admin/apps/{{ a.slug }}/roles">
+            <input type="hidden" name="csrf" value="{{ user.csrf }}">
+            {{ role_checks('app-' ~ a.slug, a.roles, not can_manage_apps) }}
+            {% if can_manage_apps %}<button type="submit" class="btn btn--secondary">{{ t('admin.roles.save') }}<span class="visually-hidden"> {{ a.slug }}</span></button>{% endif %}
+          </form>
+        </td>
+        <td>
+          {%- if can_manage_apps %}
+          <form id="remove-form-{{ a.slug }}" method="post" action="/_portal/admin/apps/{{ a.slug }}/remove">
+            <input type="hidden" name="csrf" value="{{ user.csrf }}">
+            <button type="button" class="btn btn--secondary" data-dialog-open="remove-{{ a.slug }}">{{ t('admin.remove.button') }} …<span class="visually-hidden"> {{ a.slug }}</span></button>
+          </form>
+          {%- else %}{{ t('status.unknown') }}{% endif %}
+        </td>
+        {%- endif %}
+      </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+</div>
+{% if can_manage_apps %}
+{%- for a in apps if a.status != 'retired' %}
+{{ dialog('remove-' ~ a.slug, t('admin.remove.title', name=a.name), t('admin.remove.body', slug=a.slug), t('admin.remove.confirm'), submit_form='remove-form-' ~ a.slug) }}
+{%- endfor %}
+{% endif %}
+<p class="muted small">{{ t('admin.apps.note') }}</p>
+{% else %}
+<p>{{ t('status.none') }}</p>
+{% endif %}
+
+{% if has_grants %}
+<h2 id="grants-heading">{{ t('admin.grants.heading') }}</h2>
+<p class="prose">{{ t('admin.grants.intro') }}</p>
+{% if not can_manage_grants %}<div class="notice notice--warn"><p>{{ t('admin.read_only') }}</p></div>{% endif %}
+{% if grants %}
+<div class="table-wrap" role="region" aria-labelledby="grants-caption" tabindex="0">
+  <table class="table">
+    <caption id="grants-caption">{{ t('admin.grants.caption') }}</caption>
+    <thead>
+      <tr>
+        <th scope="col">{{ t('admin.col.sub') }}</th>
+        <th scope="col">{{ t('admin.col.roles') }}</th>
+        <th scope="col">{{ t('admin.col.actions') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for g in grants %}
+      {%- set gid = loop.index %}
+      <tr>
+        <th scope="row">{{ g.sub }}</th>
+        <td>
+          <form id="grant-form-{{ gid }}" method="post" action="/_portal/admin/grants">
+            <input type="hidden" name="csrf" value="{{ user.csrf }}">
+            <input type="hidden" name="sub" value="{{ g.sub }}">
+            {{ role_checks('grant-' ~ gid, g.roles, not can_manage_grants) }}
+            {% if can_manage_grants %}<button type="submit" class="btn btn--secondary">{{ t('admin.roles.save') }}<span class="visually-hidden"> {{ g.sub }}</span></button>{% endif %}
+          </form>
+        </td>
+        <td>
+          {%- if can_manage_grants %}
+          <form id="grant-delete-form-{{ gid }}" method="post" action="/_portal/admin/grants/delete">
+            <input type="hidden" name="csrf" value="{{ user.csrf }}">
+            <input type="hidden" name="sub" value="{{ g.sub }}">
+            <button type="button" class="btn btn--secondary" data-dialog-open="grant-delete-{{ gid }}">{{ t('admin.grants.delete') }} …<span class="visually-hidden"> {{ g.sub }}</span></button>
+          </form>
+          {%- else %}{{ t('status.unknown') }}{% endif %}
+        </td>
+      </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+</div>
+{% if can_manage_grants %}
+{%- for g in grants %}
+{{ dialog('grant-delete-' ~ loop.index, t('admin.grants.delete_title', sub=g.sub), t('admin.grants.delete_body'), t('admin.grants.delete_confirm'), submit_form='grant-delete-form-' ~ loop.index) }}
+{%- endfor %}
+{% endif %}
+{% else %}
+<p>{{ t('admin.grants.none') }}</p>
+{% endif %}
+
+{% if can_manage_grants %}
+<h3>{{ t('admin.grants.add') }}</h3>
+<form method="post" action="/_portal/admin/grants" class="prose">
+  <input type="hidden" name="csrf" value="{{ user.csrf }}">
+  <div class="field">
+    <label for="grant-sub">{{ t('admin.col.sub') }} <span class="field__required">({{ t('dev.app.required') }})</span></label>
+    <p id="grant-sub-hint" class="field__hint">{{ t('admin.grants.sub_hint') }}</p>
+    <input id="grant-sub" name="sub" type="text" maxlength="200" required aria-describedby="grant-sub-hint">
+  </div>
+  {{ role_checks('grant-new', [], false) }}
+  <div class="actions"><button type="submit" class="btn btn--primary">{{ t('admin.grants.save') }}</button></div>
+</form>
+{% endif %}
+{% endif %}
+{% endblock %}
