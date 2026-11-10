@@ -215,7 +215,7 @@ def test_vm_config_loads_with_probe_registry_and_gateway(env, kit_dist):
     assert cfg.registry.owners_file == Path("/var/lib/portal/registry/owners.json").resolve()
     assert cfg.registry.admin_write and cfg.grants_file == (env / "grants-vm.yml").resolve()
     assert cfg.state_file is None and cfg.apps.upstream_for("noten") == "http://app-noten:8080"
-    assert cfg.assertion.issuer == "https://iwi-hean-05.hs-karlsruhe.de/"
+    assert cfg.auth_mode == "gateway" and cfg.gateway.issuer == "https://iwi-hean-05.hs-karlsruhe.de/"
 
 
 @pytest.mark.parametrize("section, message", [
@@ -233,7 +233,7 @@ def test_registry_section_is_checked(env, section, message):
 
 def test_probe_excludes_state_file(env):
     path = env / "gateway.dev.yml"            # enthält state_file
-    path.write_text(path.read_text(encoding="utf-8") + "\nassertion:\n  issuer: x\napps:\n  upstream: http://a-{slug}:1\n"
+    path.write_text(path.read_text(encoding="utf-8") + "\napps:\n  upstream: http://a-{slug}:1\n"
                     "registry:\n  probe: true\n", encoding="utf-8")
     with pytest.raises(ConfigError, match="remove state_file"):
         load_config(path)

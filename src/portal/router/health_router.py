@@ -18,6 +18,4 @@ def readyz(portal: PortalDep) -> Response:
     :return: 200, oder 503 mit dem fehlgeschlagenen Check
     :rtype: Response
     """
-    if portal.session_store is not None and not portal.session_store.ping():
-        return JSONResponse({"status": "unavailable", "check": "redis"}, status_code=503)
     return JSONResponse({"status": "ok"})

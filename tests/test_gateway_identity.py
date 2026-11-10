@@ -22,7 +22,7 @@ def integrated(env):
     jwk = {**json.loads(RSAAlgorithm.to_jwk(key.public_key())), 'kid': 'gateway', 'alg': 'RS256', 'use': 'sig'}
     gateway = GatewayConfig('http://localhost:18080/', 'http://gateway:8080/.well-known/jwks.json', 'http://localhost:18080')
     cfg = replace(load_config(env / 'gateway.dev.yml'), auth_mode='gateway', gateway=gateway,
-                  dev_users_file=None, redis_url=None, oidc=None, assertion=None)
+                  dev_users_file=None)
     secret = env / 'service-token'
     secret.write_text('t' * 43)
     calls = []
@@ -50,8 +50,7 @@ def headers(token):
 def test_valid_identity_no_session_or_private_key_and_protected_assets(integrated):
     client, app, token, calls = integrated
     portal = app.state.portal
-    assert portal.session_store is portal.session_service is portal.session_write_service is None
-    assert portal.login_service is portal.keys is portal.assertion_service is portal.proxy is None
+    assert portal.session_service is portal.session_write_service is portal.session_store is None
     response = client.get('/', headers=headers(token()))
     assert response.status_code == 200 and 'Test Student' in response.text
     assert 'set-cookie' not in response.headers

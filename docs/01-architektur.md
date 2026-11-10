@@ -5,11 +5,11 @@ Python-Paket `portal` (`src/portal`), FastAPI + Jinja2, serverseitig gerendertes
 ## Schichten
 
 ```text
-router/    HTTP-Handler, dünn                      page · auth · nav · health · oidc · dev_login · dev
+router/    HTTP-Handler, dünn                      page · admin · auth · nav · health · internal_registry · dev_login · dev
 web/       deps · views · errors · middleware      Session/Rolle prüfen, Templates rendern, Exceptions → HTTP
-service/   Geschäftslogik, DTOs, Exceptions        AppService · SessionService · SessionWriteService · LoginService
+service/   Geschäftslogik, DTOs, Exceptions        AppService · AdminService · SessionService · SessionWriteService
 registry/  Apps aus Manifesten                     models · validation · sources · store
-auth/      Sessions, OIDC, Rollen                  sessions · redis_sessions · oidc · roles · dev_users · redirects
+auth/      Sessions (dev), Gateway-Identität, Grants  sessions · gateway · grants · dev_users · redirects
 core/      Konfiguration, Texte, Kit-Assets, Logging  config · i18n · kit · log
 ```
 
@@ -64,9 +64,8 @@ docs/              diese Dokumentation (Markdown); docs/api/ = Sphinx-Konfigurat
 | `/_portal/status` | `platform-admin` | Status aller Apps |
 | `/_portal/connections` | Session | „Meine Verbindungen" |
 | `/_portal/error/{code}` | – | Fehlerseite (HTML) mit dem angefragten Status 400–599, für die `errors`-Middleware von Traefik |
-| `/nav` | Session oder `Authorization: Bearer <Token>` (übergangsweise `X-Portal-Assertion`) | Menü-Fragment (ETag, `X-Portal-Kit`); ohne beides 401 als JSON für das SDK |
-| `/.well-known/jwks.json` | – | öffentliche Schlüssel des Identitäts-Tokens (nur mit Abschnitt `assertion`) |
-| `/login`, `/oidc/callback` | – | Anmeldung (OIDC) bzw. Testpersonen-Auswahl |
+| `/nav` | Session (dev) bzw. Gateway-Assertion oder App-Token (`Authorization: Bearer`) | Menü-Fragment (ETag, `X-Portal-Kit`); ohne beides 401 als JSON für das SDK |
+| `/login` | – | nur `auth_mode: dev`: Testpersonen-Auswahl (im Gateway-Modus 404, Login macht das Gateway) |
 | `/logout` | Session | GET Bestätigung, POST mit CSRF-Token |
-| `/readyz` | – | 200, oder 503 (JSON) wenn Redis nicht antwortet |
-| `/apps/<slug>/…` | Session + Rolle | Weiterleitung an den App-Container mit `X-Portal-Assertion` (Abschnitt `apps`, [07](07-registry-und-apps.md)); ohne Abschnitt Platzhalter-Seite (nur Dev) |
+| `/readyz` | – | 200 |
+| `/apps/<slug>/…` | Session + Rolle | nur `auth_mode: dev`: Platzhalter-Seite. Im Gateway-Modus routet das Gateway zur App (Portal: 404) |

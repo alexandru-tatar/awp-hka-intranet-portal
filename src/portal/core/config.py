@@ -53,48 +53,6 @@ class LoggingConfig:
 
 
 @dataclass(frozen=True)
-class OidcConfig:
-    """Einstellungen des OIDC-Clients (Abschnitt ``oidc``).
-
-    :ivar issuer: Issuer des IdP, muss exakt dem ``iss`` im ID-Token entsprechen
-    :ivar client_id: Client-ID des Portals
-    :ivar client_secret: Client-Secret, aus ``client_secret_file`` gelesen
-    :ivar redirect_uri: Adresse des Callbacks ``/oidc/callback``
-    :ivar post_logout_redirect_uri: Adresse, zu der der IdP nach der Abmeldung zurückleitet; ohne Wert wird nur die Portal-Session beendet
-    :ivar discovery_url: Adresse der Discovery, falls abweichend von ``<issuer>/.well-known/openid-configuration``
-    :ivar scopes: Angeforderte Scopes
-    :ivar id_token_algs: Erlaubte Signaturalgorithmen des ID-Tokens
-    :ivar clock_leeway_seconds: Toleranz für ``exp`` und ``iat`` in Sekunden
-    """
-    issuer: str
-    client_id: str
-    client_secret: str
-    redirect_uri: str
-    post_logout_redirect_uri: str | None = None
-    discovery_url: str | None = None
-    scopes: tuple[str, ...] = ("openid", "profile", "email")
-    id_token_algs: tuple[str, ...] = ("RS256", "ES256")
-    clock_leeway_seconds: int = 60
-
-
-@dataclass(frozen=True)
-class AssertionConfig:
-    """Einstellungen des Identitäts-Tokens für Apps (Abschnitt ``assertion``).
-
-    :ivar issuer: Wert von ``iss``, muss dem ``PORTAL_ISSUER`` der Apps exakt entsprechen
-    :ivar ttl_seconds: Gültigkeit eines Tokens in Sekunden
-    :ivar signing_key_current: PEM-Datei des aktuellen Signaturschlüssels; ohne Wert erzeugt ``env: dev`` einen flüchtigen
-    :ivar signing_key_next: PEM-Datei des nächsten Schlüssels, wird nur im JWKS veröffentlicht
-    :ivar signing_key_previous: PEM-Datei des vorigen Schlüssels, wird nur im JWKS veröffentlicht
-    """
-    issuer: str
-    ttl_seconds: int = 60
-    signing_key_current: Path | None = None
-    signing_key_next: Path | None = None
-    signing_key_previous: Path | None = None
-
-
-@dataclass(frozen=True)
 class AppsConfig:
     """Weiterleitung an die App-Container (Abschnitt ``apps``).
 
@@ -158,21 +116,12 @@ class Config:
     :ivar state_file: Status je App (Platzhalter für den Prober)
     :ivar dev_users_file: Testpersonen (nur ``auth_mode: dev``)
     :ivar session_cookie: Name des Session-Cookies
-    :ivar login_cookie: Name des Cookies, das den Browser an die Login-Transaktion bindet
     :ivar cookie_secure: Cookies nur über HTTPS senden
-    :ivar auth_mode: ``dev`` (Testpersonen) oder ``oidc``
-    :ivar redis_url: Adresse von Redis; ohne sie liegen die Sessions im Speicher
-    :ivar idle_seconds: Inaktivitätsgrenze einer Session
-    :ivar absolute_seconds: Maximale Lebensdauer einer Session
-    :ivar touch_min_interval_seconds: Mindestabstand zwischen zwei Aktualisierungen von ``last_seen``
-    :ivar login_state_ttl_seconds: Lebensdauer einer Login-Transaktion
-    :ivar oidc: Einstellungen des OIDC-Clients, nur bei ``auth_mode: oidc``
+    :ivar auth_mode: ``dev`` (Testpersonen, Sessions im Speicher) oder ``gateway`` (Identität vom separaten Security-Gateway)
     :ivar logging: Einstellungen des Loggings
-    :ivar roles_file: Zuordnung IdP-Claims zu Rollen
     :ivar grants_file: Zusätzliche Rollen je Subject
     :ivar links: Footer-Links
-    :ivar assertion: Identitäts-Token für Apps, ``None`` ohne Abschnitt
-    :ivar apps: Weiterleitung an App-Container, ``None`` ohne Abschnitt (dann Platzhalter bzw. 404)
+    :ivar apps: Adressen der App-Container für den Prober, ``None`` ohne Abschnitt
     :ivar registry: Nachladen der Manifeste, Prober und Besitzerdatei
     """
     env: str
@@ -185,20 +134,11 @@ class Config:
     state_file: Path | None = None
     dev_users_file: Path | None = None
     session_cookie: str = "portal_sid"
-    login_cookie: str = "portal_login"
     cookie_secure: bool = False
     auth_mode: str = "dev"
-    redis_url: str | None = None
-    idle_seconds: int = 1800
-    absolute_seconds: int = 28800
-    touch_min_interval_seconds: int = 60
-    login_state_ttl_seconds: int = 600
-    oidc: OidcConfig | None = None
     logging: LoggingConfig = field(default_factory=LoggingConfig)
-    roles_file: Path | None = None
     grants_file: Path | None = None
     links: Links = field(default_factory=Links)
-    assertion: AssertionConfig | None = None
     apps: AppsConfig | None = None
     registry: RegistryConfig = field(default_factory=RegistryConfig)
     gateway: GatewayConfig | None = None
@@ -216,25 +156,18 @@ class Config:
 _KEYS = {
     "env", "kontakt", "manifests_dir", "schema_path", "kit_dist", "role_vocabulary",
     "adapter_scopes", "state_file", "dev_users_file", "session_cookie", "links",
-    "login_cookie", "cookie_secure", "auth_mode", "redis_url", "idle_seconds", "absolute_seconds",
-    "touch_min_interval_seconds", "login_state_ttl_seconds", "oidc", "logging", "roles_file", "grants_file",
-    "assertion", "apps", "registry", "gateway",
+    "cookie_secure", "auth_mode", "logging", "grants_file",
+    "apps", "registry", "gateway",
 }
 _REGISTRY_KEYS = {"refresh_seconds", "probe", "owners_file", "status_file", "admin_write"}
-_ASSERTION_KEYS = {"issuer", "ttl_seconds", "signing_key_current", "signing_key_next", "signing_key_previous"}
 _APPS_KEYS = {"upstream", "connect_timeout_seconds", "read_timeout_seconds", "max_body_bytes"}
-_OIDC_KEYS = {
-    "issuer", "client_id", "client_secret_file", "redirect_uri", "post_logout_redirect_uri", "discovery_url", "scopes",
-    "id_token_algs", "clock_leeway_seconds",
-}
 
 
 def load_config(path: Path) -> Config:
     """Konfiguration aus einer YAML-Datei laden und prüfen.
 
     Relative Pfade gelten relativ zur Datei. ``auth_mode: dev`` ist nur mit ``env: dev`` erlaubt und
-    braucht eine existierende ``dev_users_file``; ``auth_mode: oidc`` braucht ``redis_url``, einen
-    ``oidc``-Abschnitt und ``roles_file``.
+    braucht eine existierende ``dev_users_file``; ``auth_mode: gateway`` braucht den Abschnitt ``gateway``.
 
     :param path: Pfad zur YAML-Datei
     :return: Die geprüfte Konfiguration
@@ -254,8 +187,8 @@ def load_config(path: Path) -> Config:
     if env not in ("dev", "prod"):
         raise ConfigError(f"{path}: env must be dev or prod")
     auth_mode = raw.get("auth_mode", "dev")
-    if auth_mode not in ("dev", "oidc", "gateway"):
-        raise ConfigError(f"{path}: auth_mode must be dev, oidc or gateway")
+    if auth_mode not in ("dev", "gateway"):
+        raise ConfigError(f"{path}: auth_mode must be dev or gateway")
     for key in ("kontakt", "manifests_dir", "schema_path", "kit_dist", "role_vocabulary"):
         if not raw.get(key):
             raise ConfigError(f"{path}: missing key {key}")
@@ -264,8 +197,6 @@ def load_config(path: Path) -> Config:
     unknown_links = set(links_raw) - {"help", "privacy", "imprint"}
     if unknown_links:
         raise ConfigError(f"{path}: unknown links key(s) {', '.join(sorted(unknown_links))}")
-
-    oidc = _load_oidc(path, base, raw.get("oidc")) if auth_mode == "oidc" else None
 
     cfg = Config(
         env=env,
@@ -278,20 +209,11 @@ def load_config(path: Path) -> Config:
         state_file=p("state_file"),
         dev_users_file=p("dev_users_file"),
         session_cookie=raw.get("session_cookie", "portal_sid"),
-        login_cookie=raw.get("login_cookie", "portal_login"),
         cookie_secure=bool(raw.get("cookie_secure", False)),
         auth_mode=auth_mode,
-        redis_url=raw.get("redis_url"),
-        idle_seconds=int(raw.get("idle_seconds", 1800)),
-        absolute_seconds=int(raw.get("absolute_seconds", 28800)),
-        touch_min_interval_seconds=int(raw.get("touch_min_interval_seconds", 60)),
-        login_state_ttl_seconds=int(raw.get("login_state_ttl_seconds", 600)),
-        oidc=oidc,
         logging=_load_logging(path, base, raw.get("logging"), env),
-        roles_file=p("roles_file"),
         grants_file=p("grants_file"),
         links=Links(**links_raw),
-        assertion=_load_assertion(path, base, raw.get("assertion")),
         apps=_load_apps(path, raw.get("apps")),
         registry=_load_registry(path, base, raw.get("registry")),
         gateway=GatewayConfig(**raw["gateway"]) if raw.get("gateway") else None,
@@ -301,11 +223,6 @@ def load_config(path: Path) -> Config:
             raise ConfigError(f"{path}: registry probe needs an apps section")
         if cfg.state_file is not None:
             raise ConfigError(f"{path}: registry probe sets the status itself, remove state_file")
-    if cfg.apps is not None and cfg.auth_mode != "gateway":
-        if cfg.assertion is None:
-            raise ConfigError(f"{path}: apps needs an assertion section")
-        if not cfg.dev and cfg.assertion.signing_key_current is None:
-            raise ConfigError(f"{path}: apps in prod needs assertion.signing_key_current")
     for key in ("manifests_dir", "schema_path", "kit_dist"):
         if not getattr(cfg, key).exists():
             raise ConfigError(f"{path}: {key} does not exist: {getattr(cfg, key)}")
@@ -317,8 +234,6 @@ def load_config(path: Path) -> Config:
     elif cfg.auth_mode == "gateway":
         if cfg.gateway is None:
             raise ConfigError("auth_mode gateway requires gateway settings")
-        if cfg.redis_url or cfg.oidc or cfg.assertion:
-            raise ConfigError("Gateway mode must not configure portal Redis/OIDC/signing keys")
         from urllib.parse import urlsplit
         for value in (cfg.gateway.issuer, cfg.gateway.jwks_url, cfg.gateway.public_url):
             parts = urlsplit(value)
@@ -326,15 +241,10 @@ def load_config(path: Path) -> Config:
                 raise ConfigError("Invalid gateway URL")
         if cfg.gateway.audience in ("portal", "adapters") or not cfg.gateway.audience:
             raise ConfigError("Dedicated portal audience required")
-    else:
-        if not cfg.redis_url:
-            raise ConfigError(f"{path}: auth_mode oidc needs redis_url")
-        if not (cfg.roles_file and cfg.roles_file.exists()):
-            raise ConfigError(f"{path}: auth_mode oidc needs an existing roles_file")
-        if cfg.grants_file and not cfg.grants_file.exists():
-            # Mit admin_write legt die Verwaltungsseite die Datei bei der ersten Änderung an; dann genügt der Ordner.
-            if not (cfg.registry.admin_write and cfg.grants_file.parent.is_dir()):
-                raise ConfigError(f"{path}: grants_file does not exist: {cfg.grants_file}")
+    if cfg.grants_file and not cfg.grants_file.exists():
+        # Mit admin_write legt die Verwaltungsseite die Datei bei der ersten Änderung an; dann genügt der Ordner.
+        if not (cfg.registry.admin_write and cfg.grants_file.parent.is_dir()):
+            raise ConfigError(f"{path}: grants_file does not exist: {cfg.grants_file}")
     return cfg
 
 
@@ -378,68 +288,6 @@ def _load_logging(path: Path, base: Path, raw: dict | None, env: str) -> Logging
         retention=int(raw.get("retention", 3)),
         levels=levels,
     )
-
-
-def _load_oidc(path: Path, base: Path, raw: dict | None) -> OidcConfig:
-    """Den Abschnitt ``oidc`` lesen und prüfen.
-
-    :param path: Pfad der Konfigurationsdatei, für Fehlermeldungen
-    :param base: Ordner der Konfigurationsdatei, Basis für ``client_secret_file``
-    :param raw: Rohwerte des Abschnitts
-    :return: Die OIDC-Einstellungen mit gelesenem Client-Secret
-    :rtype: OidcConfig
-    :raises ConfigError: Falls der Abschnitt fehlt, unbekannte Schlüssel enthält oder Pflichtwerte fehlen
-    """
-    if not raw:
-        raise ConfigError(f"{path}: auth_mode oidc needs an oidc section")
-    unknown = set(raw) - _OIDC_KEYS
-    if unknown:
-        raise ConfigError(f"{path}: unknown oidc key(s) {', '.join(sorted(unknown))}")
-    for key in ("issuer", "client_id", "client_secret_file", "redirect_uri"):
-        if not raw.get(key):
-            raise ConfigError(f"{path}: missing oidc key {key}")
-    secret_file = (base / raw["client_secret_file"]).resolve()
-    if not secret_file.exists():
-        raise ConfigError(f"{path}: oidc client_secret_file does not exist: {secret_file}")
-    optional = {k: raw[k] for k in ("post_logout_redirect_uri", "discovery_url", "scopes", "id_token_algs", "clock_leeway_seconds") if k in raw}
-    for key in ("scopes", "id_token_algs"):
-        if key in optional:
-            optional[key] = tuple(optional[key])
-    return OidcConfig(
-        issuer=raw["issuer"].rstrip("/"),
-        client_id=raw["client_id"],
-        client_secret=secret_file.read_text(encoding="utf-8").strip(),
-        redirect_uri=raw["redirect_uri"],
-        **optional,
-    )
-
-
-def _load_assertion(path: Path, base: Path, raw: dict | None) -> AssertionConfig | None:
-    """Den Abschnitt ``assertion`` lesen und prüfen.
-
-    :param path: Pfad der Konfigurationsdatei, für Fehlermeldungen
-    :param base: Ordner der Konfigurationsdatei, Basis für die Schlüsseldateien
-    :param raw: Rohwerte des Abschnitts, ``None`` ohne Abschnitt
-    :return: Die Einstellungen oder ``None``
-    :rtype: AssertionConfig | None
-    :raises ConfigError: Bei unbekannten oder fehlenden Schlüsseln, ungültiger Laufzeit oder fehlenden Dateien
-    """
-    if raw is None:
-        return None
-    unknown = set(raw) - _ASSERTION_KEYS
-    if unknown:
-        raise ConfigError(f"{path}: unknown assertion key(s) {', '.join(sorted(unknown))}")
-    if not raw.get("issuer"):
-        raise ConfigError(f"{path}: missing assertion key issuer")
-    ttl = int(raw.get("ttl_seconds", 60))
-    if ttl < 1:
-        raise ConfigError(f"{path}: assertion ttl_seconds must be positive")
-    keys: dict[str, Path | None] = {}
-    for key in ("signing_key_current", "signing_key_next", "signing_key_previous"):
-        keys[key] = (base / raw[key]).resolve() if raw.get(key) else None
-        if keys[key] is not None and not keys[key].exists():
-            raise ConfigError(f"{path}: assertion {key} does not exist: {keys[key]}")
-    return AssertionConfig(issuer=str(raw["issuer"]), ttl_seconds=ttl, **keys)
 
 
 def _load_apps(path: Path, raw: dict | None) -> AppsConfig | None:

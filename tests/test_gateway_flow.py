@@ -9,7 +9,6 @@ from types import SimpleNamespace
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-import fakeredis
 from fastapi.testclient import TestClient
 import httpx
 import jwt
@@ -19,6 +18,7 @@ from portal.app import create_app as create_portal
 from portal.core.config import GatewayConfig, load_config
 
 ROOT = Path(__file__).resolve().parents[2]
+fakeredis = pytest.importorskip('fakeredis', reason='Cross-project flow test needs the gateway test dependencies')
 sys.path.insert(0, str(ROOT / 'awp-hka-security-gateway' / 'src'))
 pytest.importorskip('gateway.app', reason='Sibling gateway required for cross-project flow test')
 from gateway.app import create_app as create_gateway  # noqa: E402

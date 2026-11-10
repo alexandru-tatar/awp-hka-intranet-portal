@@ -38,22 +38,6 @@ class SessionWriteService:
         logger.debug("sub={}", session.sub)
         return SessionDTO(session)
 
-    def create_for_subject(
-        self, sub: str, name: str, roles: frozenset[str], id_token: str | None = None
-    ) -> SessionDTO:
-        """Eine Session nach erfolgreicher IdP-Anmeldung anlegen.
-
-        :param sub: Subject des IdP
-        :param name: Anzeigename
-        :param roles: Rollen aus dem Role-Mapping
-        :param id_token: ID-Token des IdP, für die spätere Abmeldung beim IdP
-        :return: Die neue Session
-        :rtype: SessionDTO
-        """
-        session: Final = self.repo.create(sub=sub, name=name, roles=roles, id_token=id_token)
-        logger.debug("sub={}", session.sub)
-        return SessionDTO(session)
-
     def discard(self, sid: str) -> None:
         """Eine Session ohne CSRF-Prüfung beenden (Rotation beim Login).
 

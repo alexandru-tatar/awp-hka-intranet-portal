@@ -15,7 +15,6 @@ dependencies = [
     "jsonschema==4.26.0",
     "python-multipart==0.0.32",
     "loguru>=0.7.3",
-    "redis>=8.1.0",
     "pyjwt[crypto]>=2.15.1",
     "httpx>=0.28.1",
 ]
@@ -23,7 +22,6 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest==9.1.1",
-    "fakeredis>=2.40.0",
     "httpx2>=2.16.0",
 ]
 doc = [

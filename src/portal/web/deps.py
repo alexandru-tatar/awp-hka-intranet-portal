@@ -13,9 +13,7 @@ from ..service import (
     AdminService,
     AppService,
     InvalidCsrfError,
-    AssertionService,
     LoginRequiredError,
-    LoginService,
     NotFoundError,
     SessionDTO,
     SessionService,
@@ -67,19 +65,6 @@ def check_csrf(session: SessionDTO, token: str) -> None:
         raise InvalidCsrfError
 
 
-def get_assertion_service(portal: PortalDep) -> AssertionService:
-    """Service, der Identitäts-Tokens ausstellt.
-
-    :param portal: Portal-Kontext
-    :return: Der Service
-    :rtype: AssertionService
-    :raises HTTPException: 404, falls der Abschnitt ``assertion`` fehlt
-    """
-    if portal.assertion_service is None:
-        raise HTTPException(404)
-    return portal.assertion_service
-
-
 def get_session_service(portal: PortalDep) -> SessionService:
     """Lesender Session-Service.
 
@@ -100,19 +85,6 @@ def get_session_write_service(portal: PortalDep) -> SessionWriteService:
     return portal.session_write_service
 
 
-def get_login_service(portal: PortalDep) -> LoginService:
-    """Login-Service für OIDC.
-
-    :param portal: Portal-Kontext
-    :return: Der Service
-    :rtype: LoginService
-    :raises HTTPException: 404, falls ``auth_mode`` nicht ``oidc`` ist
-    """
-    if portal.login_service is None:
-        raise HTTPException(404)
-    return portal.login_service
-
-
 def optional_session(request: Request, portal: PortalDep) -> SessionDTO | None:
     """Session der Anfrage, falls vorhanden.
 
@@ -120,7 +92,6 @@ def optional_session(request: Request, portal: PortalDep) -> SessionDTO | None:
     :param portal: Portal-Kontext
     :return: Die Session oder ``None`` ohne Cookie oder bei unbekannter Session
     :rtype: SessionDTO | None
-    :raises redis.exceptions.RedisError: Falls Redis nicht antwortet
     """
     if portal.cfg.auth_mode == "gateway":
         return getattr(request.state, "gateway_user", None)
@@ -160,10 +131,8 @@ def require_role(role: str) -> Callable[..., SessionDTO]:
     return dependency
 
 
-LoginServiceDep = Annotated[LoginService, Depends(get_login_service)]
 AdminServiceDep = Annotated[AdminService, Depends(get_admin_service)]
 AppServiceDep = Annotated[AppService, Depends(get_app_service)]
-AssertionServiceDep = Annotated[AssertionService, Depends(get_assertion_service)]
 SessionWriteServiceDep = Annotated[SessionWriteService, Depends(get_session_write_service)]
 OptionalSession = Annotated[SessionDTO | None, Depends(optional_session)]
 CurrentSession = Annotated[SessionDTO, Depends(require_session)]

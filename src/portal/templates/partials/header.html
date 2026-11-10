@@ -1,3 +1,4 @@
+{% from "macros/dialog.html" import dialog %}
 <header class="site-header">
   <a class="brand" href="/">
     <span class="brand__name">{{ t('brand.name') }}</span>
@@ -7,7 +8,12 @@
   <div class="site-header__user">
     <span class="muted"><span class="visually-hidden">{{ t('header.signed_in_as') }} </span>{{ user.name }}</span>
     {% if 'platform-admin' in user.roles %}<a href="/_portal/admin">{{ t('header.admin') }}</a>{% endif %}
-    <a href="/logout">{{ t('header.logout') }}</a>
+    <button type="button" class="btn btn--link" data-dialog-open="logout-dialog">{{ t('header.logout') }}</button>
+    <noscript><a href="/logout">{{ t('header.logout') }}</a></noscript>
   </div>
+  <form id="logout-form" method="post" action="/logout" hidden>
+    <input type="hidden" name="csrf" value="{{ user.csrf }}">
+  </form>
+  {{ dialog('logout-dialog', t('logout.title'), t('logout.body'), t('header.logout'), submit_form='logout-form') }}
   {% endif %}
 </header>

@@ -22,7 +22,6 @@ logging:
   levels:
     uvicorn.access: WARNING       # die Zugriffszeile schreibt portal.web.middleware, mit Request-ID
     httpx: WARNING
-    redis: INFO
     httpcore: WARNING
     watchfiles: WARNING
 

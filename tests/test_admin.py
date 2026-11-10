@@ -9,8 +9,6 @@ from fastapi.testclient import TestClient
 
 from conftest import login
 from portal.app import create_app
-from portal.auth.grants import GrantStore
-from portal.auth.roles import RoleMapper, load_role_mapper
 
 BASE = "/_portal/admin"
 
@@ -126,19 +124,6 @@ def test_grants_reject_empty_sub_and_unknown_role(admin, env):
     assert (env / "grants.yml").read_bytes() == before
 
 
-def test_grants_reach_the_role_mapper_without_restart(env):
-    store = GrantStore(env / "roles-grants.yml")                          # Datei fehlt: keine Grants
-    assert dict(store) == {}
-    store.set("abc", frozenset({"employee"}))
-    mapper = load_role_mapper(env / "roles.yml", None, grants=store)
-    assert mapper.map_roles("abc", {}) == {"employee"}
-    store.set("abc", frozenset({"professor"}))
-    assert mapper.map_roles("abc", {}) == {"professor"}
-    (env / "roles-grants.yml").write_text("grants:\n  - sub: abc\n    roles: [student]\n", encoding="utf-8")  # von Hand
-    import os
-    os.utime(env / "roles-grants.yml", ns=(10**18, 10**18 + 5))
-    assert mapper.map_roles("abc", {}) == {"student"}
-    assert isinstance(mapper, RoleMapper)
 
 
 def test_read_only_page_shows_notice_and_refuses_changes(env):

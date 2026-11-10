@@ -12,22 +12,12 @@ make dev     # baut das Kit, startet http://127.0.0.1:8000
 make test    # Kontrast-Gate + pytest
 ```
 
-Standardmäßig (`auth_mode: dev`) ersetzt eine Auswahl von Testpersonen (`dev/users.yml`) die OIDC-Anmeldung.
+Standardmäßig (`auth_mode: dev`) ersetzt eine Auswahl von Testpersonen (`dev/users.yml`) die Anmeldung, die Sessions
+liegen im Speicher.
 
-Mit echter Anmeldung (`auth_mode: oidc`: Keycloak als IdP, Sessions in Redis; braucht Docker):
-
-```sh
-make idp-up    # Redis :6379 + Keycloak :8180 (Realm hka; Benutzer = Passwort: alexandru, antonio, david, neumann, max, admin, gast)
-make dev-oidc  # Portal auf dem Host mit dev/gateway.oidc.yml, :8000 (passt zur redirect_uri)
-make idp-down
-```
-
-Oder alles im Container (Redis, Keycloak, Portal-Backend):
-
-```sh
-make server-up   # oder: cd extras/compose/server && docker compose up --build
-make server-down
-```
+Mit echter Anmeldung läuft das Portal hinter dem separaten Security-Gateway (eigenes Repo `security-gateway`,
+`auth_mode: gateway`): Login (OIDC), Sessions (Redis), App-Routing und Token-Ausstellung liegen dort, das Portal prüft
+nur die signierte Assertion. Start und Konfiguration: `security-gateway/docs/gateway-portal.md`.
 
 ## Aufbau
 
@@ -59,15 +49,14 @@ dev/
   manifests/*.json             ein Manifest pro App  ← hier neue Apps anlegen
   state.yml                    Status je App (healthy/unhealthy/…) von Hand; mit registry.probe setzt ihn der Prober
   users.yml                    Testpersonen mit Rollen
-  gateway.oidc.yml             Konfiguration für Anmeldung über Keycloak + Redis
-  roles.yml · grants.yml       IdP-Claims → Rollen (02 §8), zusätzliche Rollen je Subject
+  roles.yml · grants.yml       IdP-Claims → Rollen (liest das Gateway), zusätzliche Rollen je Subject
+  gateway.vm.yml               Konfiguration der Test-VM (auth_mode: gateway)
   keycloak/portal-client-secret  Client-Secret des dev-IdP (nur dev!)
-  gateway.compose.yml          Konfiguration für das Backend im Container
 extras/compose/                Docker Compose je Baustein
-  redis/ · keycloak/ · backend/  je eine compose.yml (keycloak/ mit Dockerfile + hka-realm.json)
-  server/                      compose.yml bindet alle drei ein: docker compose up startet alles
+  keycloak/                    IdP für dev (compose.yml, Dockerfile, hka-realm.json)
+  vm/                          Test-VM: nginx, Deploy-Skripte, compose.yml
 Dockerfile                     Portal-Image (dhi.io, braucht Login) · Dockerfile.trixie: ohne dhi
-tests/                         UI1–UI14 (soweit ohne Browser prüfbar), REG4/5, Kit, Service, Fehlerseiten, OIDC (G2/G4/G6)
+tests/                         UI1–UI14 (soweit ohne Browser prüfbar), REG4/5, Kit, Service, Fehlerseiten, Gateway-Identität
 ```
 
 ## Eine App hinzufügen
@@ -100,8 +89,8 @@ und passender Rolle; Kategorien in fester Reihenfolge, Einträge alphabetisch.
 | Seiten, Kit, Texte, `/nav` mit ETag + `X-Portal-Kit` | wie spezifiziert | — |
 | Registry | `ManifestDirectorySource` liest JSON-Dateien | SQLite-Registry implementiert `RegistrySource.load()` (03 §2) |
 | Status / Probe | lokal `dev/state.yml`; auf der VM der Prober (`registry.probe`) | Prober als Teil der SQLite-Registry (03 §7) |
-| Anmeldung | `auth_mode: dev`: Testpersonen-Auswahl; `auth_mode: oidc`: Keycloak, Authorization Code + PKCE, ID-Token-Prüfung nach 02 §5 | Shibboleth-OIDC: `issuer`, Client und `roles.yml` tauschen |
-| Sessions | Redis (`RedisSessionStore`), wenn `redis_url` gesetzt ist; sonst im Speicher | — |
+| Anmeldung | `auth_mode: dev`: Testpersonen-Auswahl; `auth_mode: gateway`: signierte Assertion des separaten Security-Gateways | Shibboleth-OIDC im Gateway |
+| Sessions | im Gateway (Redis dort); im Portal nur bei `auth_mode: dev` im Speicher | — |
 | `/nav`-Auth | Session-Cookie | `Authorization: Bearer <assertion>` auf :8001 |
 | `/apps/<slug>/` | Platzhalter-Seite mit den Kit-Mustern, gleiche Entscheidungsreihenfolge wie `/auth/verify` | Traefik routet zur App |
 

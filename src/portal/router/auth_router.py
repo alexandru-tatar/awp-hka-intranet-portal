@@ -37,13 +37,13 @@ def logout(
     session: OptionalSession,
     csrf: str = Form(""),
 ) -> Response:
-    """Abmelden: Portal-Session beenden, Cookie löschen und bei OIDC die Session beim IdP beenden.
+    """Abmelden: Portal-Session beenden und Cookie löschen.
 
     :param portal: Injizierter Portal-Kontext
     :param service: Injizierter Service für Geschäftslogik
     :param session: Angemeldete Session oder None
     :param csrf: CSRF-Token aus dem Formular
-    :return: Redirect zur Abmeldung beim IdP (OIDC) bzw. auf die Startseite
+    :return: Redirect auf die Startseite
     :rtype: Response
     :raises HTTPException: 400, falls keine Session vorhanden ist
     :raises InvalidCsrfError: Falls das CSRF-Token nicht passt
@@ -52,8 +52,6 @@ def logout(
         raise HTTPException(400)
     logger.debug("sub={}", session.sub)
     service.delete(session.sid, csrf)
-    # Bei OIDC auch die Session beim IdP beenden, sonst meldet der nächste Login ohne Passwort wieder an.
-    idp_url: Final = portal.login_service.end_session_url(session) if portal.login_service else None
-    response: Final = RedirectResponse(idp_url or "/", status_code=303)
+    response: Final = RedirectResponse("/", status_code=303)
     response.delete_cookie(portal.cfg.session_cookie, path="/")
     return response

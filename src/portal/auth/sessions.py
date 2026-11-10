@@ -1,8 +1,7 @@
 """Sessions und Session-Stores.
 
-``MemorySessionStore`` ist der Store für den Dev-Modus ohne Redis; ``RedisSessionStore`` (in
-:mod:`portal.auth.redis_sessions`) erfüllt denselben Vertrag. Beide liefern die Form
-``sub, name, roles, csrf`` (02 §4), damit Menü-Filter und Logout mit CSRF-Schutz gleich arbeiten.
+``MemorySessionStore`` ist der Store für den Dev-Modus (``auth_mode: dev``). Im Gateway-Modus gibt es keine
+eigenen Sessions. Die Form ``sub, name, roles, csrf`` ist dieselbe wie beim ``GatewayUser``.
 """
 
 from __future__ import annotations

@@ -10,16 +10,13 @@ Python ≥ 3.13, [uv](https://docs.astral.sh/uv/), für Anmeldung und Container 
 |---|---|
 | `make setup` | `uv sync`: `.venv` und Abhängigkeiten aus `uv.lock` |
 | `make dev` | baut das Kit, startet mit Testpersonen-Login auf `:8000` (`dev/gateway.dev.yml`) |
-| `make dev-apps` | wie `dev`, aber `/apps/<slug>/` geht an einen App-Container auf `:8080` (`dev/gateway.apps.yml`) |
-| `make dev-oidc` | wie `dev`, aber mit Keycloak + Redis (`dev/gateway.oidc.yml`); vorher `make idp-up` |
-| `make idp-up` / `idp-down` | nur Redis und Keycloak als Container |
-| `make server-up` / `server-down` | Redis, Keycloak und Backend als Container |
+| `make idp-up` / `idp-down` | Keycloak als IdP für das separate Security-Gateway |
 | `make kit` / `make contrast` | Design-Kit bauen / Kontrast-Gate |
 | `make test` | Kontrast-Gate und pytest |
 | `make docs` | API-Dokumentation als HTML aus den Docstrings: `docs/api/_build/html/index.html` |
 
 Abhängigkeiten: `uv add <paket>` (Laufzeit), `uv add --dev <paket>` (nur Entwicklung). `PORT` ist mit
-`make dev PORT=…` änderbar; bei `dev-oidc` muss er zur `redirect_uri` passen.
+`make dev PORT=…` änderbar.
 
 ## Konfiguration
 
@@ -29,14 +26,12 @@ Unbekannte Schlüssel brechen den Start ab. Schlüssel: `core/config.py`.
 | Datei | Zweck |
 |---|---|
 | `dev/gateway.dev.yml` | Testpersonen (`auth_mode: dev`), Sessions im Speicher |
-| `dev/gateway.apps.yml` | wie `dev`, mit `assertion` und `apps` (Weiterleitung, siehe [07](07-registry-und-apps.md)) |
-| `dev/gateway.oidc.yml` | Keycloak + Redis, Portal auf dem Host |
-| `dev/gateway.compose.yml` | wie oben, Portal im Container (`redis`, `keycloak` als Hostnamen) |
+| `dev/gateway.vm.yml` | Test-VM, `auth_mode: gateway` (Identität vom Security-Gateway) |
 
 ## Tests
 
 `pytest` unter `tests/`. `conftest.py` legt pro Test eine Kopie von `dev/` an, sodass Manifeste frei verändert werden
-können. Für die Anmeldung gibt es einen gefälschten IdP und `fakeredis` (`tests/test_oidc.py`), es wird weder Keycloak
+können. Die Gateway-Identität (`tests/test_gateway_identity.py`) prüft signierte Test-Assertions, es wird weder Keycloak
 noch Redis gebraucht.
 
 Der `TestClient` von Starlette nutzt `httpx2`; deshalb liegt es in der Gruppe `dev`. Der Laufzeitcode (OIDC-Client) und die
@@ -50,7 +45,7 @@ Fake-IdP-Tests nutzen weiterhin `httpx`, beide Pakete sind unabhängig voneinand
 | `test_errors.py` | Fehlerseiten für alle üblichen Status, nie JSON |
 | `test_manifest.py` | Manifest-Prüfung und Registry-Quelle |
 | `test_service.py` | Service-Schicht ohne HTTP |
-| `test_oidc.py` | Anmeldung, Sessions in Redis, Abmeldung, Token-Prüfung |
+| `test_gateway_identity.py` | Assertion-Prüfung, keine eigenen Sessions im Gateway-Modus, CSRF, Origin |
 | `test_kit.py` | Kontrast-Gate, Kit-Build, keine Hex-Farben außerhalb der Tokens |
 | `test_gateway.py` | Weiterleitung an Apps, Token, JWKS, `/nav` mit Token, Kit-Aliase (HKA-52, AK1 bis AK6) |
 | `test_logging.py` | Logformat, Level je Logger, Request-ID in den Zeilen, Umleitung des Standard-Loggings |
@@ -101,7 +96,6 @@ logging:
     portal.service: DEBUG
     uvicorn.access: WARNING
     httpx: WARNING
-    redis: INFO
 ```
 
 Unbekannte Schlüssel oder Level (erlaubt: `TRACE` bis `CRITICAL`) brechen den Start ab. Ein Eintrag unter `levels` gilt für die
