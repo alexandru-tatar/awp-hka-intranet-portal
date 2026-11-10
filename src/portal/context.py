@@ -7,22 +7,16 @@ from pathlib import Path
 from typing import Mapping
 
 import httpx
-from redis import Redis
 
-from .auth.assertion_keys import SigningKeys
 from .auth.dev_users import DevUser, load_dev_users
-from .auth.oidc import OidcClient
-from .auth.redis_sessions import RedisLoginStore, RedisSessionStore
 from .auth.grants import GrantStore
-from .auth.roles import load_role_mapper
 from .auth.sessions import MemorySessionStore, SessionStore
 from .core.config import Config
 from .core.i18n import Messages
 from .core.kit import Kit
 from .registry import ManifestDirectorySource, ManifestValidator, Prober, Registry, StatusWriter
 from .registry.registration import Registrar
-from .service import AdminService, AppService, AssertionService, LoginService, SessionService, SessionWriteService
-from .web.proxy import AppProxy
+from .service import AdminService, AppService, SessionService, SessionWriteService
 from .web.views import Views
 
 PACKAGE_DIR = Path(__file__).resolve().parent
@@ -42,13 +36,9 @@ class Portal:
     :ivar admin_service: Service der Verwaltungsseite für platform-admin
     :ivar session_service: Lesender Service für Sessions
     :ivar session_write_service: Schreibender Service für Sessions
-    :ivar login_service: Service für die OIDC-Anmeldung, ``None`` bei ``auth_mode: dev``
-    :ivar session_store: Session-Store (Redis oder Speicher), für ``/readyz``
+    :ivar session_store: Session-Store im Speicher, nur bei ``auth_mode: dev``
     :ivar views: Rendert Seiten aus Templates
-    :ivar dev_users: Testpersonen, leer bei ``auth_mode: oidc``
-    :ivar keys: Signaturschlüssel des Identitäts-Tokens, ``None`` ohne Abschnitt ``assertion``
-    :ivar assertion_service: Stellt Tokens aus, ``None`` ohne Abschnitt ``assertion``
-    :ivar proxy: Leitet an App-Container weiter, ``None`` ohne Abschnitt ``apps``
+    :ivar dev_users: Testpersonen, leer bei ``auth_mode: gateway``
     :ivar prober: Prüft ``/healthz`` der Apps und setzt den Status, ``None`` ohne ``registry.probe``
     """
     cfg: Config
@@ -57,34 +47,28 @@ class Portal:
     registry: Registry
     app_service: AppService
     admin_service: AdminService
-    session_service: SessionService
-    session_write_service: SessionWriteService
-    login_service: LoginService | None
-    session_store: SessionStore
+    session_service: SessionService | None
+    session_write_service: SessionWriteService | None
+    session_store: SessionStore | None
     views: Views
     dev_users: Mapping[str, DevUser]
-    keys: SigningKeys | None = None
-    assertion_service: AssertionService | None = None
-    proxy: AppProxy | None = None
     prober: Prober | None = None
 
 
 def build_portal(
     cfg: Config,
     *,
-    redis_client: Redis | None = None,
     http_client: httpx.Client | None = None,
     app_transport: httpx.AsyncBaseTransport | None = None,
 ) -> Portal:
     """Den Kontext aus der Konfiguration bauen.
 
-    Wählt den Session-Store (Redis, wenn ``redis_url`` gesetzt ist oder ein Client übergeben wird,
-    sonst Speicher), lädt die Registry und baut bei ``auth_mode: oidc`` den Login-Service.
+    Bei ``auth_mode: dev`` gibt es einen Session-Store im Speicher, bei ``auth_mode: gateway`` keine
+    eigenen Sessions: die Identität kommt vom separaten Security-Gateway.
 
     :param cfg: Konfiguration
-    :param redis_client: Redis-Client, sonst aus ``cfg.redis_url``
-    :param http_client: HTTP-Client für den IdP, sonst ein Standardclient
-    :param app_transport: Transport zu den App-Containern statt des Netzwerks (Weiterleitung und Prober), für Tests
+    :param http_client: nicht mehr verwendet, bleibt für bestehende Aufrufer
+    :param app_transport: Transport zu den App-Containern statt des Netzwerks (Prober), für Tests
     :return: Der fertige Kontext
     :rtype: Portal
     """
@@ -92,17 +76,7 @@ def build_portal(
     t = Messages(MESSAGES_FILE, defaults={"kontakt": cfg.kontakt})
     registry = _build_registry(cfg)
     registry.reload()
-    client = redis_client or (Redis.from_url(cfg.redis_url, decode_responses=True) if cfg.redis_url else None)
-    sessions: SessionStore = (
-        RedisSessionStore(
-            client,
-            idle_seconds=cfg.idle_seconds,
-            absolute_seconds=cfg.absolute_seconds,
-            touch_min_interval_seconds=cfg.touch_min_interval_seconds,
-        )
-        if client is not None
-        else MemorySessionStore()
-    )
+    sessions: SessionStore | None = MemorySessionStore() if cfg.auth_mode == "dev" else None
     dev_users = load_dev_users(cfg.dev_users_file) if cfg.auth_mode == "dev" else {}
     app_service = AppService(registry)
     grants = GrantStore(cfg.grants_file) if cfg.grants_file is not None else None
@@ -112,17 +86,7 @@ def build_portal(
         if cfg.registry.owners_file is not None else None
     )
     admin_service = AdminService(registry, registrar, grants, cfg.role_vocabulary, writable=cfg.registry.admin_write)
-    session_write_service = SessionWriteService(sessions, dev_users)
-    login_service = None
-    if cfg.oidc is not None:
-        assert client is not None and cfg.roles_file is not None  # checked by load_config
-        login_service = LoginService(
-            OidcClient(cfg.oidc, http_client),
-            RedisLoginStore(client, ttl_seconds=cfg.login_state_ttl_seconds),
-            load_role_mapper(cfg.roles_file, cfg.grants_file, grants=grants),
-            session_write_service,
-        )
-    keys = SigningKeys.load(cfg.assertion, dev=cfg.dev) if cfg.assertion is not None else None
+    session_write_service = SessionWriteService(sessions, dev_users) if sessions is not None else None
     return Portal(
         cfg=cfg,
         kit=kit,
@@ -130,17 +94,11 @@ def build_portal(
         registry=registry,
         app_service=app_service,
         admin_service=admin_service,
-        session_service=SessionService(sessions),
+        session_service=SessionService(sessions) if sessions is not None else None,
         session_write_service=session_write_service,
-        login_service=login_service,
         session_store=sessions,
         views=Views(TEMPLATES_DIR, apps=app_service, t=t, kit=kit, cfg=cfg),
         dev_users=dev_users,
-        keys=keys,
-        assertion_service=(
-            AssertionService(keys, cfg.assertion, cfg.role_vocabulary) if keys is not None and cfg.assertion else None
-        ),
-        proxy=AppProxy(cfg.apps, app_transport) if cfg.apps is not None else None,
         prober=(
             Prober(registry, cfg.apps, app_transport,
                    status_writer=StatusWriter(cfg.registry.status_file) if cfg.registry.status_file else None)

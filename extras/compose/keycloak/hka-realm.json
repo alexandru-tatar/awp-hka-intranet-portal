@@ -30,12 +30,13 @@
       "serviceAccountsEnabled": false,
       "redirectUris": [
         "http://localhost:8000/oidc/callback",
+        "http://localhost:18080/oidc/callback",
         "https://iwi-hean-05.hs-karlsruhe.de/oidc/callback"
       ],
       "webOrigins": [],
       "attributes": {
         "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "http://localhost:8000/##https://iwi-hean-05.hs-karlsruhe.de/"
+        "post.logout.redirect.uris": "http://localhost:8000/##http://localhost:18080/##https://iwi-hean-05.hs-karlsruhe.de/"
       },
       "protocolMappers": [
         {

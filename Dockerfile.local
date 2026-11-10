@@ -1,0 +1,40 @@
+# syntax=docker/dockerfile:1
+# Local development only. Production continues to use Dockerfile (DHI).
+ARG PYTHON_VERSION=3.14.3
+ARG UV_VERSION=0.11.0
+
+FROM ghcr.io/astral-sh/uv:${UV_VERSION} AS uv
+FROM python:${PYTHON_VERSION}-slim-trixie AS builder
+COPY --from=uv /uv /usr/local/bin/uv
+WORKDIR /opt/app
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PYTHON_DOWNLOADS=0 \
+    UV_NO_MANAGED_PYTHON=true
+
+COPY README.md pyproject.toml uv.lock ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project --no-default-groups --no-editable
+COPY src ./src
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-default-groups --no-editable
+COPY kit ./kit
+COPY schemas ./schemas
+COPY dev ./dev
+RUN ["/opt/app/.venv/bin/python", "kit/tools/build.py"]
+
+FROM python:${PYTHON_VERSION}-slim-trixie AS final
+RUN useradd --system --uid 10001 --no-create-home --shell /usr/sbin/nologin nonroot
+WORKDIR /opt/app
+COPY --from=builder --chown=10001:10001 /opt/app/.venv ./.venv
+COPY --from=builder --chown=10001:10001 /opt/app/kit/dist ./kit/dist
+COPY --from=builder --chown=10001:10001 /opt/app/schemas ./schemas
+COPY --from=builder --chown=10001:10001 /opt/app/dev ./dev
+ENV PATH="/opt/app/.venv/bin:$PATH" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PORTAL_CONFIG=/opt/app/dev/gateway.dev.yml
+USER 10001:10001
+EXPOSE 8000
+STOPSIGNAL SIGINT
+ENTRYPOINT ["python", "-m", "uvicorn", "portal.dev:app", "--host", "0.0.0.0", "--port", "8000"]

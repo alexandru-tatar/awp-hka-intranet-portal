@@ -6,7 +6,6 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import RedirectResponse, Response
 from loguru import logger
-from redis.exceptions import RedisError
 from starlette.exceptions import HTTPException
 
 from ..auth.redirects import login_url
@@ -28,18 +27,13 @@ from .deps import get_portal, optional_session
 def render_error(request: Request, status: int) -> Response:
     """Fehlerseite rendern.
 
-    Eine nicht lesbare Session (Redis nicht erreichbar) gilt als nicht angemeldet, damit die Seite trotzdem erscheint.
-
     :param request: Anfrage
     :param status: HTTP-Status
     :return: Fehlerseite mit diesem Status
     :rtype: Response
     """
     portal = get_portal(request)
-    try:
-        session = optional_session(request, portal)
-    except RedisError:  # error pages must render even when Redis is down
-        session = None
+    session = optional_session(request, portal)
     return portal.views.error(request, status, session)
 
 
@@ -50,7 +44,6 @@ SERVICE_ERROR_STATUS = {
     UnavailableError: 503,
     InvalidCsrfError: 400,
     LoginFailedError: 400,
-    RedisError: 503,  # fail closed (02 §10)
     UnknownUserError: 400,
     AdminReadOnlyError: 403,
     RegistryError: 503,  # Verwaltungsseite: Dateien nicht beschreibbar oder Registrierung läuft

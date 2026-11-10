@@ -8,3 +8,20 @@ kit/dist/
 **/*.egg-info/
 extras/
 docs/
+
+# Exclude local credentials and history from the build context.
+.git
+.env
+.env.*
+.local
+secrets
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/*.jks
+**/*.keystore
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+.ruff_cache

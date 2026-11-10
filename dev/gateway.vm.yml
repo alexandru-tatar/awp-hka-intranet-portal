@@ -1,8 +1,8 @@
-# Portal auf der Test-VM iwi-hean-05 (extras/compose/vm): wie gateway.compose.yml, aber hinter nginx mit HTTPS.
-# Der Browser erreicht Portal und Keycloak über https://iwi-hean-05.hs-karlsruhe.de (Keycloak unter /auth = issuer);
-# der Container holt Discovery, Token und JWKS intern über keycloak:8080/auth (KC_HOSTNAME_BACKCHANNEL_DYNAMIC).
+# Portal auf der Test-VM iwi-hean-05 (extras/compose/vm) hinter nginx mit HTTPS.
+# Login, Sessions und App-Routing liegen im separaten Security-Gateway (eigenes Repo); das Portal prüft nur dessen
+# signierte Assertion (auth_mode gateway). Issuer, JWKS-URL und öffentliche URL passend zum Gateway-Deployment setzen.
 env: dev
-auth_mode: oidc
+auth_mode: gateway
 kontakt: "dem IT-Servicedesk (Kontakt folgt)"
 # Die Manifeste der Apps legt die Pipeline ab (extras/compose/vm/deploy/README.md), das Portal liest sie nur.
 # Der Prober setzt den Status (registry.probe), deshalb gibt es hier keine state.yml.
@@ -14,27 +14,21 @@ adapter_scopes: [noten:read, mail:send]
 links: { help: "#", privacy: "#", imprint: "#" }
 
 session_cookie: portal_sid
-login_cookie: portal_login
 cookie_secure: true
 
-redis_url: redis://redis:6379/0
-idle_seconds: 1800
-absolute_seconds: 28800
-touch_min_interval_seconds: 60
-login_state_ttl_seconds: 600
+# Muss zum Gateway-Deployment passen (security-gateway, Env des Gateway-Containers):
+#   issuer     = GW_ASSERTION_ISSUER, ohne Wert GW_PUBLIC_URL + "/"  (gateway/app.py)
+#   public_url = GW_PUBLIC_URL, nur Origin ohne Pfad, HTTPS bei GW_COOKIE_SECURE=true
+#   jwks_url   = interner Name des Gateway-Containers + Port 8080 + /.well-known/jwks.json;
+#                der Hostname muss in GW_INTERNAL_HOSTS des Gateways stehen
+#   audience   = GW_PORTAL_AUDIENCE (Standard hka-portal-ui)
+# TODO: Containername/Netz auf der VM mit dem Gateway-Deployment abstimmen (hier: Dienstname "gateway").
+gateway:
+  issuer: https://iwi-hean-05.hs-karlsruhe.de/
+  jwks_url: http://gateway:8080/.well-known/jwks.json
+  public_url: https://iwi-hean-05.hs-karlsruhe.de
+  audience: hka-portal-ui
 
-oidc:
-  issuer: https://iwi-hean-05.hs-karlsruhe.de/auth/realms/hka
-  discovery_url: http://keycloak:8080/auth/realms/hka/.well-known/openid-configuration
-  client_id: portal
-  client_secret_file: keycloak/portal-client-secret
-  redirect_uri: https://iwi-hean-05.hs-karlsruhe.de/oidc/callback
-  post_logout_redirect_uri: https://iwi-hean-05.hs-karlsruhe.de/   # IdP-Abmeldung (RP-initiated Logout); Wert muss im Client erlaubt sein
-  scopes: [openid, profile, email]
-  id_token_algs: [RS256, ES256]
-  clock_leeway_seconds: 60
-
-roles_file: roles.yml
 # Grants im beschreibbaren Registry-Ordner, damit die Verwaltungsseite sie ändern kann. Fehlt die Datei, gibt es keine Grants.
 grants_file: /var/lib/portal/registry/grants.yml
 
@@ -48,10 +42,7 @@ registry:
   status_file: /var/lib/portal/status/status.json
   admin_write: true   # Verwaltungsseite /_portal/admin darf Apps entfernen, Rollen und Grants ändern (docs/07); braucht die :rw-Mounts
 
-# Weiterleitung /apps/<slug>/ an den Container "app-<slug>" im selben Docker-Netz (HKA-52); der Prober fragt dort /healthz.
-# env dev: Der Signaturschlüssel ist flüchtig und ändert sich bei jedem Start des Portals.
-assertion:
-  issuer: https://iwi-hean-05.hs-karlsruhe.de/
+# Der Prober fragt /healthz des Containers "app-<slug>" im selben Docker-Netz (HKA-52).
 apps:
   upstream: http://app-{slug}:8080
 
@@ -66,6 +57,5 @@ logging:
   levels:
     uvicorn.access: WARNING       # die Zugriffszeile schreibt portal.web.middleware, mit Request-ID
     httpx: WARNING
-    redis: INFO
     httpcore: WARNING
     watchfiles: WARNING

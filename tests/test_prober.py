@@ -61,7 +61,7 @@ def probe_cfg(env):
     path = env / "gateway.dev.yml"
     text = path.read_text(encoding="utf-8").replace("state_file: state.yml\n", "")
     path.write_text(
-        text + f"\nassertion:\n  issuer: {ISSUER}\napps:\n  upstream: http://app-{{slug}}:8080\nregistry:\n  probe: true\n",
+        text + "\napps:\n  upstream: http://app-{slug}:8080\nregistry:\n  probe: true\n",
         encoding="utf-8",
     )
     for f in (env / "manifests").glob("*.json"):

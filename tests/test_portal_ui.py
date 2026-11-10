@@ -172,3 +172,12 @@ def test_dialog_has_exactly_two_buttons(client):
     html = login(client, "alexandru").get("/apps/nachricht/").text
     for actions in re.findall(r'<div class="dialog__actions">(.*?)</div>', html, re.S):
         assert actions.count("<button") == 2
+
+
+def test_header_logout_opens_a_confirmation_dialog_with_csrf(client):
+    login(client, "alexandru")
+    page = client.get("/").text
+    assert 'data-dialog-open="logout-dialog"' in page
+    assert '<dialog id="logout-dialog"' in page and 'data-submit-form="logout-form"' in page
+    form = re.search(r'<form id="logout-form" method="post" action="/logout"[^>]*>(.*?)</form>', page, re.S)
+    assert form and re.search(r'name="csrf" value="[^"]+"', form.group(1))

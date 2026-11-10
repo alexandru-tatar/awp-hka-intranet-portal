@@ -1,6 +1,6 @@
 PORT ?= 8000
 
-.PHONY: setup kit contrast dev dev-apps dev-oidc idp-up idp-down server-up server-down test docs sdk-test sdk-release
+.PHONY: setup kit contrast dev idp-up idp-down test docs sdk-test sdk-release
 
 COMPOSE = extras/compose
 
@@ -16,29 +16,12 @@ contrast:
 dev: kit
 	uv run uvicorn portal.dev:app --reload --reload-dir src --reload-dir dev --port $(PORT)
 
-# Testpersonen-Login, /apps/<slug>/ geht an einen lokalen App-Container auf :8080 (docs/07-registry-und-apps.md).
-dev-apps: kit
-	PORTAL_CONFIG=dev/gateway.apps.yml uv run uvicorn portal.dev:app --reload --reload-dir src --reload-dir dev --port $(PORT)
-
-# Echte Anmeldung: Keycloak + Redis müssen laufen (make idp-up), PORT muss zur redirect_uri passen.
-dev-oidc: kit
-	PORTAL_CONFIG=dev/gateway.oidc.yml uv run uvicorn portal.dev:app --reload --reload-dir src --reload-dir dev --port $(PORT)
-
-# Nur Redis + Keycloak, das Portal läuft auf dem Host (make dev-oidc).
+# Keycloak als IdP für das separate Security-Gateway (Repo security-gateway), nicht für das Portal selbst.
 idp-up:
-	docker compose -f $(COMPOSE)/redis/compose.yml up -d
 	docker compose -f $(COMPOSE)/keycloak/compose.yml up -d --build
 
 idp-down:
 	docker compose -f $(COMPOSE)/keycloak/compose.yml down
-	docker compose -f $(COMPOSE)/redis/compose.yml down
-
-# Alles im Container: Redis, Keycloak und Portal-Backend (http://localhost:8000).
-server-up:
-	docker compose -f $(COMPOSE)/server/compose.yml up -d --build
-
-server-down:
-	docker compose -f $(COMPOSE)/server/compose.yml down
 
 test: contrast sdk-test
 	uv run pytest -q tests

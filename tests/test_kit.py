@@ -46,3 +46,12 @@ def test_no_hex_outside_root():
         if css.name == "tokens.css":
             continue
         assert not re.search(r"#[0-9a-fA-F]{3,8}\b", css.read_text()), css.name
+
+
+def test_kit_files_are_served_under_sdk_names(client):
+    kit = client.app.state.portal.kit
+    for alias, real in kit.aliases.items():
+        r = client.get(f"/_portal/static/{alias}")
+        assert r.status_code == 200 and r.headers["cache-control"] == "no-cache"
+        assert r.content == client.get(f"/_portal/static/{real}").content
+    assert client.get(kit.css_url).headers["cache-control"].endswith("immutable")

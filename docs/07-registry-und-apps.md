@@ -259,3 +259,28 @@ das ist der Preis der Seite. Wer das nicht will, setzt `admin_write` auf `false`
 **Lokal:** `gateway.dev.yml` hat `admin_write: true` und legt `owners.json` und `retired.json` neben die Konfiguration (in `.gitignore`).
 Entfernen löscht die Datei in `dev/manifests/`; `git restore dev/manifests` und das Löschen von `dev/owners.json` und `dev/retired.json` stellen den Stand wieder her.
 Die Grants wirken nur bei `auth_mode: oidc`; in dev kommen die Rollen aus `users.yml`.
+
+
+## Interne lesende API für den separaten Gateway
+
+Neu: `GET /internal/apps/{slug}/access` liefert ausschließlich `slug`, `roles`,
+`status`, `adapters` direkt aus dem aktuellen Snapshot. Keine zweite Registry und
+keine Änderung am bisherigen Registrierungs- oder Proberverhalten. Der Endpunkt
+ist ohne `PORTAL_REGISTRY_SERVICE_TOKEN_FILE` deaktiviert; Zugriff nur mit
+separatem Bearer-Service-Token. Benutzer-Cookies und Assertions genügen nicht.
+Öffentliches NGINX muss `/internal` und `/internal/…` sperren, bevor der Endpunkt
+aktiviert wird. Die VM-Compose-Ergänzung `compose.registry.yml` bindet Secret und
+internes Portal-Gateway-Netz optional ein; bestehende Stacks bleiben unverändert.
+Keine laufende VM-Konfiguration wurde geändert. Ablauf und Testgrenzen:
+[`Gateway-Integrationsdokumentation`](../../awp-hka-security-gateway/docs/internal-registry.md).
+
+## Gateway-Betrieb mit Portal-Autorisierung
+
+Mit `auth_mode: gateway` verwendet das Portal einen signierten Benutzerkontext
+statt eigener OIDC-/Redis-Sessions. `POST /internal/apps/{slug}/authorize`
+verlangt separates Service-Token und Portal-Assertion und verwendet den vorhandenen
+`AppService.find_authorized()`. Der Gateway setzt die Entscheidung durch und
+stellt anschließend die App-Assertion aus. Die Manifestsemantik bleibt gleich.
+Formular-CSRF und Adminrollen bleiben geschützt. Die bisherigen Dev-/OIDC-Modi
+bleiben erhalten. Details und lokale Test-App-Konfiguration:
+[Gateway-Integration](../../awp-hka-security-gateway/docs/gateway-portal.md).

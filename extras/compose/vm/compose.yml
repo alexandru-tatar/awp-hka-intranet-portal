@@ -1,9 +1,10 @@
-# Test-VM iwi-hean-05: Redis, Keycloak und Portal-Backend hinter nginx (nginx-portal.conf).
+# Test-VM iwi-hean-05: nur noch Keycloak (IdP) hinter nginx (nginx-portal.conf, /auth/).
+# Portal, Security-Gateway und Gateway-Redis laufen im Projekt security-gateway/compose.vm.yml; sie nutzen das Netz
+# dieses Projekts (hka-portal-vm_default) als externes Netz "identity", um Keycloak zu erreichen.
 # Die VM erreicht keine Registry. Images deshalb auf dem Mac bauen und übertragen:
 #
 #   Mac:  docker compose -f extras/compose/vm/compose.yml build
-#         docker pull --platform linux/amd64 redis:8-alpine
-#         docker save hka/portal:0.1.0-hardened hka/portal-keycloak:0.1.0 redis:8-alpine | gzip > ~/Downloads/portal-vm.tar.gz
+#         docker save hka/portal-keycloak:0.1.0 | gzip > ~/Downloads/portal-vm.tar.gz
 #         scp ~/Downloads/portal-vm.tar.gz extras/compose/vm/compose.yml sadmin@iwi-hean-05.hs-karlsruhe.de:~
 #   VM:   gunzip -c ~/portal-vm.tar.gz | sudo docker load
 #         sudo docker compose -f ~/compose.yml up -d --no-build
@@ -13,17 +14,6 @@
 name: hka-portal-vm
 
 services:
-  redis:
-    image: redis:8-alpine
-    platform: linux/amd64
-    command: ["redis-server", "--save", "", "--appendonly", "no"]
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 2s
-      retries: 10
-
   keycloak:
     image: hka/portal-keycloak:0.1.0
     platform: linux/amd64
@@ -42,26 +32,3 @@ services:
       - "127.0.0.1:8180:8080"
     restart: unless-stopped
 
-  backend:
-    image: hka/portal:0.1.0-hardened
-    platform: linux/amd64
-    build:
-      context: ../../..
-      dockerfile: Dockerfile
-    environment:
-      PORTAL_CONFIG: /opt/app/dev/gateway.vm.yml
-    ports:
-      - "127.0.0.1:8000:8000"
-    volumes:
-      # Manifeste der Apps, von Hand mit portal-deploy abgelegt (deploy/README.md). Der Ordner muss vor "up" existieren.
-      # :rw, weil die Verwaltungsseite /_portal/admin Apps entfernen und ihre Rollen ändern darf (registry.admin_write).
-      - /srv/portal/manifests:/var/lib/portal/manifests:rw
-      # Status der Apps, schreibt der Prober, liest "portal-deploy list" (HKA-56). Der Ordner muss vor "up" existieren.
-      - /srv/portal/status:/var/lib/portal/status:rw
-      # Besitzer (owners.json), Stilllegungen (retired.json), Sperrdatei und die Grants der Verwaltungsseite (grants.yml).
-      # Dieselben Dateien benutzt portal-deploy; beide sperren owners.json.lock.
-      - /srv/portal/registry:/var/lib/portal/registry:rw
-    depends_on:
-      redis:
-        condition: service_healthy
-    restart: unless-stopped
