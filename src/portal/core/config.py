@@ -137,6 +137,14 @@ class RegistryConfig:
 
 
 @dataclass(frozen=True)
+class GatewayConfig:
+    issuer: str
+    jwks_url: str
+    public_url: str
+    audience: str = "hka-portal-ui"
+
+
+@dataclass(frozen=True)
 class Config:
     """Geprüfte Konfiguration des Portals.
 
@@ -193,6 +201,7 @@ class Config:
     assertion: AssertionConfig | None = None
     apps: AppsConfig | None = None
     registry: RegistryConfig = field(default_factory=RegistryConfig)
+    gateway: GatewayConfig | None = None
 
     @property
     def dev(self) -> bool:
@@ -209,7 +218,7 @@ _KEYS = {
     "adapter_scopes", "state_file", "dev_users_file", "session_cookie", "links",
     "login_cookie", "cookie_secure", "auth_mode", "redis_url", "idle_seconds", "absolute_seconds",
     "touch_min_interval_seconds", "login_state_ttl_seconds", "oidc", "logging", "roles_file", "grants_file",
-    "assertion", "apps", "registry",
+    "assertion", "apps", "registry", "gateway",
 }
 _REGISTRY_KEYS = {"refresh_seconds", "probe", "owners_file", "status_file", "admin_write"}
 _ASSERTION_KEYS = {"issuer", "ttl_seconds", "signing_key_current", "signing_key_next", "signing_key_previous"}
@@ -245,8 +254,8 @@ def load_config(path: Path) -> Config:
     if env not in ("dev", "prod"):
         raise ConfigError(f"{path}: env must be dev or prod")
     auth_mode = raw.get("auth_mode", "dev")
-    if auth_mode not in ("dev", "oidc"):
-        raise ConfigError(f"{path}: auth_mode must be dev or oidc")
+    if auth_mode not in ("dev", "oidc", "gateway"):
+        raise ConfigError(f"{path}: auth_mode must be dev, oidc or gateway")
     for key in ("kontakt", "manifests_dir", "schema_path", "kit_dist", "role_vocabulary"):
         if not raw.get(key):
             raise ConfigError(f"{path}: missing key {key}")
@@ -285,13 +294,14 @@ def load_config(path: Path) -> Config:
         assertion=_load_assertion(path, base, raw.get("assertion")),
         apps=_load_apps(path, raw.get("apps")),
         registry=_load_registry(path, base, raw.get("registry")),
+        gateway=GatewayConfig(**raw["gateway"]) if raw.get("gateway") else None,
     )
     if cfg.registry.probe:
         if cfg.apps is None:
             raise ConfigError(f"{path}: registry probe needs an apps section")
         if cfg.state_file is not None:
             raise ConfigError(f"{path}: registry probe sets the status itself, remove state_file")
-    if cfg.apps is not None:
+    if cfg.apps is not None and cfg.auth_mode != "gateway":
         if cfg.assertion is None:
             raise ConfigError(f"{path}: apps needs an assertion section")
         if not cfg.dev and cfg.assertion.signing_key_current is None:
@@ -304,6 +314,18 @@ def load_config(path: Path) -> Config:
             raise ConfigError(f"{path}: auth_mode dev is only allowed with env dev")
         if not (cfg.dev_users_file and cfg.dev_users_file.exists()):
             raise ConfigError(f"{path}: auth_mode dev needs an existing dev_users_file")
+    elif cfg.auth_mode == "gateway":
+        if cfg.gateway is None:
+            raise ConfigError("auth_mode gateway requires gateway settings")
+        if cfg.redis_url or cfg.oidc or cfg.assertion:
+            raise ConfigError("Gateway mode must not configure portal Redis/OIDC/signing keys")
+        from urllib.parse import urlsplit
+        for value in (cfg.gateway.issuer, cfg.gateway.jwks_url, cfg.gateway.public_url):
+            parts = urlsplit(value)
+            if parts.scheme not in ("http", "https") or not parts.hostname or parts.username or parts.password or parts.query or parts.fragment:
+                raise ConfigError("Invalid gateway URL")
+        if cfg.gateway.audience in ("portal", "adapters") or not cfg.gateway.audience:
+            raise ConfigError("Dedicated portal audience required")
     else:
         if not cfg.redis_url:
             raise ConfigError(f"{path}: auth_mode oidc needs redis_url")

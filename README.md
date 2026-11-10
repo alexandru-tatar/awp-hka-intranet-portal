@@ -117,3 +117,11 @@ und passender Rolle; Kategorien in fester Reihenfolge, Einträge alphabetisch.
   `immutable`-Caching bei Icon-Änderungen nicht veraltet.
 - Noch nicht umgesetzt: axe/Playwright-Gates und visuelle Regression (04 §9–10), Stylelint
   (ersatzweise Test „kein Hex außerhalb `tokens.css`").
+
+### Lokaler Container ohne DHI-Zugriff
+
+`Dockerfile.local` verwendet öffentliche Python-3.14.3-/uv-Images. Das produktive
+`Dockerfile` und die VM-Konfiguration bleiben bei DHI. Die lokale Gateway-Integration
+wählt das lokale Dockerfile automatisch über `compose.portal.yml` aus; ihre
+Sicherheits- und Authentifizierungseinstellungen bleiben unverändert.
+Startbefehle und Secrets: [Gateway-Anleitung](../awp-hka-security-gateway/docs/gateway-portal.md).

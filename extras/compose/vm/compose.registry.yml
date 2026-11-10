@@ -1,0 +1,20 @@
+# Opt-in addition to compose.yml. Install the nginx /internal deny rules FIRST.
+services:
+  backend:
+    environment:
+      PORTAL_REGISTRY_SERVICE_TOKEN_FILE: /run/secrets/registry_service_token
+    secrets:
+      - registry_service_token
+    networks:
+      default: {}
+      registry:
+        aliases: [portal-registry]
+
+networks:
+  registry:
+    external: true
+    name: ${HKA_REGISTRY_NETWORK:?Set a dedicated internal Portal-Gateway network}
+
+secrets:
+  registry_service_token:
+    file: ${HKA_REGISTRY_SERVICE_TOKEN_FILE:?Set an external registry service token file}

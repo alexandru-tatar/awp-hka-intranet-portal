@@ -57,10 +57,10 @@ class Portal:
     registry: Registry
     app_service: AppService
     admin_service: AdminService
-    session_service: SessionService
-    session_write_service: SessionWriteService
+    session_service: SessionService | None
+    session_write_service: SessionWriteService | None
     login_service: LoginService | None
-    session_store: SessionStore
+    session_store: SessionStore | None
     views: Views
     dev_users: Mapping[str, DevUser]
     keys: SigningKeys | None = None
@@ -93,7 +93,7 @@ def build_portal(
     registry = _build_registry(cfg)
     registry.reload()
     client = redis_client or (Redis.from_url(cfg.redis_url, decode_responses=True) if cfg.redis_url else None)
-    sessions: SessionStore = (
+    sessions: SessionStore | None = None if cfg.auth_mode == "gateway" else (
         RedisSessionStore(
             client,
             idle_seconds=cfg.idle_seconds,
@@ -112,9 +112,9 @@ def build_portal(
         if cfg.registry.owners_file is not None else None
     )
     admin_service = AdminService(registry, registrar, grants, cfg.role_vocabulary, writable=cfg.registry.admin_write)
-    session_write_service = SessionWriteService(sessions, dev_users)
+    session_write_service = SessionWriteService(sessions, dev_users) if sessions is not None else None
     login_service = None
-    if cfg.oidc is not None:
+    if cfg.auth_mode == "oidc" and cfg.oidc is not None:
         assert client is not None and cfg.roles_file is not None  # checked by load_config
         login_service = LoginService(
             OidcClient(cfg.oidc, http_client),
@@ -130,7 +130,7 @@ def build_portal(
         registry=registry,
         app_service=app_service,
         admin_service=admin_service,
-        session_service=SessionService(sessions),
+        session_service=SessionService(sessions) if sessions is not None else None,
         session_write_service=session_write_service,
         login_service=login_service,
         session_store=sessions,
@@ -140,7 +140,7 @@ def build_portal(
         assertion_service=(
             AssertionService(keys, cfg.assertion, cfg.role_vocabulary) if keys is not None and cfg.assertion else None
         ),
-        proxy=AppProxy(cfg.apps, app_transport) if cfg.apps is not None else None,
+        proxy=AppProxy(cfg.apps, app_transport) if cfg.apps is not None and cfg.auth_mode != "gateway" else None,
         prober=(
             Prober(registry, cfg.apps, app_transport,
                    status_writer=StatusWriter(cfg.registry.status_file) if cfg.registry.status_file else None)

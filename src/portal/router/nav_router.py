@@ -46,7 +46,9 @@ def nav(
     """
     logger.debug("current={}", current)
     token: Final = _token_of(request)
-    if token is not None:
+    if portal.cfg.auth_mode == "gateway":
+        roles = session.roles if session is not None else None
+    elif token is not None:
         roles = _roles_of(portal, token)
     else:
         roles = session.roles if session is not None else None

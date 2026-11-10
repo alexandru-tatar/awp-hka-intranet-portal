@@ -122,6 +122,8 @@ def optional_session(request: Request, portal: PortalDep) -> SessionDTO | None:
     :rtype: SessionDTO | None
     :raises redis.exceptions.RedisError: Falls Redis nicht antwortet
     """
+    if portal.cfg.auth_mode == "gateway":
+        return getattr(request.state, "gateway_user", None)
     sid = request.cookies.get(portal.cfg.session_cookie)
     if sid is None:
         return None

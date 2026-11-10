@@ -15,3 +15,22 @@ dev/owners.json
 dev/owners.json.lock
 dev/retired.json
 *.tar.gz
+
+# Local credentials and runtime artifacts (never commit actual secrets).
+.env.*
+!.env.example
+.local/
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.db
+*.sqlite
+*.sqlite3
+.coverage
+htmlcov/
+.env
+.ruff_cache/
+.mypy_cache/
