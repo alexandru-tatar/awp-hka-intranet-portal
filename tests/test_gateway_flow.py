@@ -39,7 +39,9 @@ def test_complete_portal_app_flow(env, tmp_path, monkeypatch):
     secret = tmp_path / 'service-token'
     secret.write_text('s' * 43)
     public = 'http://localhost:18080'
-    portal_cfg = replace(load_config(env / 'gateway.dev.yml'), auth_mode='gateway', dev_users_file=None,
+    base_cfg = load_config(env / 'gateway.dev.yml')
+    portal_cfg = replace(base_cfg, auth_mode='gateway', dev_users_file=None,
+                         adapter_scopes=(*base_cfg.adapter_scopes, 'bwsync:read', 'bwsync:write'),
                          gateway=GatewayConfig(public + '/', 'http://gateway:8080/.well-known/jwks.json', public))
     gateway = None
     key_client = httpx.Client(transport=httpx.MockTransport(
@@ -69,6 +71,7 @@ def test_complete_portal_app_flow(env, tmp_path, monkeypatch):
         monkeypatch.setenv('PORTAL_ENV', 'production')
         monkeypatch.setenv('PORTAL_API_URL', 'http://gateway:8080')
         monkeypatch.setenv('PORTAL_ISSUER', public + '/')
+        monkeypatch.setenv('PORTAL_ADAPTERS_URL', 'http://bwsync-adapter:8080')
         # Config reads the real supplied manifest; no test changes to that repository.
         monkeypatch.chdir(sample)
         micro = importlib.import_module('app.main')
@@ -86,6 +89,27 @@ def test_complete_portal_app_flow(env, tmp_path, monkeypatch):
         for name in ('platform_sdk.jwks', 'platform_sdk.layout'):
             module = importlib.import_module(name)
             monkeypatch.setattr(module, 'httpx', SimpleNamespace(AsyncClient=sdk_client, HTTPError=httpx.HTTPError))
+        # Exercise the real SDK file transport; only the external adapter is simulated.
+        adapter_files = {}
+        adapter_calls = []
+        def adapter_response(request):
+            adapter_calls.append(request)
+            token = request.headers['authorization'].removeprefix('Bearer ')
+            claims = gateway.state.assertions.keys.verify(token, 'syncshare-test')
+            assert claims['sub'] == 'student-1'
+            assert 'adapters' in claims['aud']
+            assert set(claims['scp']) == {'bwsync:read', 'bwsync:write'}
+            assert 'x-request-id' in request.headers
+            assert 'cookie' not in request.headers
+            assert request.url.path.startswith('/bwsync/files/adapter-test/')
+            if request.method == 'PUT':
+                adapter_files[request.url.path] = request.content
+                return httpx.Response(204)
+            return httpx.Response(200, content=adapter_files[request.url.path])
+        def adapter_client(**kwargs):
+            return httpx.AsyncClient(transport=httpx.MockTransport(adapter_response), **kwargs)
+        monkeypatch.setattr(importlib.import_module('platform_sdk.adapters.transport'), 'httpx', SimpleNamespace(
+            AsyncClient=adapter_client, HTTPError=httpx.HTTPError, TimeoutException=httpx.TimeoutException))
         with TestClient(gateway, base_url=public, follow_redirects=False) as browser:
             assert browser.get('/').headers['location'] == 'https://idp.invalid/login'
             user = gateway.state.sessions.create('student-1', 'Group Test', frozenset({'student'}))
@@ -106,6 +130,8 @@ def test_complete_portal_app_flow(env, tmp_path, monkeypatch):
             assert upload.status_code == 200 and 'hello.txt' in upload.text
             file_id = next(iter(micro.views.STORE['student-1']))
             assert browser.get('/apps/syncshare-test/datei/' + file_id).content == b'hello group'
+            assert [r.method for r in adapter_calls] == ['PUT', 'GET']
+            assert not hasattr(micro.views.STORE['student-1'][file_id], 'data')
             assert browser.post('/apps/syncshare-test/upload', files={'datei': ('bad.txt', b'bad')},
                                 headers={'Origin': 'https://evil.invalid', 'Sec-Fetch-Site': 'cross-site'}).status_code == 403
             other = gateway.state.sessions.create('employee-1', 'Employee', frozenset({'employee'}))

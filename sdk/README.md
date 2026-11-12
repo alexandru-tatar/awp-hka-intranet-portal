@@ -26,7 +26,15 @@ In einem Starter holt `make sdk-update` die gebaute Kopie nach `platform_sdk/` (
 
 ## Stand
 
-Version `1.0.1-dev` (holt das Menü mit `Authorization: Bearer`, 02 §3; `1.0.0-dev` schickte `X-Portal-Assertion`), vorläufig, in Python und JavaScript. Umgesetzt (in beiden Fassungen): Prüfung der Assertion (§5), JWKS-Zwischenspeicher (§6), Middleware mit `/healthz` (§4), `layout()` mit Ersatz-Menü, Test-Anmeldung im Entwicklungsmodus (§7), Noten-Client mit Testdaten (§8), Prüfsumme (§10), JSON-Log (§11).
+Python unterstützt zusätzlich `portal.adapters.bwsync.upload(path, data)` und
+`download(path, max_bytes=...)` für den lokalen bwSync-Test. Der HTTP-Transport
+verlangt die vorhandene App-Assertion, sendet rohe Bytes per PUT, akzeptiert 204
+ohne JSON und begrenzt binäre Downloads. Kein bwSync-Fixture oder Auth-Bypass;
+die JavaScript-Fassung hat diesen Client noch nicht. SDK-Aufrufe erfolgen innerhalb
+eines authentifizierten Requests. Der derzeitige Adapter ist nur für kontrollierte
+lokale Tests vorgesehen und prüft die mitgesendete Assertion noch nicht.
+
+Version `1.0.2-dev` (holt das Menü mit `Authorization: Bearer`, 02 §3; `1.0.0-dev` schickte `X-Portal-Assertion`), vorläufig, in Python und JavaScript. Umgesetzt (in beiden Fassungen): Prüfung der Assertion (§5), JWKS-Zwischenspeicher (§6), Middleware mit `/healthz` (§4), `layout()` mit Ersatz-Menü, Test-Anmeldung im Entwicklungsmodus (§7), Noten-Client mit Testdaten (§8), Prüfsumme (§10), JSON-Log (§11).
 
 Offen:
 
