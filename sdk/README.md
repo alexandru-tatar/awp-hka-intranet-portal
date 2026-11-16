@@ -39,7 +39,7 @@ die JavaScript-Fassung hat diesen Client noch nicht. SDK-Aufrufe erfolgen innerh
 eines authentifizierten Requests. Der derzeitige Adapter ist nur für kontrollierte
 lokale Tests vorgesehen und prüft die mitgesendete Assertion noch nicht.
 
-Version `1.0.3-dev` (bwSync-Explorer nur in Python; `1.0.2-dev` holte das Menü mit `Authorization: Bearer`, 02 §3; `1.0.0-dev` schickte `X-Portal-Assertion`), vorläufig, in Python und JavaScript. Umgesetzt (in beiden Fassungen): Prüfung der Assertion (§5), JWKS-Zwischenspeicher (§6), Middleware mit `/healthz` (§4), `layout()` mit Ersatz-Menü, Test-Anmeldung im Entwicklungsmodus (§7), Noten-Client mit Testdaten (§8), Prüfsumme (§10), JSON-Log (§11).
+Version `1.0.4-dev` (Abmelden im Seitenrahmen per Dialog direkt mit POST /logout statt Link auf die Gateway-Zwischenseite; `1.0.3-dev`: bwSync-Explorer nur in Python; `1.0.2-dev` holte das Menü mit `Authorization: Bearer`, 02 §3; `1.0.0-dev` schickte `X-Portal-Assertion`), vorläufig, in Python und JavaScript. Umgesetzt (in beiden Fassungen): Prüfung der Assertion (§5), JWKS-Zwischenspeicher (§6), Middleware mit `/healthz` (§4), `layout()` mit Ersatz-Menü, Test-Anmeldung im Entwicklungsmodus (§7), Noten-Client mit Testdaten (§8), Prüfsumme (§10), JSON-Log (§11).
 
 Offen:
 

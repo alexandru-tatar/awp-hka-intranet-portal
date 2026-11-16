@@ -84,6 +84,10 @@ test("gültige Assertion: Seitenrahmen mit Ersatz-Menü", async () => {
   assert.ok(html.includes('aria-label="Hauptnavigation"')); // Ersatz-Menü, weil das Portal nicht erreichbar ist
   assert.ok(html.includes("Erika Musterfrau"));
   assert.ok(html.includes("/static/app.css"));
+  // Abmelden ohne Zwischenseite: Dialog schickt POST /logout an das Gateway; kein Banner im Betrieb
+  assert.ok(html.includes('<form id="logout-form" method="post" action="/logout" hidden></form>'));
+  assert.ok(html.includes('data-dialog-open="logout-dialog"') && html.includes('data-submit-form="logout-form"'));
+  assert.ok(!html.includes("dev-banner") && !html.includes("/__dev/login"));
 });
 
 test("requires: 403 ohne die Rolle", async () => {
@@ -140,7 +144,9 @@ test("Test-Anmeldung", async () => {
   const cookie = await devLogin([["sub", "student-test"], ["roles", "student"]]);
   const page = await fetch(`${dev.base}/`, { headers: cookie });
   assert.equal(page.status, 200);
-  assert.ok((await page.text()).includes("Entwicklungsmodus – Testperson: Erika Musterfrau"));
+  const devHtml = await page.text();
+  assert.ok(devHtml.includes("Entwicklungsmodus – Testperson: Erika Musterfrau"));
+  assert.ok(devHtml.includes('<a href="/__dev/login">Abmelden</a>') && !devHtml.includes("logout-form"));
   assert.deepEqual(await (await fetch(`${dev.base}/noten`, { headers: cookie })).json(), { count: 5 });
   assert.equal((await fetch(`${dev.base}/nur-professor`, { headers: cookie })).status, 403);
 });

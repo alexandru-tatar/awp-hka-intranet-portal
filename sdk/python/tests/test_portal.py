@@ -37,6 +37,11 @@ def test_gueltige_assertion_layout(client):
     assert 'aria-label="Hauptnavigation"' in html  # Ersatz-Menü, weil das Portal nicht erreichbar ist
     assert "Erika Musterfrau" in html
     assert "/static/app.css" in html
+    # Abmelden ohne Zwischenseite: Dialog schickt POST /logout an das Gateway; kein Banner im Betrieb
+    assert '<form id="logout-form" method="post" action="/logout" hidden></form>' in html
+    assert 'data-dialog-open="logout-dialog"' in html and 'data-submit-form="logout-form"' in html
+    assert '<a href="/logout">' in html.split("<noscript>")[1].split("</noscript>")[0]
+    assert "dev-banner" not in html and "/__dev/login" not in html
 
 
 def test_menue_vom_portal_mit_bearer(client, monkeypatch):
@@ -99,6 +104,7 @@ def test_dev_login(dev_client):
     page = dev_client.get("/")
     assert page.status_code == 200
     assert "Entwicklungsmodus – Testperson: Erika Musterfrau" in page.text
+    assert '<a href="/__dev/login">Abmelden</a>' in page.text and "logout-form" not in page.text
     assert dev_client.get("/noten").json() == {"count": 5}
     assert dev_client.get("/nur-professor").status_code == 403
 
