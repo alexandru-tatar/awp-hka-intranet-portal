@@ -120,3 +120,118 @@ def test_fixture_mode_does_not_simulate_success():
     with pytest.raises(AdapterError) as error:
         asyncio.run(client.upload("file.txt", b"x"))
     assert error.value.status == 501
+
+
+# --- Ordner: list, mkdir, move, delete (1.0.3-dev) -------------------------------------------------------------
+
+LISTING = {"path": "Studium", "truncated": False, "skipped": 1, "entries": [
+    {"name": "Übungen", "type": "folder", "size": 10, "modified": "2026-11-16T13:28:22+00:00"},
+    {"name": "a b.pdf", "type": "file", "size": 1200, "modified": None},
+]}
+
+
+def recorder(monkeypatch, status=204, body=None):
+    calls = []
+    def remote(request):
+        calls.append(request)
+        if body is not None:
+            return httpx.Response(status, json=body)
+        return httpx.Response(status)
+    return client_for(monkeypatch, remote), calls
+
+
+def run_as_user(coroutine):
+    async def go():
+        current_assertion.set(make_token())
+        current_request_id.set("explorer-test")
+        return await coroutine
+    return asyncio.run(go())
+
+
+def test_list_root_and_subfolder(monkeypatch):
+    client, calls = recorder(monkeypatch, 200, LISTING)
+    folder = run_as_user(client.list())
+    assert calls[0].method == "GET" and calls[0].url.raw_path == b"/bwsync/folders/"
+    assert [e.name for e in folder.entries] == ["Übungen", "a b.pdf"] and folder.skipped == 1
+    assert folder.entries[0].type == "folder" and folder.entries[0].modified.year == 2026
+    run_as_user(client.list("Studium/Semester 5"))
+    assert calls[1].url.raw_path == b"/bwsync/folders/Studium/Semester%205"
+    assert calls[1].headers["authorization"].startswith("Bearer ")
+
+
+@pytest.mark.parametrize("bad", [
+    {**LISTING, "extra": 1},
+    {**LISTING, "entries": [{"name": "../x", "type": "file", "size": 1, "modified": None}]},
+    {**LISTING, "entries": [{"name": "a/b", "type": "file", "size": 1, "modified": None}]},
+    {**LISTING, "entries": [{"name": "a", "type": "link", "size": 1, "modified": None}]},
+    {**LISTING, "entries": [{"name": "a", "type": "file", "size": -1, "modified": None}]},
+    {**LISTING, "entries": [{"name": "a", "type": "file", "size": 1, "modified": None}] * 1001},
+    [],
+])
+def test_list_rejects_unexpected_answers(monkeypatch, bad):
+    client, _ = recorder(monkeypatch, 200, bad)
+    with pytest.raises(AdapterError) as error:
+        run_as_user(client.list())
+    assert error.value.status == 502 and error.value.type == "contract-violation"
+
+
+def test_mkdir_move_delete_requests(monkeypatch):
+    client, calls = recorder(monkeypatch, 204)
+    run_as_user(client.move("Studium/alt.txt", "Archiv/neu ä.txt"))
+    run_as_user(client.delete("Archiv/neu ä.txt"))
+    run_as_user(client.delete("Leer", folder=True))
+    client, mk_calls = recorder(monkeypatch, 201)
+    run_as_user(client.mkdir("Neuer Ordner"))
+    calls += mk_calls
+    assert [(c.method, c.url.raw_path) for c in calls] == [
+        ("POST", b"/bwsync/move"), ("DELETE", b"/bwsync/files/Archiv/neu%20%C3%A4.txt"),
+        ("DELETE", b"/bwsync/folders/Leer"), ("POST", b"/bwsync/folders/Neuer%20Ordner")]
+    import json
+    assert json.loads(calls[0].content) == {"from": "Studium/alt.txt", "to": "Archiv/neu ä.txt"}
+    assert all(c.headers["x-request-id"] == "explorer-test" for c in calls)
+
+
+@pytest.mark.parametrize("status,kind", [(409, "bwsync-exists"), (409, "bwsync-folder-not-empty"),
+                                         (403, "bwsync-not-linked"), (403, "bwsync-forbidden")])
+def test_adapter_problem_types_reach_the_app(monkeypatch, status, kind):
+    client, calls = recorder(monkeypatch, status, {"type": f"urn:hka:problem:{kind}", "detail": "Deutscher Hinweis."})
+    with pytest.raises(AdapterError) as error:
+        run_as_user(client.mkdir("X"))
+    assert (error.value.status, error.value.type, error.value.detail) == (status, kind, "Deutscher Hinweis.")
+    assert len(calls) == 1  # keine Wiederholung
+
+
+def test_send_rejects_unexpected_success_status(monkeypatch):
+    client, _ = recorder(monkeypatch, 200, {"ok": True})
+    with pytest.raises(AdapterError) as error:
+        run_as_user(client.mkdir("X"))
+    assert error.value.status == 502 and error.value.type == "contract-violation"
+
+
+@pytest.mark.parametrize("call", [
+    lambda c: c.mkdir(""), lambda c: c.mkdir("../x"), lambda c: c.delete("", folder=True), lambda c: c.delete("a//b"),
+    lambda c: c.move("a", "https://evil.test/x"), lambda c: c.move("", "b"), lambda c: c.list("../.."),
+    lambda c: c.list("a%2fb"), lambda c: c.mkdir("x" * 256),
+])
+def test_bad_paths_never_reach_the_adapter(monkeypatch, call):
+    client = client_for(monkeypatch, lambda request: pytest.fail("unexpected HTTP request"))
+    with pytest.raises(ValueError):
+        run_as_user(call(client))
+
+
+@pytest.mark.parametrize("call", [lambda c: c.list(), lambda c: c.mkdir("X"), lambda c: c.delete("a"),
+                                  lambda c: c.move("a", "b")])
+def test_fixture_mode_does_not_simulate_folders(call):
+    with pytest.raises(AdapterError) as error:
+        asyncio.run(call(BwSyncClient(FixtureTransport())))
+    assert error.value.status == 501
+
+
+def test_missing_assertion_never_contacts_adapter_for_folders(monkeypatch):
+    client = client_for(monkeypatch, lambda request: pytest.fail("unexpected HTTP request"))
+    async def go():
+        current_assertion.set(None)
+        with pytest.raises(AdapterError) as error:
+            await client.mkdir("X")
+        assert error.value.type == "no-user-context"
+    asyncio.run(go())

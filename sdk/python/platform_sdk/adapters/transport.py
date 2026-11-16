@@ -19,6 +19,7 @@ TIMEOUT = "Das System antwortet zu langsam."
 
 class Transport(Protocol):
     async def get(self, path: str, params: dict[str, str] | None) -> Any: ...
+    async def send(self, method: str, path: str, body: Any | None = None) -> None: ...
     async def put_bytes(self, path: str, data: bytes) -> None: ...
     async def get_bytes(self, path: str, *, max_bytes: int) -> bytes: ...
 
@@ -86,6 +87,28 @@ class HttpTransport:
         raise _problem(response)
 
 
+    async def send(self, method: str, path: str, body: Any | None = None) -> None:
+        """POST/DELETE ohne Antwortinhalt (201 oder 204), z. B. Ordner anlegen, verschieben, löschen."""
+        token = current_assertion.get()
+        if token is None:
+            raise AdapterError(500, "no-user-context", NO_USER)
+        headers = {"Authorization": f"Bearer {token}"}
+        request_id = current_request_id.get()
+        if request_id:
+            headers["X-Request-Id"] = request_id
+        try:
+            async with httpx.AsyncClient(timeout=30, follow_redirects=False) as client:  # keine Wiederholung
+                response = await client.request(method, self._base + path, headers=headers, json=body)
+        except httpx.TimeoutException:
+            raise AdapterError(504, "backend-timeout", TIMEOUT, request_id) from None
+        except httpx.HTTPError:
+            raise AdapterError(503, "backend-unavailable", UNAVAILABLE, request_id) from None
+        if not response.is_success:
+            raise _problem(response)
+        if response.status_code not in (201, 204):
+            raise AdapterError(502, "contract-violation", UNAVAILABLE, request_id)
+
+
 class FixtureTransport:
     """Feste Testdaten aus `fixtures/<system>/<sub>.json`; unbekannte Person: leere Liste."""
 
@@ -95,7 +118,12 @@ class FixtureTransport:
     async def get_bytes(self, path: str, *, max_bytes: int) -> bytes:
         raise AdapterError(501, "not-implemented", "bwSync benötigt den Gateway-Testbetrieb mit echtem Adapter.")
 
+    async def send(self, method: str, path: str, body: Any | None = None) -> None:
+        raise AdapterError(501, "not-implemented", "bwSync benötigt den Gateway-Testbetrieb mit echtem Adapter.")
+
     async def get(self, path: str, params: dict[str, str] | None) -> Any:
+        if path.startswith("/bwsync/"):
+            raise AdapterError(501, "not-implemented", "bwSync benötigt den Gateway-Testbetrieb mit echtem Adapter.")
         user = current_user.get()
         if user is None:
             raise AdapterError(500, "no-user-context", NO_USER)
