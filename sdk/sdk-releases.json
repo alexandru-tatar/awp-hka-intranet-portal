@@ -22,5 +22,13 @@
       1
     ],
     "released": "2026-11-12"
+  },
+  "1.0.3-dev": {
+    "python": "sha256:369bc9b730b391e58d70beeddeddb966433c961a522c3f439e530f2052850bff",
+    "javascript": "sha256:402c0b6a92de7742774e807007fc3e1e9e91722dc02404fc354ab0d35c7efda3",
+    "assertion_versions": [
+      1
+    ],
+    "released": "2026-11-16"
   }
 }
