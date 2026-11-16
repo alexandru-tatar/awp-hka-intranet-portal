@@ -1,4 +1,4 @@
-# Portal auf der Test-VM iwi-hean-05 (extras/compose/vm) hinter nginx mit HTTPS.
+# Portal auf der Test-VM iwi-hean-05 (extras/compose/backend, Start über das Security-Gateway) hinter nginx mit HTTPS.
 # Login, Sessions und App-Routing liegen im separaten Security-Gateway (eigenes Repo); das Portal prüft nur dessen
 # signierte Assertion (auth_mode gateway). Issuer, JWKS-URL und öffentliche URL passend zum Gateway-Deployment setzen.
 env: dev
@@ -10,7 +10,7 @@ manifests_dir: /var/lib/portal/manifests
 schema_path: ../schemas/manifest.schema.json
 kit_dist: ../kit/dist
 role_vocabulary: [student, employee, professor, platform-admin, pilot-tester]
-adapter_scopes: [noten:read, mail:send]
+adapter_scopes: [noten:read, mail:send, bwsync:read, bwsync:write]
 links: { help: "#", privacy: "#", imprint: "#" }
 
 session_cookie: portal_sid
@@ -22,7 +22,7 @@ cookie_secure: true
 #   jwks_url   = interner Name des Gateway-Containers + Port 8080 + /.well-known/jwks.json;
 #                der Hostname muss in GW_INTERNAL_HOSTS des Gateways stehen
 #   audience   = GW_PORTAL_AUDIENCE (Standard hka-portal-ui)
-# TODO: Containername/Netz auf der VM mit dem Gateway-Deployment abstimmen (hier: Dienstname "gateway").
+# Gateway und Portal laufen im selben Compose-Projekt; das Portal erreicht den Dienst "gateway" im Netz "portal".
 gateway:
   issuer: https://iwi-hean-05.hs-karlsruhe.de/
   jwks_url: http://gateway:8080/.well-known/jwks.json
