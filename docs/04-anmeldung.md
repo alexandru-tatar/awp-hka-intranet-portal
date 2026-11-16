@@ -40,7 +40,7 @@ gateway:
   audience: hka-portal-ui
 ```
 
-Beispiele: `dev/gateway.vm.yml` (Test-VM) und `security-gateway/deployment/portal.yml` (lokal).
+Beispiele: `dev/gateway.compose.yml` (lokal, `awp-hka-security-gateway/server/`) und `dev/gateway.vm.yml` (Test-VM, `awp-hka-security-gateway/vm/`).
 
 ## Modus `dev`
 
