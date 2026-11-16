@@ -1,0 +1,5 @@
+# Design-Kit immer mit LF auschecken: kit.css und die Keycloak-Theme-Kopie (SHA256) sind dann
+# auf Linux, macOS und Windows byte-gleich.
+kit/** text=auto eol=lf
+# Schriften und ihre Lizenz (OFL.txt liegt mit CRLF vor) unverändert lassen
+kit/fonts/** -text

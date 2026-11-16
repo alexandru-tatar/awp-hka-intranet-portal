@@ -1,6 +1,6 @@
 PORT ?= 8000
 
-.PHONY: setup kit contrast dev idp-up idp-down test docs sdk-test sdk-release
+.PHONY: setup kit contrast dev idp-up idp-down test docs sdk-test sdk-release keycloak-theme-release
 
 COMPOSE = extras/compose
 
@@ -33,6 +33,11 @@ sdk-test:
 
 sdk-release: sdk-test
 	uv run python sdk/tools/release.py
+
+# Design-Kit für das Keycloak-Login-Theme im Security-Gateway: kit.css + fonts/ nach sdk/dist/keycloak-theme/
+# (mit VERSION und SHA256). Im Gateway-Repository: make keycloak-theme-update THEME_DIST=…/sdk/dist/keycloak-theme
+keycloak-theme-release:
+	uv run python sdk/tools/keycloak_theme_release.py
 
 # API-Dokumentation als HTML aus den Docstrings: docs/api/_build/html/index.html
 # portal.dev bleibt draußen, weil der Import die Anwendung erzeugt.
