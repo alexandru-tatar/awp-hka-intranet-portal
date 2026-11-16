@@ -35,7 +35,7 @@ C4Container
 | Portal-Backend | Python, FastAPI, Jinja2, uvicorn; Image aus `Dockerfile.trixie` | Seiten (`/`, `/_portal/*`), Menü-Fragment `/nav`, Anmeldung (`/login`, `/oidc/callback`, `/logout`), `/readyz`, Fehlerseiten, Kit-Assets unter `/static` | `src/portal/`, `extras/compose/backend/` |
 | Session-Store | Redis 8 (`redis:8-alpine`), speichert nichts auf Platte | Sessions mit Idle- und Absolut-Timeout, Login-Transaktionen (State, Nonce, PKCE-Verifier) | `auth/redis_sessions.py`, `extras/compose/redis/` |
 | Registry- und Konfigurationsdateien | Dateien im Backend-Image, kein eigener Prozess | App-Manifeste, Status je App, Rollenzuordnung, Schema, gebautes Kit | `dev/`, `schemas/`, `kit/dist/` |
-| Identity Provider (extern) | Keycloak 26 mit Realm `hka` und Login-Theme `hka` | Authorization Code mit PKCE, ID-Token, RP-initiated Logout | `extras/compose/keycloak/` |
+| Identity Provider (extern) | Keycloak 26 mit Realm `hka` und Login-Theme `hka` | Authorization Code mit PKCE, ID-Token, RP-initiated Logout Security-Gateway-Repo `keycloak/` |
 
 ## Beziehungen
 

@@ -51,9 +51,7 @@ dev/
   users.yml                    Testpersonen mit Rollen
   roles.yml · grants.yml       IdP-Claims → Rollen (liest das Gateway), zusätzliche Rollen je Subject
   gateway.vm.yml               Konfiguration der Test-VM (auth_mode: gateway)
-  keycloak/portal-client-secret  Client-Secret des dev-IdP (nur dev!)
 extras/compose/                Docker Compose je Baustein
-  keycloak/                    IdP für dev (compose.yml, Dockerfile, hka-realm.json)
   vm/                          Test-VM: nginx, Deploy-Skripte, compose.yml
 Dockerfile                     Portal-Image (dhi.io, braucht Login) · Dockerfile.trixie: ohne dhi
 tests/                         UI1–UI14 (soweit ohne Browser prüfbar), REG4/5, Kit, Service, Fehlerseiten, Gateway-Identität

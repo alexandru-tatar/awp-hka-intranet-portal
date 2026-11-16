@@ -1,8 +1,6 @@
 PORT ?= 8000
 
-.PHONY: setup kit contrast dev idp-up idp-down test docs sdk-test sdk-release keycloak-theme-release
-
-COMPOSE = extras/compose
+.PHONY: setup kit contrast dev test docs sdk-test sdk-release keycloak-theme-release
 
 setup:
 	uv sync
@@ -15,13 +13,6 @@ contrast:
 
 dev: kit
 	uv run uvicorn portal.dev:app --reload --reload-dir src --reload-dir dev --port $(PORT)
-
-# Keycloak als IdP für das separate Security-Gateway (Repo security-gateway), nicht für das Portal selbst.
-idp-up:
-	docker compose -f $(COMPOSE)/keycloak/compose.yml up -d --build
-
-idp-down:
-	docker compose -f $(COMPOSE)/keycloak/compose.yml down
 
 test: contrast sdk-test
 	uv run pytest -q tests

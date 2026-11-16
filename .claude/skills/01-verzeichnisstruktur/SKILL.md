@@ -76,8 +76,7 @@ intranet-portal/
 │   ├── users.yml                   # Testpersonen mit Rollen (auth_mode: dev)
 │   ├── gateway.oidc.yml            # Konfiguration für Keycloak + Redis (auth_mode: oidc)
 │   ├── roles.yml, grants.yml       # IdP-Claims → Rollen (02 §8), Rollen je Subject
-│   ├── gateway.compose.yml         # Konfiguration fürs Backend im Container (redis, keycloak über Compose-Netz)
-│   └── keycloak/portal-client-secret  # Client-Secret des dev-IdP (nur dev!)
+│   └── gateway.compose.yml         # Konfiguration fürs Backend im Container (lokaler Stack über das Security-Gateway)
 └── tests/
     ├── conftest.py
     ├── test_kit.py                 # Kit, "kein Hex außerhalb tokens.css"
@@ -139,7 +138,7 @@ Nie umgekehrt (z. B. importiert `service/` nie aus `web/` oder `router/`, `regis
 | Header, CSP, ETag, `X-Portal-Kit` | `web/middleware.py` / `router/nav_router.py` (Header-Namen in `router/constants.py`) |
 | Konfigurationswert | `core/config.py` (unbekannte Keys sind Fehler) + `dev/gateway.dev.yml` bzw. `dev/gateway.oidc.yml` |
 | neue Rollenzuordnung vom IdP | `dev/roles.yml` (Claim → Rolle), `dev/grants.yml` (je Subject) |
-| neuer Testbenutzer im dev-IdP | `extras/compose/keycloak/hka-realm.json`, danach `make idp-down idp-up` (baut das Image neu) |
+| neuer Testbenutzer im IdP | Security-Gateway-Repo `keycloak/hka-realm.json`, danach dort `make server-up` (baut das Keycloak-Image neu; der Realm wird nur importiert, wenn es ihn noch nicht gibt) |
 | UI-Text | `locales/messages.de.yml` – nie im Template hartkodieren |
 | wiederverwendbares HTML (Feld, Dialog, Tabelle) | `templates/macros/` |
 | CSS / Farbe / Schrift / Icon | `kit/` (Tokens nur in `kit/css/tokens.css`), danach `make kit contrast` |
