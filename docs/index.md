@@ -11,7 +11,7 @@ Portal-UI, Registry und Anmeldung des HKA Portals (Gateway-Teil). Die fachliche 
 | [02 Entwicklung](02-entwicklung.md) | Einrichten, Befehle, Tests, Konventionen, Docker-Images |
 | [03 Service und Router](03-service-und-router.md) | Aufbau der Schichten, Feature hinzufügen, Fehlerbehandlung |
 | [04 Anmeldung](04-anmeldung.md) | OIDC-Ablauf, Sessions in Redis, Rollen, Konfiguration, Umstieg auf prod |
-| [05 Compose](05-compose.md) | Redis, Keycloak und Backend lokal starten, Fehlersuche |
+| [05 Compose](05-compose.md) | Portal-Backend im Stack des Security-Gateways, lokal und VM, Fehlersuche |
 | [06 Oberfläche](06-oberflaeche.md) | Templates, Makros, Texte, Fehlerseiten, Design-Kit |
 | [07 Registry und Apps](07-registry-und-apps.md) | Manifeste, Prüfung, Status, Menü, Quelle austauschen |
 | [08 C4 Container](08-c4-container.md) | C4-Modell Level 2 (Mermaid): Backend, Redis, Dateien, IdP |

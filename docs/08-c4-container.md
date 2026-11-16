@@ -1,5 +1,10 @@
 # 08 – C4-Modell: Container (Level 2)
 
+> **Überholt.** Beschreibt den Stand vor dem Security-Gateway (Portal mit eigener Anmeldung, Redis und Keycloak).
+> Heute: Anmeldung, Sessions und Keycloak im Security-Gateway, das Portal prüft nur dessen Assertion. Aktueller Aufbau
+> (Dienste, Netze, Ports): README des Repos `awp-hka-security-gateway`, Abschnitt „Aufbau“; Portal-Teil in
+> [05 Compose](05-compose.md).
+
 Container des Portals im jetzigen Stand, wie `make server-up` sie startet (`extras/compose/server`). Bausteine, die es
 noch nicht gibt (Traefik, SQLite-Registry, Prober, echte Apps), stehen unter [Noch nicht im Diagramm](#noch-nicht-im-diagramm).
 

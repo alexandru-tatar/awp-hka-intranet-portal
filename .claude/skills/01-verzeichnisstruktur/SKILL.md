@@ -14,11 +14,9 @@ Spezifikationen: `02-gateway.md`, `03-registry.md`, `04-portal-ui-and-design-kit
 intranet-portal/
 ├── pyproject.toml                  # Paket "hka-portal", Dependencies (gepinnt), Gruppe dev, pytest-Konfiguration, package-data
 ├── Dockerfile, Dockerfile.trixie   # Portal-Image: dhi.io (hardened) bzw. Debian Trixie ohne Login; .dockerignore
-├── extras/compose/                 # Docker Compose je Baustein
-│   ├── redis/compose.yml           # Sessions (:6379)
-│   ├── keycloak/                   # compose.yml, Dockerfile (+ .dockerignore), hka-realm.json, theme/hka/login (Login-Seite im Portal-Look), dev-IdP :8180
-│   ├── backend/compose.yml         # Portal-Container (Dockerfile.trixie, dev/gateway.compose.yml)
-│   └── server/compose.yml          # include: redis + keycloak + backend → docker compose up startet alles
+├── extras/compose/                 # Docker Compose (eingebunden vom Security-Gateway: server/ lokal, vm/ auf der VM)
+│   ├── backend/compose.yml         # Portal-Container (Dockerfile.local bzw. Dockerfile, dev/gateway.compose.yml bzw. gateway.vm.yml)
+│   └── vm/                         # nginx-portal.conf, deploy/ (portal-deploy); Redis und Keycloak liegen im Security-Gateway
 ├── uv.lock                         # GENERIERT durch uv – nicht von Hand editieren
 ├── Makefile                        # setup · kit · contrast · dev · test
 ├── README.md                       # Start, Aufbau, "Eine App hinzufügen", Platzhalter-Tabelle
