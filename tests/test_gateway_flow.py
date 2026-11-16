@@ -71,7 +71,7 @@ def test_complete_portal_app_flow(env, tmp_path, monkeypatch):
         monkeypatch.setenv('PORTAL_ENV', 'production')
         monkeypatch.setenv('PORTAL_API_URL', 'http://gateway:8080')
         monkeypatch.setenv('PORTAL_ISSUER', public + '/')
-        monkeypatch.setenv('PORTAL_ADAPTERS_URL', 'http://bwsync-adapter:8080')
+        monkeypatch.setenv('PORTAL_ADAPTERS_URL', 'http://adapter:8080')
         # Config reads the real supplied manifest; no test changes to that repository.
         monkeypatch.chdir(sample)
         micro = importlib.import_module('app.main')
