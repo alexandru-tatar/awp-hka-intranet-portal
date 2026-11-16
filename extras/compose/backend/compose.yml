@@ -1,0 +1,41 @@
+# Portal (Menü, Status, Verwaltung, Registry) im Gateway-Modus: keine eigene Anmeldung, kein Redis.
+# Das Portal prüft nur die Assertion des Security-Gateways und beantwortet dessen Registry-Fragen.
+# Aufruf: über awp-hka-security-gateway/server/compose.yml (lokal) bzw. vm/compose.yml (VM) per include.
+# Kein Hostport: erreichbar nur über das Gateway (Netz "portal"); Prober erreicht die Apps im Netz "apps".
+# Werte, die sich zwischen lokal und VM unterscheiden, kommen aus der .env des einbindenden Ordners.
+name: hka-portal-backend
+
+services:
+  backend:
+    image: hka/portal:${PORTAL_IMAGE_TAG:-local}
+    platform: linux/amd64
+    build:
+      context: ../../..
+      dockerfile: ${PORTAL_DOCKERFILE:-Dockerfile.local}   # VM-Image: Dockerfile (gehärtet)
+    environment:
+      PORTAL_CONFIG: ${PORTAL_CONFIG:-/opt/app/dev/gateway.compose.yml}
+      PORTAL_REGISTRY_SERVICE_TOKEN_FILE: /run/secrets/registry_service_token
+    volumes:
+      # Manifeste der Apps (portal-deploy), Status (Prober), Besitzer/Stilllegungen/Grants (Verwaltungsseite).
+      # Ordner müssen vor "up" existieren, sonst legt Docker sie als root an.
+      - ${PORTAL_MANIFESTS_SOURCE:-../../../.local/portal/manifests}:/var/lib/portal/manifests:rw
+      - ${PORTAL_STATUS_SOURCE:-../../../.local/portal/status}:/var/lib/portal/status:rw
+      - ${PORTAL_REGISTRY_SOURCE:-../../../.local/portal/registry}:/var/lib/portal/registry:rw
+    secrets: [registry_service_token]
+    networks: [portal, apps]
+    read_only: true             # schreibt nur in die Volumes oben und nach /tmp
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+
+networks:
+  portal:
+    internal: true              # Gateway <-> Portal (Dienst backend)
+  apps:
+    name: hka-portal-apps       # fester Name: tools/deploy.sh startet App-Container darin (PORTAL_NETZ)
+    internal: true
+
+secrets:
+  registry_service_token:
+    file: ${HKA_REGISTRY_SERVICE_TOKEN_SOURCE:?Pfad zum Registry-Token fehlt}
