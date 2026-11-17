@@ -1,4 +1,4 @@
-"""Real portal + standalone gateway + supplied SyncShare SDK app, in-process only."""
+"""Real portal + standalone gateway + supplied SyncShare SDK app (bwSync explorer), in-process only."""
 from dataclasses import replace
 import importlib
 import json
@@ -41,7 +41,7 @@ def test_complete_portal_app_flow(env, tmp_path, monkeypatch):
     public = 'http://localhost:18080'
     base_cfg = load_config(env / 'gateway.dev.yml')
     portal_cfg = replace(base_cfg, auth_mode='gateway', dev_users_file=None,
-                         adapter_scopes=(*base_cfg.adapter_scopes, 'bwsync:read', 'bwsync:write'),
+                         adapter_scopes=(*base_cfg.adapter_scopes, 'bwsync:read', 'bwsync:write', 'bwsync:delete'),
                          gateway=GatewayConfig(public + '/', 'http://gateway:8080/.well-known/jwks.json', public))
     gateway = None
     key_client = httpx.Client(transport=httpx.MockTransport(
@@ -75,7 +75,6 @@ def test_complete_portal_app_flow(env, tmp_path, monkeypatch):
         # Config reads the real supplied manifest; no test changes to that repository.
         monkeypatch.chdir(sample)
         micro = importlib.import_module('app.main')
-        micro.views.STORE.clear()
         app_transport = httpx.ASGITransport(app=micro.app)
         async def send_app(request):
             upstreams.append(request)
@@ -89,23 +88,39 @@ def test_complete_portal_app_flow(env, tmp_path, monkeypatch):
         for name in ('platform_sdk.jwks', 'platform_sdk.layout'):
             module = importlib.import_module(name)
             monkeypatch.setattr(module, 'httpx', SimpleNamespace(AsyncClient=sdk_client, HTTPError=httpx.HTTPError))
-        # Exercise the real SDK file transport; only the external adapter is simulated.
+        # Exercise the real SDK file transport; only the external adapter (bwSync account) is simulated.
         adapter_files = {}
+        adapter_folders = set()
         adapter_calls = []
         def adapter_response(request):
-            adapter_calls.append(request)
+            adapter_calls.append((request.method, request.url.path))
             token = request.headers['authorization'].removeprefix('Bearer ')
             claims = gateway.state.assertions.keys.verify(token, 'syncshare-test')
             assert claims['sub'] == 'student-1'
             assert 'adapters' in claims['aud']
-            assert set(claims['scp']) == {'bwsync:read', 'bwsync:write'}
+            assert set(claims['scp']) == {'bwsync:read', 'bwsync:write', 'bwsync:delete'}
             assert 'x-request-id' in request.headers
             assert 'cookie' not in request.headers
-            assert request.url.path.startswith('/bwsync/files/adapter-test/')
+            kind, _, path = request.url.path.removeprefix('/bwsync/').partition('/')
+            if (kind, request.method) == ('folders', 'GET'):
+                path = path.rstrip('/')
+                prefix = path + '/' if path else ''
+                children = {k[len(prefix):] for k in (*adapter_files, *adapter_folders) if k.startswith(prefix)}
+                entries = [{'name': c, 'type': 'folder' if prefix + c in adapter_folders else 'file',
+                            'size': len(adapter_files.get(prefix + c, b'')) if prefix + c in adapter_files else None}
+                           for c in sorted(children) if c and '/' not in c]
+                return httpx.Response(200, json={'path': path, 'entries': entries, 'truncated': False, 'skipped': 0})
+            if (kind, request.method) == ('folders', 'POST'):
+                adapter_folders.add(path)
+                return httpx.Response(201)
+            assert kind == 'files', request.url.path
             if request.method == 'PUT':
-                adapter_files[request.url.path] = request.content
+                adapter_files[path] = request.content
                 return httpx.Response(204)
-            return httpx.Response(200, content=adapter_files[request.url.path])
+            if request.method == 'DELETE':
+                del adapter_files[path]
+                return httpx.Response(204)
+            return httpx.Response(200, content=adapter_files[path])
         def adapter_client(**kwargs):
             return httpx.AsyncClient(transport=httpx.MockTransport(adapter_response), **kwargs)
         monkeypatch.setattr(importlib.import_module('platform_sdk.adapters.transport'), 'httpx', SimpleNamespace(
@@ -125,15 +140,33 @@ def test_complete_portal_app_flow(env, tmp_path, monkeypatch):
             assert lookups[-1].url.path == '/internal/apps/syncshare-test/authorize'
             assert 'token_use' not in jwt.decode(upstreams[-1].headers['x-portal-assertion'], options={'verify_signature': False})
             assert browser.get('/apps/syncshare-test/static/app.css').status_code == 200
-            upload = browser.post('/apps/syncshare-test/upload', files={'datei': ('hello.txt', b'hello group')},
-                                  headers={'Origin': public, 'Sec-Fetch-Site': 'same-origin'})
-            assert upload.status_code == 200 and 'hello.txt' in upload.text
-            file_id = next(iter(micro.views.STORE['student-1']))
-            assert browser.get('/apps/syncshare-test/datei/' + file_id).content == b'hello group'
-            assert [r.method for r in adapter_calls] == ['PUT', 'GET']
-            assert not hasattr(micro.views.STORE['student-1'][file_id], 'data')
+            same_origin = {'Origin': public, 'Sec-Fetch-Site': 'same-origin'}
+            made = browser.post('/apps/syncshare-test/ordner', data={'pfad': '', 'name': 'adapter-test'},
+                                headers=same_origin)
+            assert made.status_code == 303 and made.headers['location'] == '/apps/syncshare-test/?ok=ordner'
+            upload = browser.post('/apps/syncshare-test/upload', data={'pfad': 'adapter-test'},
+                                  files={'datei': ('hello.txt', b'hello group')}, headers=same_origin)
+            assert upload.status_code == 303
+            assert upload.headers['location'] == '/apps/syncshare-test/?pfad=adapter-test&ok=hochgeladen'
+            listing = browser.get(upload.headers['location'])
+            assert listing.status_code == 200 and 'hello.txt' in listing.text
+            assert 'Die Datei wurde hochgeladen.' in listing.text
+            download = browser.get('/apps/syncshare-test/datei', params={'pfad': 'adapter-test/hello.txt'})
+            assert download.content == b'hello group'
+            assert download.headers['content-type'] == 'application/octet-stream'
+            removed = browser.post('/apps/syncshare-test/loeschen',
+                                   data={'pfad': 'adapter-test/hello.txt', 'art': 'datei'}, headers=same_origin)
+            assert removed.status_code == 303 and adapter_files == {}
+            assert adapter_calls == [('GET', '/bwsync/folders/'),  # first page load lists the top level
+                                     ('POST', '/bwsync/folders/adapter-test'),
+                                     ('PUT', '/bwsync/files/adapter-test/hello.txt'),
+                                     ('GET', '/bwsync/folders/adapter-test'),
+                                     ('GET', '/bwsync/files/adapter-test/hello.txt'),
+                                     ('DELETE', '/bwsync/files/adapter-test/hello.txt')]
+            count = len(adapter_calls)
             assert browser.post('/apps/syncshare-test/upload', files={'datei': ('bad.txt', b'bad')},
                                 headers={'Origin': 'https://evil.invalid', 'Sec-Fetch-Site': 'cross-site'}).status_code == 403
+            assert len(adapter_calls) == count  # the gateway stops the cross-site upload before the app
             other = gateway.state.sessions.create('employee-1', 'Employee', frozenset({'employee'}))
             browser.cookies.set(cfg.cookie_name, other.sid)
             count = len(upstreams)
