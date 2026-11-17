@@ -189,3 +189,33 @@ def test_fake_noten(in_request):
     with pytest.raises(AdapterError) as err:
         run(noten.list_my_grades())
     assert err.value.type == transport.BACKEND_TIMEOUT
+
+
+# --- Browser-Skript (connect.js) -----------------------------------------------------------------------------
+
+def test_install_liefert_connect_js_nur_angemeldet():
+    from fastapi.testclient import TestClient
+
+    from conftest import make_app, make_portal, make_token
+    from platform_sdk.adapters.bwsync import connect as bwsync_connect
+
+    client = TestClient(make_app(make_portal()))
+    ok = client.get(SCRIPT, headers={"X-Portal-Assertion": make_token()})
+    assert ok.status_code == 200 and ok.headers["content-type"].startswith("text/javascript")
+    assert ok.headers["x-content-type-options"] == "nosniff"
+    assert ok.content == bwsync_connect.SCRIPT_FILE.read_bytes()
+    assert client.get(SCRIPT).status_code == 401
+
+
+def test_connect_js_ohne_oberflaeche_und_nur_gateway_routen():
+    from platform_sdk.adapters.bwsync import connect as bwsync_connect
+
+    js = bwsync_connect.SCRIPT_FILE.read_text(encoding="utf-8")
+    for route in ROUTES.values():
+        assert f'"{route}"' in js
+    for kind in (bwsync_connect.POPUP_BLOCKED, bwsync_connect.EXPIRED, bwsync_connect.ABORTED,
+                 bwsync_connect.SESSION_EXPIRED):
+        assert f'"{kind}"' in js
+    assert "innerHTML" not in js and "textContent" not in js and "createElement" not in js
+    assert "tab.opener = null" in js and 'credentials: "same-origin"' in js
+    assert "localStorage" not in js and "document." not in js

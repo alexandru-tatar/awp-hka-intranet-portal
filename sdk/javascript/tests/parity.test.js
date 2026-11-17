@@ -75,6 +75,8 @@ test("gleiche Funktionen und Konstanten in paths und common", () => {
     assert.deepEqual(jsFns, pyFunctions(path.join(PY, `${file}.py`)), file);
     assert.deepEqual(constants(path.join(JS, `${file}.js`), "js"), constants(path.join(PY, `${file}.py`), "py"), file);
   }
+  assert.deepEqual(constants(path.join(JS, "adapters/bwsync/connect/server.js"), "js"),
+    constants(path.join(PY, "adapters/bwsync/connect/server.py"), "py"));
   const { ROUTES, SCRIPT } = require(path.join(JS, "adapters/bwsync/connect"));
   const py = fs.readFileSync(path.join(PY, "adapters/bwsync/connect/server.py"), "utf-8");
   for (const [key, value] of Object.entries(ROUTES)) assert.ok(py.includes(`"${key}": "${value}"`), key);

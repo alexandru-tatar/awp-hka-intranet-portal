@@ -90,6 +90,16 @@ test("gültige Assertion: Seitenrahmen mit Ersatz-Menü", async () => {
   assert.ok(!html.includes("dev-banner") && !html.includes("/__dev/login"));
 });
 
+test("install liefert connect.js aus, nur angemeldet", async () => {
+  const { SCRIPT_FILE } = require("../platform_sdk/adapters/bwsync/connect");
+  const ok = await fetch(`${prod.base}/_sdk/bwsync/connect.js`, { headers: student() });
+  assert.equal(ok.status, 200);
+  assert.ok(ok.headers.get("content-type").startsWith("text/javascript"));
+  assert.equal(ok.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(await ok.text(), fs.readFileSync(SCRIPT_FILE, "utf-8"));
+  assert.equal((await fetch(`${prod.base}/_sdk/bwsync/connect.js`)).status, 401);
+});
+
 test("requires: 403 ohne die Rolle", async () => {
   assert.equal((await fetch(`${prod.base}/nur-professor`, { headers: student() })).status, 403);
 });

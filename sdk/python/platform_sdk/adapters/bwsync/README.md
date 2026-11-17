@@ -75,8 +75,39 @@ Alle Fehler sind `AdapterError`. Entscheiden nach `type` (Konstante aus `errors`
 ## Konto verbinden
 
 `connect/connect.js` (in Python und JavaScript byte-gleich) spricht nur mit dem Gateway (`connect.ROUTES`) und hat
-keine Oberfläche. `portal.install(app)` liefert es unter `<app>/_sdk/bwsync/connect.js` aus; die Adresse ist
-`portal.url(connect.SCRIPT)`. Die App baut Knopf, Texte und Dialog selbst.
+keine Oberfläche und keine Texte. `portal.install(app)` liefert es unter `<app>/_sdk/bwsync/connect.js` aus (nur für
+angemeldete Personen); die Adresse ist `portal.url(connect.SCRIPT)`. Die App bindet es vor ihrem eigenen Skript ein
+(`<script src="…" defer>`) und baut Knopf, Texte und Dialog selbst.
+
+Im Browser steht danach `window.PortalBwSync` bereit:
+
+| Aufruf | Ergebnis |
+|---|---|
+| `connect(onState)` | direkt im Klick aufrufen (sonst blockiert der Browser den neuen Tab). `onState` bekommt `{state: "waiting"}`, dann `{state: "linked", account}` oder `{state: "error", type, status}`. Rückgabe `{cancel()}` |
+| `disconnect()` | Promise `{linked: false, revoked}`: `true` App-Passwort widerrufen, `null` nicht vom Portal angelegt (bleibt), `false` Widerruf nicht bestätigt |
+| `status()` | Promise `{linked, account}` |
+
+Fehler kommen als `{type, status}` (bei `disconnect`/`status` als abgelehnte Promise). Neben den Typen aus der
+Tabelle oben meldet das Skript selbst (Konstanten in `connect` und `window.PortalBwSync.ERRORS`):
+
+| `type` (Konstante) | Bedeutung | empfohlene Reaktion |
+|---|---|---|
+| `connect-popup-blocked` (`POPUP_BLOCKED`) | Browser hat den neuen Tab blockiert | Pop-ups erlauben lassen |
+| `connect-expired` (`EXPIRED`) | Anmeldung nicht rechtzeitig abgeschlossen | erneut verbinden |
+| `connect-aborted` (`ABORTED`) | Anmeldung abgebrochen | erneut verbinden |
+| `portal-session-expired` (`SESSION_EXPIRED`) | Sitzung im Portal abgelaufen (401) | Seite neu laden |
+| `backend-unavailable` | Gateway oder Adapter nicht erreichbar | später erneut |
+
+```js
+// im Skript der App (Texte schreibt die App)
+button.addEventListener("click", () => {
+  window.PortalBwSync.connect((s) => {
+    if (s.state === "waiting") status.textContent = "Bitte im neuen Tab anmelden …";
+    if (s.state === "linked") window.location.reload();
+    if (s.state === "error") status.textContent = TEXTE[s.type] || "Das hat nicht geklappt.";
+  });
+});
+```
 
 ## Tests
 

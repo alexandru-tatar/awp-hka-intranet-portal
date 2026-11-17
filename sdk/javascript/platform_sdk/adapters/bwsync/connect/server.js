@@ -1,5 +1,7 @@
 "use strict";
 
+const path = require("node:path");
+
 /**
  * bwSync&Share verbinden und trennen: Server-Teil.
  *
@@ -15,7 +17,14 @@ const ROUTES = Object.freeze({
   disconnect: "/connect/bwsync", // DELETE: {linked: false, revoked: true|null|false}
 });
 
-// Adresse des Browser-Skripts unter dem Pfad der App: portal.url(SCRIPT)
+// Adresse des Browser-Skripts unter dem Pfad der App: portal.url(SCRIPT); portal.install(app) liefert es aus.
 const SCRIPT = "/_sdk/bwsync/connect.js";
+const SCRIPT_FILE = path.join(__dirname, "connect.js");
 
-module.exports = { ROUTES, SCRIPT };
+// Fehlertypen, die connect.js selbst meldet (window.PortalBwSync.ERRORS); sonst kommt der type des Adapters.
+const POPUP_BLOCKED = "connect-popup-blocked"; // Browser hat den neuen Tab blockiert
+const EXPIRED = "connect-expired"; // Anmeldung bei bwSync&Share nicht rechtzeitig abgeschlossen
+const ABORTED = "connect-aborted"; // Anmeldung abgebrochen oder vom Adapter verworfen
+const SESSION_EXPIRED = "portal-session-expired"; // Sitzung im Portal abgelaufen (401): Seite neu laden
+
+module.exports = { ROUTES, SCRIPT, SCRIPT_FILE, POPUP_BLOCKED, EXPIRED, ABORTED, SESSION_EXPIRED };

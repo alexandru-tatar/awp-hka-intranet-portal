@@ -48,8 +48,8 @@
     "released": "2026-11-17"
   },
   "1.1.0-dev": {
-    "python": "sha256:332bd7404ffb35ae67e8c1eef7b8ae08503c9c16821cf19c9e1b283508e346a8",
-    "javascript": "sha256:83082c9851674092361a5f9b04004f66e3c3d53734db1f7fbf9aaffb2737f613",
+    "python": "sha256:c02a2505f86371d10d2ad1dc8a465b133b80f26a332c94669b310bb840f6e5ab",
+    "javascript": "sha256:44fe0bd1d704e619b0222ac11fbd64934f94d70abb58b374d64b7f33eb8f3fe2",
     "assertion_versions": [
       1
     ],
