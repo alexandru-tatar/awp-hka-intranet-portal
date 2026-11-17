@@ -11,10 +11,11 @@ import httpx
 from ..context import current_assertion, current_request_id, current_user
 from ..errors import AdapterError
 
-FIXTURES = Path(__file__).parent.parent / "fixtures"
+ADAPTERS = Path(__file__).parent  # Testdaten: adapters/<system>/fixtures/<sub>.json
 NO_USER = "Die Schnittstelle kann nur während einer Anfrage einer angemeldeten Person benutzt werden."
 UNAVAILABLE = "Das System ist gerade nicht erreichbar."
 TIMEOUT = "Das System antwortet zu langsam."
+CONTRACT_VIOLATION = "Das System hat unerwartete Daten geliefert. Bitte versuchen Sie es später noch einmal."
 
 
 class Transport(Protocol):
@@ -166,7 +167,7 @@ class HttpTransport:
 
 
 class FixtureTransport:
-    """Feste Testdaten aus `fixtures/<system>/<sub>.json`; unbekannte Person: leere Liste."""
+    """Feste Testdaten aus `adapters/<system>/fixtures/<sub>.json`; unbekannte Person: leere Liste."""
 
     async def put_bytes(self, path: str, data: bytes) -> None:
         raise AdapterError(501, "not-implemented", "bwSync benötigt den Gateway-Testbetrieb mit echtem Adapter.")
@@ -187,7 +188,7 @@ class FixtureTransport:
         if user is None:
             raise AdapterError(500, "no-user-context", NO_USER)
         if path == "/v1/noten/me/grades":
-            file = FIXTURES / "noten" / f"{user.sub}.json"
+            file = ADAPTERS / "noten" / "fixtures" / f"{user.sub}.json"
             data = json.loads(file.read_text(encoding="utf-8")) if file.is_file() else {"items": []}
             if params and params.get("semester"):
                 data = {"items": [g for g in data["items"] if g["semester"] == params["semester"]]}

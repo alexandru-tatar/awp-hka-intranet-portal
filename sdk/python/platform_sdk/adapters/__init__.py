@@ -1,13 +1,14 @@
 """Clients für die Schnittstellen (06 §8).
 
 Vorläufig von Hand geschrieben. Später erzeugt `tools/gen_clients.py` diesen Ordner
-aus den OpenAPI-Dateien der Plattform. Python: Noten und bwSync-Dateitransfer.
+aus den OpenAPI-Dateien der Plattform. Ein Ordner je System: bwsync/, noten/.
 """
 
 from __future__ import annotations
 
 from ..config import Config
-from .clients import BwSyncClient, NotenClient
+from .bwsync import BwSyncClient
+from .noten import NotenClient
 from .transport import FixtureTransport, HttpTransport
 
 

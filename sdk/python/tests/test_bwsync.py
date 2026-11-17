@@ -5,7 +5,7 @@ import httpx
 import pytest
 
 from conftest import make_token
-from platform_sdk.adapters.clients import BwSyncClient
+from platform_sdk.adapters.bwsync import BwSyncClient
 from platform_sdk.adapters.transport import FixtureTransport, HttpTransport
 from platform_sdk.adapters import transport as transport_module
 from platform_sdk.context import current_assertion, current_request_id
