@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from ..errors import AdapterError
 from .models import Folder, GradeList
-from .transport import Transport
+from .transport import AdapterStream, Transport
 
 CONTRACT_VIOLATION = "Das System hat unerwartete Daten geliefert. Bitte versuchen Sie es später noch einmal."
 
@@ -48,6 +48,18 @@ class BwSyncClient:
 
     async def download(self, path: str, *, max_bytes: int = 10_000_000) -> bytes:
         return await self._t.get_bytes(self._path(path), max_bytes=max_bytes)
+
+    async def download_zip(self, path: str) -> AdapterStream:
+        """Ordner als ZIP, gestreamt (Scope ``bwsync:read``); nicht die Wurzel (``""``).
+
+        Beispiel::
+
+            stream = await bwsync.download_zip("Studium")   # Fehler hier, bevor geantwortet wird
+            return StreamingResponse(stream, media_type="application/zip",
+                                     headers={"Content-Disposition": 'attachment; filename="Studium.zip"'},
+                                     background=BackgroundTask(stream.aclose))
+        """
+        return await self._t.open_stream("/bwsync/zip/" + quote(self._rel(path), safe="/"))
 
     async def list(self, path: str = "") -> Folder:
         """Direkte Einträge eines Ordners (Scope ``bwsync:read``)."""

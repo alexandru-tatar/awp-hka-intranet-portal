@@ -30,7 +30,8 @@ Python unterstützt zusätzlich `portal.adapters.bwsync.upload(path, data)` und
 `download(path, max_bytes=...)` für den lokalen bwSync-Test, ab `1.0.3-dev` auch den
 Datei-Explorer: `list(path="")` (gibt `Folder` mit `entries`, `truncated`, `skipped`),
 `mkdir(path)`, `move(src, dst)` (nie überschreiben) und `delete(path, folder=False)`
-(nur leere Ordner). Scopes im Manifest: `bwsync:read`, `bwsync:write`, für Löschen
+(nur leere Ordner), ab `1.0.5-dev` `download_zip(path)`: Ordner als ZIP, gestreamt (`AdapterStream`
+für `StreamingResponse`, Fehler schon beim Öffnen; nicht die Wurzel). Scopes im Manifest: `bwsync:read`, `bwsync:write`, für Löschen
 eigens `bwsync:delete`. Fehler kommen als `AdapterError` mit `type`, z. B.
 `bwsync-not-linked`, `bwsync-exists`, `bwsync-parent-missing`, `bwsync-folder-not-empty`. Der HTTP-Transport
 verlangt die vorhandene App-Assertion, sendet rohe Bytes per PUT, akzeptiert 204

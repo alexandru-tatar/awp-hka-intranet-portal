@@ -235,3 +235,51 @@ def test_missing_assertion_never_contacts_adapter_for_folders(monkeypatch):
             await client.mkdir("X")
         assert error.value.type == "no-user-context"
     asyncio.run(go())
+
+
+def test_download_zip_streams_and_closes(monkeypatch):
+    class Stream(httpx.AsyncByteStream):
+        closed = False
+        async def __aiter__(self):
+            yield b"PK\x03\x04"
+            yield b"rest"
+        async def aclose(self):
+            self.closed = True
+    stream = Stream()
+    seen = []
+    def remote(request):
+        seen.append(request)
+        return httpx.Response(200, stream=stream, headers={"Content-Type": "application/zip"})
+    client = client_for(monkeypatch, remote)
+    async def run():
+        current_assertion.set(make_token())
+        result = await client.download_zip("Studium/Semester 5")
+        assert not stream.closed  # erst beim Lesen
+        assert [chunk async for chunk in result] == [b"PK\x03\x04", b"rest"]
+        assert stream.closed
+        await result.aclose()  # nochmal schließen schadet nicht
+    asyncio.run(run())
+    assert seen[0].method == "GET" and seen[0].url.raw_path == b"/bwsync/zip/Studium/Semester%205"
+
+
+@pytest.mark.parametrize("status,kind", [(404, "bwsync-not-found"), (423, "bwsync-locked"), (403, "bwsync-not-linked")])
+def test_download_zip_error_before_answer(monkeypatch, status, kind):
+    body = {"type": f"urn:hka:problem:{kind}", "detail": "Text"}
+    client = client_for(monkeypatch, lambda request: httpx.Response(status, json=body))
+    async def run():
+        current_assertion.set(make_token())
+        with pytest.raises(AdapterError) as error:
+            await client.download_zip("Studium")
+        assert error.value.status == status and error.value.type == kind
+    asyncio.run(run())
+
+
+def test_download_zip_rejects_root_and_fixture_mode():
+    async def run():
+        with pytest.raises(ValueError):
+            await BwSyncClient(FixtureTransport()).download_zip("")
+        with pytest.raises(AdapterError) as error:
+            await BwSyncClient(FixtureTransport()).download_zip("Studium")
+        assert error.value.status == 501
+    asyncio.run(run())
+

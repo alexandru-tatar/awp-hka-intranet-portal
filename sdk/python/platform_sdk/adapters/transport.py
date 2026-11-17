@@ -22,6 +22,35 @@ class Transport(Protocol):
     async def send(self, method: str, path: str, body: Any | None = None) -> None: ...
     async def put_bytes(self, path: str, data: bytes) -> None: ...
     async def get_bytes(self, path: str, *, max_bytes: int) -> bytes: ...
+    async def open_stream(self, path: str) -> AdapterStream: ...
+
+
+class AdapterStream:
+    """Antwortinhalt des Adapters zum Durchreichen (z. B. ``StreamingResponse(stream, …)``), ohne ihn ganz zu laden.
+
+    Fehler des Adapters kommen schon beim Öffnen als :class:`AdapterError`, also bevor die App antwortet.
+    Der Strom schließt sich am Ende selbst; bricht die App vorher ab, ``await stream.aclose()`` aufrufen
+    (z. B. ``background=BackgroundTask(stream.aclose)``). Mehrfaches Schließen schadet nicht.
+    """
+
+    def __init__(self, client: httpx.AsyncClient, response: httpx.Response) -> None:
+        self._client = client
+        self._response = response
+        self._closed = False
+
+    async def __aiter__(self):
+        try:
+            async for chunk in self._response.aiter_bytes():
+                yield chunk
+        finally:
+            await self.aclose()
+
+    async def aclose(self) -> None:
+        if self._closed:
+            return
+        self._closed = True
+        await self._response.aclose()
+        await self._client.aclose()
 
 
 class HttpTransport:
@@ -67,6 +96,33 @@ class HttpTransport:
             raise AdapterError(504, "backend-timeout", TIMEOUT, request_id) from None
         except httpx.HTTPError:
             raise AdapterError(503, "backend-unavailable", UNAVAILABLE, request_id) from None
+
+    async def open_stream(self, path: str) -> AdapterStream:
+        """GET mit gestreamter Antwort (200), z. B. ZIP eines Ordners. Ohne Obergrenze; Wartezeit je Schritt 60 s."""
+        token = current_assertion.get()
+        if token is None:
+            raise AdapterError(500, "no-user-context", NO_USER)
+        request_id = current_request_id.get()
+        headers = {"Authorization": f"Bearer {token}"}
+        if request_id:
+            headers["X-Request-Id"] = request_id
+        client = httpx.AsyncClient(timeout=60, follow_redirects=False)
+        try:
+            response = await client.send(client.build_request("GET", self._base + path, headers=headers), stream=True)
+        except httpx.TimeoutException:
+            await client.aclose()
+            raise AdapterError(504, "backend-timeout", TIMEOUT, request_id) from None
+        except httpx.HTTPError:
+            await client.aclose()
+            raise AdapterError(503, "backend-unavailable", UNAVAILABLE, request_id) from None
+        if response.status_code != 200:
+            await response.aread()
+            await response.aclose()
+            await client.aclose()
+            if not response.is_success:
+                raise _problem(response)
+            raise AdapterError(502, "contract-violation", UNAVAILABLE, request_id)
+        return AdapterStream(client, response)
 
     async def get(self, path: str, params: dict[str, str] | None) -> Any:
         token = current_assertion.get()
@@ -116,6 +172,9 @@ class FixtureTransport:
         raise AdapterError(501, "not-implemented", "bwSync benötigt den Gateway-Testbetrieb mit echtem Adapter.")
 
     async def get_bytes(self, path: str, *, max_bytes: int) -> bytes:
+        raise AdapterError(501, "not-implemented", "bwSync benötigt den Gateway-Testbetrieb mit echtem Adapter.")
+
+    async def open_stream(self, path: str) -> AdapterStream:
         raise AdapterError(501, "not-implemented", "bwSync benötigt den Gateway-Testbetrieb mit echtem Adapter.")
 
     async def send(self, method: str, path: str, body: Any | None = None) -> None:
