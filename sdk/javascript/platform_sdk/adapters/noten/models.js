@@ -1,11 +1,8 @@
 "use strict";
 
-/**
- * Datenmodelle nach den OpenAPI-Dateien des Adapter-Dienstes (05 §4).
- * Streng: unbekannte Felder und falsche Werte sind ein Fehler (`ContractError`).
- */
+/** Noten: Datenmodelle der Adapter-Antworten. Streng: unbekannte Felder und falsche Werte sind ein Fehler. */
 
-class ContractError extends Error {}
+const { ContractError } = require("../transport");
 
 const GRADE_RE = /^([1-4][,.][037]|5[,.]0|bestanden|nicht bestanden)$/;
 

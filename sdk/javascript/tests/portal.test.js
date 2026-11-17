@@ -99,7 +99,8 @@ test("Adapter nicht erreichbar", async () => {
   await assert.rejects(new HttpTransport("http://127.0.0.1:9").get(req, "/v1/noten/me/grades", null), (err) => {
     assert.ok(err instanceof AdapterError);
     assert.equal(err.type, "backend-unavailable");
-    assert.equal(err.detail, "Das System ist gerade nicht erreichbar.");
+    assert.equal(err.status, 503);
+    assert.equal(err.detail, ""); // kein Nutzertext im SDK; den Text wählt die App nach type
     return true;
   });
 });
