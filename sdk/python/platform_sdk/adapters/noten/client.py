@@ -19,4 +19,4 @@ class NotenClient:
         try:
             return GradeList.model_validate(data)
         except ValidationError:
-            raise AdapterError(502, "contract-violation", CONTRACT_VIOLATION) from None
+            raise AdapterError(502, CONTRACT_VIOLATION, "") from None

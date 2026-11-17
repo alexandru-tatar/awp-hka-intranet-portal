@@ -4,7 +4,12 @@ from __future__ import annotations
 
 
 class AdapterError(Exception):
-    """Fehler einer Schnittstelle (06 §8). `detail` ist deutsch und darf angezeigt werden."""
+    """Fehler einer Schnittstelle.
+
+    Die App entscheidet anhand von ``type`` (Konstanten in ``adapters/<system>/errors`` und ``adapters/transport``)
+    und ``status``, nie anhand eines Textes, und schreibt den Text für die Person selbst. ``detail`` ist für Logs
+    und Fehlersuche (Text des Adapters; leer, wenn keine Antwort vom Adapter kam).
+    """
 
     def __init__(self, status: int, type: str, detail: str, request_id: str | None = None) -> None:
         super().__init__(f"{status} {type}")

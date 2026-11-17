@@ -54,10 +54,17 @@ class BwSyncClient:
 
             stream = await bwsync.download_zip("Studium")   # Fehler hier, bevor geantwortet wird
             return StreamingResponse(stream, media_type="application/zip",
-                                     headers={"Content-Disposition": 'attachment; filename="Studium.zip"'},
+                                     headers=download_headers("Studium.zip"),  # platform_sdk.common.downloads
                                      background=BackgroundTask(stream.aclose))
         """
         return await self._t.open_stream("/bwsync/zip/" + quote(self._rel(path), safe="/"))
+
+    async def is_linked(self) -> bool:
+        """Ist das bwSync&Share-Konto der Person verbunden? (Scope ``bwsync:read``; ohne Kontonamen)"""
+        data = await self._t.get("/bwsync/link", None)
+        if not isinstance(data, dict) or not isinstance(data.get("linked"), bool):
+            raise AdapterError(502, CONTRACT_VIOLATION, "")
+        return data["linked"]
 
     async def list(self, path: str = "") -> Folder:
         """Direkte Einträge eines Ordners (Scope ``bwsync:read``)."""
@@ -65,7 +72,7 @@ class BwSyncClient:
         try:
             return Folder.model_validate(data)
         except ValidationError:
-            raise AdapterError(502, "contract-violation", CONTRACT_VIOLATION) from None
+            raise AdapterError(502, CONTRACT_VIOLATION, "") from None
 
     async def mkdir(self, path: str) -> None:
         """Ordner anlegen (Scope ``bwsync:write``); vorhanden → ``bwsync-exists``."""

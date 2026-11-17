@@ -77,8 +77,8 @@ def test_adapter_nicht_erreichbar():
     current_assertion.set(make_token())
     with pytest.raises(AdapterError) as exc:
         asyncio.run(HttpTransport("http://127.0.0.1:9").get("/v1/noten/me/grades", None))
-    assert exc.value.type == "backend-unavailable"
-    assert exc.value.detail == "Das System ist gerade nicht erreichbar."
+    assert exc.value.type == "backend-unavailable" and exc.value.status == 503
+    assert exc.value.detail == ""  # kein Nutzertext im SDK; den Text wählt die App nach type
 
 
 def test_dev_abgelehnt_in_produktion(monkeypatch):
