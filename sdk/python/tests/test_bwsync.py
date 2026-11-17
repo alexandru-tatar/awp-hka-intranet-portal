@@ -17,6 +17,7 @@ def client_for(monkeypatch, handler):
         return httpx.AsyncClient(transport=httpx.MockTransport(handler), **kwargs)
     monkeypatch.setattr(transport_module, "httpx", SimpleNamespace(
         AsyncClient=factory, TimeoutException=httpx.TimeoutException, HTTPError=httpx.HTTPError,
+        Timeout=httpx.Timeout,
     ))
     return BwSyncClient(HttpTransport("http://adapter.test"))
 
@@ -191,7 +192,7 @@ def test_mkdir_move_delete_requests(monkeypatch):
     assert all(c.headers["x-request-id"] == "explorer-test" for c in calls)
 
 
-@pytest.mark.parametrize("status,kind", [(409, "bwsync-exists"), (409, "bwsync-folder-not-empty"),
+@pytest.mark.parametrize("status,kind", [(409, "bwsync-exists"), (409, "bwsync-parent-missing"),
                                          (403, "bwsync-not-linked"), (403, "bwsync-forbidden")])
 def test_adapter_problem_types_reach_the_app(monkeypatch, status, kind):
     client, calls = recorder(monkeypatch, status, {"type": f"urn:hka:problem:{kind}", "detail": "Deutscher Hinweis."})

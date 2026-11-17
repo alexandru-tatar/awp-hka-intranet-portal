@@ -30,17 +30,17 @@ Python unterstützt zusätzlich `portal.adapters.bwsync.upload(path, data)` und
 `download(path, max_bytes=...)` für den lokalen bwSync-Test, ab `1.0.3-dev` auch den
 Datei-Explorer: `list(path="")` (gibt `Folder` mit `entries`, `truncated`, `skipped`),
 `mkdir(path)`, `move(src, dst)` (nie überschreiben) und `delete(path, folder=False)`
-(nur leere Ordner), ab `1.0.5-dev` `download_zip(path)`: Ordner als ZIP, gestreamt (`AdapterStream`
+(Ordner samt Inhalt, landet im Papierkorb von bwSync&Share), ab `1.0.5-dev` `download_zip(path)`: Ordner als ZIP, gestreamt (`AdapterStream`
 für `StreamingResponse`, Fehler schon beim Öffnen; nicht die Wurzel). Scopes im Manifest: `bwsync:read`, `bwsync:write`, für Löschen
 eigens `bwsync:delete`. Fehler kommen als `AdapterError` mit `type`, z. B.
-`bwsync-not-linked`, `bwsync-exists`, `bwsync-parent-missing`, `bwsync-folder-not-empty`. Der HTTP-Transport
+`bwsync-not-linked`, `bwsync-link-invalid`, `bwsync-exists`, `bwsync-parent-missing`, `bwsync-forbidden`. Der HTTP-Transport
 verlangt die vorhandene App-Assertion, sendet rohe Bytes per PUT, akzeptiert 204
 ohne JSON und begrenzt binäre Downloads. Kein bwSync-Fixture oder Auth-Bypass;
 die JavaScript-Fassung hat diesen Client noch nicht. SDK-Aufrufe erfolgen innerhalb
-eines authentifizierten Requests. Der derzeitige Adapter ist nur für kontrollierte
-lokale Tests vorgesehen und prüft die mitgesendete Assertion noch nicht.
+eines authentifizierten Requests. Der Adapter prüft die mitgesendete Assertion (Signatur,
+Aussteller, Scope) und arbeitet nur mit dem verbundenen Konto der angemeldeten Person.
 
-Version `1.0.4-dev` (Abmelden im Seitenrahmen per Dialog direkt mit POST /logout statt Link auf die Gateway-Zwischenseite; `1.0.3-dev`: bwSync-Explorer nur in Python; `1.0.2-dev` holte das Menü mit `Authorization: Bearer`, 02 §3; `1.0.0-dev` schickte `X-Portal-Assertion`), vorläufig, in Python und JavaScript. Umgesetzt (in beiden Fassungen): Prüfung der Assertion (§5), JWKS-Zwischenspeicher (§6), Middleware mit `/healthz` (§4), `layout()` mit Ersatz-Menü, Test-Anmeldung im Entwicklungsmodus (§7), Noten-Client mit Testdaten (§8), Prüfsumme (§10), JSON-Log (§11).
+Version `1.0.5-dev` (bwSync: Ordner als ZIP, gestreamt, nur Python; `1.0.4-dev`: Abmelden im Seitenrahmen per Dialog direkt mit POST /logout statt Link auf die Gateway-Zwischenseite; `1.0.3-dev`: bwSync-Explorer nur in Python; `1.0.2-dev` holte das Menü mit `Authorization: Bearer`, 02 §3; `1.0.0-dev` schickte `X-Portal-Assertion`), vorläufig, in Python und JavaScript. Umgesetzt (in beiden Fassungen): Prüfung der Assertion (§5), JWKS-Zwischenspeicher (§6), Middleware mit `/healthz` (§4), `layout()` mit Ersatz-Menü, Test-Anmeldung im Entwicklungsmodus (§7), Noten-Client mit Testdaten (§8), Prüfsumme (§10), JSON-Log (§11).
 
 Offen:
 

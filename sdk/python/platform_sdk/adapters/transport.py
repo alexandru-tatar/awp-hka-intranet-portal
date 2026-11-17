@@ -98,7 +98,7 @@ class HttpTransport:
             raise AdapterError(503, "backend-unavailable", UNAVAILABLE, request_id) from None
 
     async def open_stream(self, path: str) -> AdapterStream:
-        """GET mit gestreamter Antwort (200), z. B. ZIP eines Ordners. Ohne Obergrenze; Wartezeit je Schritt 60 s."""
+        """GET mit gestreamter Antwort (200), z. B. ZIP eines Ordners. Ohne Obergrenze; Verbindung 5 s, sonst 60 s."""
         token = current_assertion.get()
         if token is None:
             raise AdapterError(500, "no-user-context", NO_USER)
@@ -106,7 +106,7 @@ class HttpTransport:
         headers = {"Authorization": f"Bearer {token}"}
         if request_id:
             headers["X-Request-Id"] = request_id
-        client = httpx.AsyncClient(timeout=60, follow_redirects=False)
+        client = httpx.AsyncClient(timeout=httpx.Timeout(60.0, connect=5.0), follow_redirects=False)
         try:
             response = await client.send(client.build_request("GET", self._base + path, headers=headers), stream=True)
         except httpx.TimeoutException:

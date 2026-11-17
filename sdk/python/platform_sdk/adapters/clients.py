@@ -18,7 +18,7 @@ class BwSyncClient:
 
     Pfade sind relativ zur Wurzel des Kontos, z. B. ``"Studium/Notizen.pdf"``; ``""`` ist die Wurzel
     (nur bei :meth:`list`). Fehler kommen als :class:`AdapterError`; ``type`` nennt den Fall, z. B.
-    ``bwsync-not-linked``, ``bwsync-exists``, ``bwsync-parent-missing``, ``bwsync-folder-not-empty``.
+    ``bwsync-not-linked``, ``bwsync-link-invalid``, ``bwsync-exists``, ``bwsync-parent-missing``, ``bwsync-forbidden``.
     """
 
     def __init__(self, transport: Transport) -> None:
@@ -78,9 +78,9 @@ class BwSyncClient:
         await self._t.send("POST", "/bwsync/move", {"from": self._rel(source), "to": self._rel(target)})
 
     async def delete(self, path: str, *, folder: bool = False) -> None:
-        """Datei löschen, mit ``folder=True`` einen leeren Ordner (Scope ``bwsync:delete``).
+        """Datei löschen, mit ``folder=True`` einen Ordner samt Inhalt (Scope ``bwsync:delete``).
 
-        Ordner mit Inhalt → ``bwsync-folder-not-empty``; Gelöschtes landet im Papierkorb von bwSync&Share.
+        Nie die Wurzel. Gelöschtes landet im Papierkorb von bwSync&Share.
         """
         await self._t.send("DELETE", self._folder(path) if folder else self._path(path))
 

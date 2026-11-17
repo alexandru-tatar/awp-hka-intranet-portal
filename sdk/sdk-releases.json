@@ -38,5 +38,13 @@
       1
     ],
     "released": "2026-11-16"
+  },
+  "1.0.5-dev": {
+    "python": "sha256:a993050db511c02d5cca3d8e4d424bb40bc1b355f0d6054e49e2775f67dcfa8d",
+    "javascript": "sha256:15882c5d221b64fe720260feed396e10505ffd53bcc05fbfad590d987d479528",
+    "assertion_versions": [
+      1
+    ],
+    "released": "2026-11-17"
   }
 }
