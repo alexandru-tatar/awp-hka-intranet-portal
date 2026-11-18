@@ -59,7 +59,8 @@ Fachlich (bwSync&Share):
 | `type` (Konstante) | `status` | Bedeutung | empfohlene Reaktion |
 |---|---|---|---|
 | `bwsync-not-linked` (`NOT_LINKED`) | 403 | Konto nicht verbunden | „Verbinden“ anbieten |
-| `bwsync-link-invalid` (`LINK_INVALID`) | 403 | Verbindung gilt nicht mehr (App-Passwort widerrufen) | neu verbinden anbieten |
+| `bwsync-link-invalid` (`LINK_INVALID`) | 403 | Verbindung gilt nicht mehr (App-Passwort widerrufen oder gespeicherter Zugang nicht mehr lesbar) | neu verbinden anbieten |
+| `bwsync-link-failed` (`LINK_FAILED`) | 403 | nur beim Verbinden (über `connect.js`): bwSync&Share lehnt den gerade erhaltenen Zugang ab | erneut verbinden; wenn es wieder passiert, Support |
 | `bwsync-forbidden` (`FORBIDDEN`) | 403 | bwSync&Share verweigert die Aktion (z. B. nur lesbar geteilt) | sagen, dass es hier nicht geht |
 | `bwsync-not-found` (`NOT_FOUND`) | 404 | Datei oder Ordner gibt es nicht (mehr) | sagen, dass es das nicht mehr gibt; Liste neu laden |
 | `bwsync-exists` (`EXISTS`) | 409, 412 | Name gibt es dort schon | anderen Namen erbitten |
@@ -67,17 +68,22 @@ Fachlich (bwSync&Share):
 | `bwsync-conflict` (`CONFLICT`) | 409 | sonstiger Konflikt, z. B. Ordner als Datei gelöscht | sagen, dass es gerade nicht geht; Seite neu laden und erneut versuchen |
 | `bwsync-too-large` (`TOO_LARGE`) | 413 | Upload über 10 MB | Grenze nennen (10 MB) |
 | `bwsync-locked` (`LOCKED`) | 423 | in bwSync&Share gesperrt (z. B. geöffnet) | sagen, dass die Datei gesperrt ist; später erneut |
+| `bwsync-not-a-file` (`NOT_A_FILE`) | 409 | Datei erwartet, es ist ein Ordner (z. B. Datei löschen) | sagen, dass es ein Ordner ist; Liste neu laden |
+| `bwsync-not-a-folder` (`NOT_A_FOLDER`) | 409 | Ordner erwartet, es ist eine Datei (auflisten, Ordner löschen) | sagen, dass es eine Datei ist; Liste neu laden |
+| `bwsync-move-into-self` (`MOVE_INTO_SELF`) | 400 | Ziel ist die Quelle selbst oder ein Ordner in ihr | anderen Zielordner wählen lassen |
+| `bwsync-folder-too-large` (`FOLDER_TOO_LARGE`) | 422 | Ordnerliste größer als die Grenze des Adapters | sagen, dass der Ordner zu groß ist; direkt in bwSync&Share öffnen |
 
 Allgemein (Konstanten in `transport`):
 
 | `type` (Konstante) | `status` | Bedeutung | empfohlene Reaktion |
 |---|---|---|---|
 | `backend-unavailable` (`transport.BACKEND_UNAVAILABLE`) | 503 u. a. | Adapter nicht erreichbar, abgestürzt oder Antwort ohne eigenen `type` | später erneut. Kommt er bei normaler Bedienung, fehlt im Adapter ein `type`: als Fehler im Adapter melden |
-| `backend-timeout` (`transport.BACKEND_TIMEOUT`) | 504 | Adapter zu langsam | später erneut |
+| `backend-timeout` (`transport.BACKEND_TIMEOUT`) | 504 | Adapter oder bwSync&Share zu langsam | später erneut |
 | `contract-violation` (`transport.CONTRACT_VIOLATION`) | 502 | Antwort passt nicht zur Beschreibung | später erneut, Log prüfen |
 | `download-too-large` (`transport.DOWNLOAD_TOO_LARGE`) | 413 | größer als `max_bytes` der App | Grenze nennen |
 | `not-implemented` (`transport.NOT_IMPLEMENTED`) | 501 | `make dev` ohne Adapter: bwSync gibt es dort nicht | Gateway-Testbetrieb nutzen |
 | `no-user-context` (`transport.NO_USER_CONTEXT`) | 500 | Aufruf außerhalb einer Anfrage einer angemeldeten Person | Programmierfehler beheben |
+| `scope-not-granted` (`transport.SCOPE_NOT_GRANTED`) | 403 | der App fehlt das Recht (z. B. `bwsync:delete`) im Manifest | Programmierfehler: Recht im Manifest ergänzen |
 
 `errors.LINK_PROBLEMS` enthält `NOT_LINKED` und `LINK_INVALID` (in beiden Fällen: verbinden anbieten).
 
@@ -93,7 +99,7 @@ Im Browser steht danach `window.PortalBwSync` bereit:
 | Aufruf | Ergebnis |
 |---|---|
 | `connect(onState)` | direkt im Klick aufrufen (sonst blockiert der Browser den neuen Tab). `onState` bekommt `{state: "waiting"}`, dann `{state: "linked", account}` oder `{state: "error", type, status}`. Rückgabe `{cancel()}` |
-| `disconnect()` | Promise `{linked: false, revoked}`: `true` App-Passwort widerrufen, `null` nicht vom Portal angelegt (bleibt), `false` Widerruf nicht bestätigt |
+| `disconnect()` | Promise `{linked: false, revoked}`: `true` App-Passwort widerrufen, `null` nicht vom Portal angelegt (bleibt), `false` Widerruf nicht bestätigt oder nicht möglich (Zugang nicht mehr lesbar) |
 | `status()` | Promise `{linked, account}` |
 
 Fehler kommen als `{type, status}` (bei `disconnect`/`status` als abgelehnte Promise). Neben den Typen aus der

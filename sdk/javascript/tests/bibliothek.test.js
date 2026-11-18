@@ -95,7 +95,9 @@ test("contentDisposition", () => {
 test("Fehlertypen sind Konstanten", () => {
   const kinds = new Set(Object.entries(errors).filter(([, v]) => typeof v === "string").map(([, v]) => v));
   assert.deepEqual(kinds, new Set(["bwsync-not-linked", "bwsync-link-invalid", "bwsync-forbidden", "bwsync-not-found",
-    "bwsync-exists", "bwsync-parent-missing", "bwsync-conflict", "bwsync-too-large", "bwsync-locked"]));
+    "bwsync-exists", "bwsync-parent-missing", "bwsync-conflict", "bwsync-too-large", "bwsync-locked",
+    "bwsync-not-a-file", "bwsync-not-a-folder", "bwsync-move-into-self", "bwsync-folder-too-large",
+    "bwsync-link-failed"]));
   assert.deepEqual(errors.LINK_PROBLEMS, new Set([errors.NOT_LINKED, errors.LINK_INVALID]));
   assert.equal(transport.BACKEND_UNAVAILABLE, "backend-unavailable");
 });
@@ -148,8 +150,10 @@ test("FakeBwSync verhält sich wie der Adapter", async () => {
   await rejectsWith(bwsync.mkdir(req, "x/y"), 409, errors.PARENT_MISSING);
   await rejectsWith(bwsync.list(req, "fehlt"), 404, errors.NOT_FOUND);
   await rejectsWith(bwsync.move(req, "Studium", "fehlt/x"), 409, errors.PARENT_MISSING);
-  await rejectsWith(bwsync.move(req, "Studium", "Studium/x"), 400, transport.BACKEND_UNAVAILABLE);
-  await rejectsWith(bwsync.delete(req, "Studium"), 409, errors.CONFLICT);
+  await rejectsWith(bwsync.move(req, "Studium", "Studium/x"), 400, errors.MOVE_INTO_SELF);
+  await rejectsWith(bwsync.delete(req, "Studium"), 409, errors.NOT_A_FILE);
+  await rejectsWith(bwsync.list(req, "Studium/a b.txt"), 409, errors.NOT_A_FOLDER);
+  await rejectsWith(bwsync.delete(req, "Studium/a b.txt", { folder: true }), 409, errors.NOT_A_FOLDER);
   await rejectsWith(bwsync.upload(req, "Studium/gross", Buffer.alloc(10 * 1024 * 1024 + 1)), 413, errors.TOO_LARGE);
   await bwsync.mkdir(req, "Archiv");
   await bwsync.move(req, "Studium", "Archiv/Studium");

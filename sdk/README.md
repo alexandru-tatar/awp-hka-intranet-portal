@@ -63,7 +63,8 @@ Knopf, Texte und Dialog selbst; das Skript meldet nur Zustände (wartet, verbund
 4. **Fehler sind `AdapterError`.** Felder: `status` (HTTP-Status), `type` (z. B. `bwsync-exists`), `detail`,
    `request_id`. Jeder `type` steht als Konstante in `adapters/<system>/errors`; Bedeutung und typische Reaktion stehen
    in der Fehler-Tabelle der README des Systems. Allgemeine Typen (Konstanten in `adapters/transport`): `backend-unavailable`,
-   `backend-timeout`, `contract-violation`, `not-implemented`, `download-too-large`, `no-user-context`.
+   `backend-timeout`, `contract-violation`, `not-implemented`, `download-too-large`, `no-user-context`,
+   `scope-not-granted`.
    - Einteilung in fachlich, technisch und Aufruf, Standardbehandlung und Regeln für neue Typen: Abschnitt
      „Fehler: Standard“ unten.
    - Die App entscheidet **immer anhand von `type`** (und `status`), nie anhand eines Textes, und vergleicht mit der
@@ -100,7 +101,7 @@ Fachsystem liefert nur seine Liste von Fällen, der Prüfteil ist für alle glei
 |---|---|---|---|---|
 | **Fachlich:** ein System lehnt eine Aktion ab oder kennt etwas nicht | nur der **Adapter** | `adapters/<system>/errors` | `bwsync-not-found`, `bwsync-locked`, `bwsync-link-invalid` | eigener Text je `type`, nächster Schritt für die Person |
 | **Technisch:** kann bei jedem System passieren | nur das **SDK** | `adapters/transport` (`TECHNICAL_TYPES`) | `backend-unavailable`, `backend-timeout`, `contract-violation` | ein gemeinsamer Text: später erneut versuchen |
-| **Aufruf:** die App hat eine Grenze oder Regel des SDK verletzt | das **SDK** (Ausnahme siehe unten) | `adapters/transport` (`CALL_TYPES`) | `download-too-large`, `no-user-context`, `not-implemented` | Grenze nennen bzw. Programmierfehler beheben |
+| **Aufruf:** die App hat eine Grenze oder Regel des SDK verletzt | das **SDK** (Ausnahme siehe unten) | `adapters/transport` (`CALL_TYPES`) | `download-too-large`, `no-user-context`, `not-implemented`, `scope-not-granted` | Grenze nennen bzw. Programmierfehler beheben |
 
 - Aufruf-Typen legt das SDK fest, außer Plattform-Prüfungen im Adapter wie `scope-not-granted` (403: der App fehlt
   das Recht im Manifest).
@@ -209,4 +210,4 @@ In einer App holt `make sdk-update SDK_DIST=<Portal-Repository>/sdk/dist/<sprach
 
 Eine Version für beide Sprachen, in `python/platform_sdk/VERSION`, `javascript/platform_sdk/VERSION` und
 `javascript/package.json`. Jede Änderung unter `platform_sdk/` braucht eine neue Version und `make sdk-release`.
-Aktuell: `1.1.0-dev`.
+Aktuell: `1.2.0-dev`.

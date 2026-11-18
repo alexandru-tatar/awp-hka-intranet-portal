@@ -14,7 +14,7 @@ from .adapters import Adapters
 from .adapters.bwsync import connect as bwsync_connect
 from .config import Config
 from .context import User
-from .errors import PortalHTTPError
+from .errors import AdapterError, PortalHTTPError
 from .jwks import JwksCache
 from .layout import Layout
 from .middleware import PortalMiddleware
@@ -36,9 +36,12 @@ class Portal:
         return cls(Config.from_env(manifest_path))
 
     def install(self, app: FastAPI) -> None:
-        """Prüfung der Anmeldung vor allen Routen, /healthz und im Entwicklungsmodus die Test-Anmeldung."""
+        """Prüfung der Anmeldung vor allen Routen, /healthz, im Entwicklungsmodus die Test-Anmeldung und die
+        Standardbehandlung aller Fehler, die die App nicht selbst abfängt (sdk/README.md, „Fehler: Standard“)."""
         app.add_middleware(PortalMiddleware, portal=self)
         app.add_exception_handler(PortalHTTPError, self._error_response)
+        app.add_exception_handler(AdapterError, self._unhandled)
+        app.add_exception_handler(Exception, self._unhandled)
 
         @app.get("/healthz", include_in_schema=False)
         async def healthz() -> JSONResponse:
@@ -84,3 +87,6 @@ class Portal:
     async def _error_response(self, request: Request, exc: Exception) -> Response:
         assert isinstance(exc, PortalHTTPError)
         return pages.error(request, exc.status, exc.title, exc.detail)
+
+    async def _unhandled(self, request: Request, exc: Exception) -> Response:
+        return pages.fallback(request, exc)

@@ -14,7 +14,7 @@ from typing import Any
 
 from ...context import current_user
 from ...errors import AdapterError
-from ..transport import NO_USER_CONTEXT
+from ..transport import BACKEND_UNAVAILABLE, NO_USER_CONTEXT
 from .client import NotenClient
 
 
@@ -48,7 +48,7 @@ class FakeNoten:
         self.calls.append(("GET", path, params))
         if self.fail:
             status, kind = self.fail
-            raise AdapterError(status, kind or "backend-unavailable", "Fake")
+            raise AdapterError(status, kind or BACKEND_UNAVAILABLE, "Fake")
         if path != "/v1/noten/me/grades":
             raise AssertionError(f"unerwarteter Aufruf GET {path}")
         items = self.grades.get(user.sub, [])

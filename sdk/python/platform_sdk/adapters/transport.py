@@ -19,6 +19,20 @@ CONTRACT_VIOLATION = "contract-violation"  # Antwort passt nicht zur Beschreibun
 NOT_IMPLEMENTED = "not-implemented"  # im Entwicklungsmodus (Testdaten) nicht verfügbar
 NO_USER_CONTEXT = "no-user-context"  # Aufruf außerhalb einer Anfrage einer angemeldeten Person (Programmierfehler)
 DOWNLOAD_TOO_LARGE = "download-too-large"  # Download größer als max_bytes (Grenze der App)
+SCOPE_NOT_GRANTED = "scope-not-granted"  # der App fehlt das Recht im Manifest (Plattform-Prüfung im Adapter)
+
+# Arten (sdk/README.md, „Fehler: Standard“). Jeder andere type ist fachlich, auch ein unbekannter.
+TECHNICAL_TYPES = frozenset({BACKEND_UNAVAILABLE, BACKEND_TIMEOUT, CONTRACT_VIOLATION})
+CALL_TYPES = frozenset({NO_USER_CONTEXT, NOT_IMPLEMENTED, DOWNLOAD_TOO_LARGE, SCOPE_NOT_GRANTED})
+
+
+def category(err: AdapterError) -> str:
+    """Art eines Fehlers: ``"technical"``, ``"call"`` oder ``"domain"`` (fachlich)."""
+    if err.type in TECHNICAL_TYPES:
+        return "technical"
+    if err.type in CALL_TYPES:
+        return "call"
+    return "domain"
 
 # detail nur für Logs (Regel 4 in sdk/README.md); ohne Antwort vom Adapter bleibt detail leer.
 _NO_USER = "Aufruf außerhalb einer Anfrage einer angemeldeten Person."
@@ -208,6 +222,10 @@ def _problem(response: httpx.Response) -> AdapterError:
         body = response.json()
     except ValueError:
         body = {}
-    kind = str(body.get("type", "")).removeprefix("urn:hka:problem:") or BACKEND_UNAVAILABLE
+    if not isinstance(body, dict):
+        body = {}
+    # Ohne type: technisch. 504 heißt Zeitüberschreitung (auch zwischen Adapter und Fachsystem).
+    fallback = BACKEND_TIMEOUT if response.status_code == 504 else BACKEND_UNAVAILABLE
+    kind = str(body.get("type", "")).removeprefix("urn:hka:problem:") or fallback
     detail = str(body.get("detail") or "")
     return AdapterError(response.status_code, kind, detail, body.get("request_id"))

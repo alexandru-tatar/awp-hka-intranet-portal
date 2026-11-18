@@ -15,6 +15,18 @@ const CONTRACT_VIOLATION = "contract-violation"; // Antwort passt nicht zur Besc
 const NOT_IMPLEMENTED = "not-implemented"; // im Entwicklungsmodus (Testdaten) nicht verfügbar
 const NO_USER_CONTEXT = "no-user-context"; // Aufruf außerhalb einer Anfrage einer angemeldeten Person (Programmierfehler)
 const DOWNLOAD_TOO_LARGE = "download-too-large"; // Download größer als maxBytes (Grenze der App)
+const SCOPE_NOT_GRANTED = "scope-not-granted"; // der App fehlt das Recht im Manifest (Plattform-Prüfung im Adapter)
+
+// Arten (sdk/README.md, „Fehler: Standard“). Jeder andere type ist fachlich, auch ein unbekannter.
+const TECHNICAL_TYPES = Object.freeze(new Set([BACKEND_UNAVAILABLE, BACKEND_TIMEOUT, CONTRACT_VIOLATION]));
+const CALL_TYPES = Object.freeze(new Set([NO_USER_CONTEXT, NOT_IMPLEMENTED, DOWNLOAD_TOO_LARGE, SCOPE_NOT_GRANTED]));
+
+/** Art eines Fehlers: "technical", "call" oder "domain" (fachlich). */
+function category(err) {
+  if (TECHNICAL_TYPES.has(err.type)) return "technical";
+  if (CALL_TYPES.has(err.type)) return "call";
+  return "domain";
+}
 
 // detail nur für Logs (Regel 4 in sdk/README.md); ohne Antwort vom Adapter bleibt detail leer.
 /** Antwort passt nicht zum Modell (intern; nach außen AdapterError mit CONTRACT_VIOLATION). */
@@ -227,7 +239,9 @@ async function problem(response) {
     body = {};
   }
   if (body === null || typeof body !== "object") body = {};
-  const kind = String(body.type ?? "").replace(/^urn:hka:problem:/, "") || BACKEND_UNAVAILABLE;
+  // Ohne type: technisch. 504 heißt Zeitüberschreitung (auch zwischen Adapter und Fachsystem).
+  const fallback = response.status === 504 ? BACKEND_TIMEOUT : BACKEND_UNAVAILABLE;
+  const kind = String(body.type ?? "").replace(/^urn:hka:problem:/, "") || fallback;
   return new AdapterError(response.status, kind, String(body.detail || ""), body.request_id ?? null);
 }
 
@@ -236,6 +250,7 @@ module.exports = {
   AdapterStream,
   BACKEND_TIMEOUT,
   BACKEND_UNAVAILABLE,
+  CALL_TYPES,
   CONTRACT_VIOLATION,
   ContractError,
   DOWNLOAD_TOO_LARGE,
@@ -243,4 +258,7 @@ module.exports = {
   HttpTransport,
   NOT_IMPLEMENTED,
   NO_USER_CONTEXT,
+  SCOPE_NOT_GRANTED,
+  TECHNICAL_TYPES,
+  category,
 };

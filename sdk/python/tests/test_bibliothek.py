@@ -95,7 +95,9 @@ def test_download_headers():
 def test_fehlertypen_sind_konstanten():
     kinds = {v for k, v in vars(errors).items() if k.isupper() and isinstance(v, str)}
     assert kinds == {"bwsync-not-linked", "bwsync-link-invalid", "bwsync-forbidden", "bwsync-not-found", "bwsync-exists",
-                     "bwsync-parent-missing", "bwsync-conflict", "bwsync-too-large", "bwsync-locked"}
+                     "bwsync-parent-missing", "bwsync-conflict", "bwsync-too-large", "bwsync-locked",
+                     "bwsync-not-a-file", "bwsync-not-a-folder", "bwsync-move-into-self", "bwsync-folder-too-large",
+                     "bwsync-link-failed"}
     assert errors.LINK_PROBLEMS == {errors.NOT_LINKED, errors.LINK_INVALID}
     assert transport.BACKEND_UNAVAILABLE == "backend-unavailable"
 
@@ -132,8 +134,10 @@ def test_fake_bwsync_wie_adapter(in_request):
         (lambda: bwsync.mkdir("x/y"), 409, errors.PARENT_MISSING),
         (lambda: bwsync.list("fehlt"), 404, errors.NOT_FOUND),
         (lambda: bwsync.move("Studium", "fehlt/x"), 409, errors.PARENT_MISSING),
-        (lambda: bwsync.move("Studium", "Studium/x"), 400, transport.BACKEND_UNAVAILABLE),
-        (lambda: bwsync.delete("Studium"), 409, errors.CONFLICT),
+        (lambda: bwsync.move("Studium", "Studium/x"), 400, errors.MOVE_INTO_SELF),
+        (lambda: bwsync.delete("Studium"), 409, errors.NOT_A_FILE),
+        (lambda: bwsync.list("Studium/a b.txt"), 409, errors.NOT_A_FOLDER),
+        (lambda: bwsync.delete("Studium/a b.txt", folder=True), 409, errors.NOT_A_FOLDER),
         (lambda: bwsync.upload("Studium/gross", b"x" * (10 * 1024 * 1024 + 1)), 413, errors.TOO_LARGE),
     ]:
         with pytest.raises(AdapterError) as err:

@@ -22,7 +22,7 @@ from urllib.parse import unquote
 
 from ...context import current_assertion
 from ...errors import AdapterError
-from ..transport import NO_USER_CONTEXT
+from ..transport import BACKEND_UNAVAILABLE, DOWNLOAD_TOO_LARGE, NO_USER_CONTEXT
 from . import errors
 from .client import BwSyncClient
 
@@ -110,7 +110,7 @@ class FakeBwSync:
         self.calls.append((method, path, body))
         if self.fail:
             status, kind = self.fail
-            raise AdapterError(status, kind or "backend-unavailable", "Fake")
+            raise AdapterError(status, kind or BACKEND_UNAVAILABLE, "Fake")
         if not self.linked and path != "/bwsync/link":
             raise AdapterError(403, errors.NOT_LINKED, "Fake")
         return path
@@ -131,7 +131,7 @@ class FakeBwSync:
         if self.listing is not None:
             return self.listing
         if rel in self.files:
-            raise self._error(400, "backend-unavailable")
+            raise self._error(409, errors.NOT_A_FOLDER)
         if rel not in self.folders:
             raise self._error(404, errors.NOT_FOUND)
         names = sorted(self._children(rel), key=lambda p: (p not in self.folders, p.lower()))
@@ -160,6 +160,8 @@ class FakeBwSync:
                 self.folders.add(rel)
                 return None
             if method == "DELETE":
+                if rel in self.files:
+                    raise self._error(409, errors.NOT_A_FOLDER)
                 if rel == "" or rel not in self.folders:
                     raise self._error(404, errors.NOT_FOUND)
                 # wie der Adapter: mit allem Inhalt (bwSync&Share legt es in den Papierkorb)
@@ -169,7 +171,7 @@ class FakeBwSync:
         if path.startswith(FILES) and method == "DELETE":
             rel = path.removeprefix(FILES)
             if rel in self.folders:
-                raise self._error(409, errors.CONFLICT)
+                raise self._error(409, errors.NOT_A_FILE)
             if rel not in self.files:
                 raise self._error(404, errors.NOT_FOUND)
             del self.files[rel]
@@ -177,8 +179,8 @@ class FakeBwSync:
         raise AssertionError(f"unerwarteter Aufruf {method} {path}")
 
     def _move(self, source: str, target: str) -> None:
-        if source == target or target.startswith(source + "/"):  # wie der Adapter: 400 ohne eigenen type
-            raise self._error(400, "backend-unavailable")
+        if source == target or target.startswith(source + "/"):
+            raise self._error(400, errors.MOVE_INTO_SELF)
         if not self.exists(source):
             raise self._error(404, errors.NOT_FOUND)
         if self.exists(target):
@@ -211,7 +213,7 @@ class FakeBwSync:
         if rel not in self.files:
             raise self._error(404, errors.NOT_FOUND)
         if len(self.files[rel]) > max_bytes:
-            raise AdapterError(413, "download-too-large", f"mehr als max_bytes={max_bytes}")
+            raise AdapterError(413, DOWNLOAD_TOO_LARGE, f"mehr als max_bytes={max_bytes}")
         return self.files[rel]
 
     async def open_stream(self, path: str) -> FakeStream:

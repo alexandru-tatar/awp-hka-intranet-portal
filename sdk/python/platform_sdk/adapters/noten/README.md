@@ -33,6 +33,7 @@ nicht abgefangener Fehler: `sdk/README.md`, Abschnitt „Fehler: Standard“.
 | `backend-unavailable` | 503 u. a. | Adapter nicht erreichbar, abgestürzt oder Antwort ohne eigenen `type` | später erneut |
 | `backend-timeout` | 504 | Adapter zu langsam | später erneut |
 | `contract-violation` | 502 | Antwort passt nicht zur Beschreibung | später erneut, Log prüfen |
+| `scope-not-granted` | 403 | der App fehlt das Recht `noten:read` im Manifest | Programmierfehler: Recht im Manifest ergänzen |
 
 ## Tests
 

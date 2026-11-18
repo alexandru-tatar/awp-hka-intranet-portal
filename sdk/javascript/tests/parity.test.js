@@ -93,3 +93,13 @@ test("gleiche Aufrufe der Clients und Fakes", () => {
     assert.deepEqual(jsMethods(jsCls), pyMethods(path.join(PY, `${file}.py`), cls), cls);
   }
 });
+
+test("gleiche Arten von Fehlern (TECHNICAL_TYPES, CALL_TYPES)", () => {
+  const transport = require(path.join(JS, "adapters/transport"));
+  const py = fs.readFileSync(path.join(PY, "adapters/transport.py"), "utf-8");
+  const consts = constants(path.join(PY, "adapters/transport.py"), "py");
+  for (const name of ["TECHNICAL_TYPES", "CALL_TYPES"]) {
+    const names = py.match(new RegExp(`^${name} = frozenset\\(\\{([^}]*)\\}\\)`, "m"))[1].split(",").map((s) => s.trim());
+    assert.deepEqual([...transport[name]].sort(), names.map((n) => consts[n]).sort(), name);
+  }
+});

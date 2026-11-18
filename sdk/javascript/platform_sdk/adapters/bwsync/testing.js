@@ -11,7 +11,7 @@
 const zlib = require("node:zlib");
 const { Readable } = require("node:stream");
 const { AdapterError } = require("../../errors");
-const { NO_USER_CONTEXT } = require("../transport");
+const { BACKEND_UNAVAILABLE, DOWNLOAD_TOO_LARGE, NO_USER_CONTEXT } = require("../transport");
 const errors = require("./errors");
 const { BwSyncClient } = require("./client");
 
@@ -176,7 +176,7 @@ class FakeBwSync {
     }
     const decoded = decodeURIComponent(pathName);
     this.calls.push([method, decoded, body]);
-    if (this.fail) throw fail(this.fail[0], this.fail[1] || "backend-unavailable");
+    if (this.fail) throw fail(this.fail[0], this.fail[1] || BACKEND_UNAVAILABLE);
     if (!this.linked && decoded !== "/bwsync/link") throw fail(403, errors.NOT_LINKED);
     return decoded;
   }
@@ -189,7 +189,7 @@ class FakeBwSync {
     if (!p.startsWith(FOLDERS)) throw new Error(`unerwarteter Aufruf GET ${p}`);
     const rel = p.slice(FOLDERS.length);
     if (this.listing !== null) return this.listing;
-    if (this.files.has(rel)) throw fail(400, "backend-unavailable");
+    if (this.files.has(rel)) throw fail(409, errors.NOT_A_FOLDER);
     if (!this.folders.has(rel)) throw fail(404, errors.NOT_FOUND);
     const names = this._children(rel).sort((a, b) => {
       const fa = this.folders.has(a) ? 0 : 1;
@@ -220,6 +220,7 @@ class FakeBwSync {
         return undefined;
       }
       if (method === "DELETE") {
+        if (this.files.has(rel)) throw fail(409, errors.NOT_A_FOLDER);
         if (rel === "" || !this.folders.has(rel)) throw fail(404, errors.NOT_FOUND);
         // wie der Adapter: mit allem Inhalt (bwSync&Share legt es in den Papierkorb)
         for (const f of [...this.folders]) if (f === rel || f.startsWith(`${rel}/`)) this.folders.delete(f);
@@ -229,7 +230,7 @@ class FakeBwSync {
     }
     if (p.startsWith(FILES) && method === "DELETE") {
       const rel = p.slice(FILES.length);
-      if (this.folders.has(rel)) throw fail(409, errors.CONFLICT);
+      if (this.folders.has(rel)) throw fail(409, errors.NOT_A_FILE);
       if (!this.files.has(rel)) throw fail(404, errors.NOT_FOUND);
       this.files.delete(rel);
       return undefined;
@@ -238,7 +239,7 @@ class FakeBwSync {
   }
 
   _move(source, target) {
-    if (source === target || target.startsWith(`${source}/`)) throw fail(400, "backend-unavailable"); // wie der Adapter
+    if (source === target || target.startsWith(`${source}/`)) throw fail(400, errors.MOVE_INTO_SELF);
     if (!this.exists(source)) throw fail(404, errors.NOT_FOUND);
     if (this.exists(target)) throw fail(409, errors.EXISTS);
     if (!this.folders.has(parent(target))) throw fail(409, errors.PARENT_MISSING);
@@ -273,7 +274,7 @@ class FakeBwSync {
     const rel = this._call(req, "GET", pathName).slice(FILES.length);
     if (!this.files.has(rel)) throw fail(404, errors.NOT_FOUND);
     if (this.files.get(rel).length > maxBytes) {
-      throw new AdapterError(413, "download-too-large", `mehr als maxBytes=${maxBytes}`);
+      throw new AdapterError(413, DOWNLOAD_TOO_LARGE, `mehr als maxBytes=${maxBytes}`);
     }
     return this.files.get(rel);
   }

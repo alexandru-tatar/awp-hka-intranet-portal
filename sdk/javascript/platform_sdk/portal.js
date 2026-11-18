@@ -47,6 +47,17 @@ class Portal {
     }
   }
 
+  /**
+   * Standardbehandlung aller Fehler, die die App nicht selbst abfängt (sdk/README.md, „Fehler: Standard“).
+   * Als **letzte** Zeile nach allen Routen aufrufen: Express ruft Fehler-Handler nur nach den Routen auf.
+   */
+  handleErrors(app) {
+    app.use((err, req, res, next) => {
+      if (res.headersSent) return next(err); // Antwort läuft schon (z. B. Strom): Express bricht sie ab
+      return pages.fallback(err, req, res);
+    });
+  }
+
   /** Router der App; die App hängt ihn unter `portal.url("/")` ein. */
   router() {
     return express.Router();
