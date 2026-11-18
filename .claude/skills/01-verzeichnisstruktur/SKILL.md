@@ -14,11 +14,9 @@ Spezifikationen: `02-gateway.md`, `03-registry.md`, `04-portal-ui-and-design-kit
 intranet-portal/
 ├── pyproject.toml                  # Paket "hka-portal", Dependencies (gepinnt), Gruppe dev, pytest-Konfiguration, package-data
 ├── Dockerfile, Dockerfile.trixie   # Portal-Image: dhi.io (hardened) bzw. Debian Trixie ohne Login; .dockerignore
-├── extras/compose/                 # Docker Compose je Baustein
-│   ├── redis/compose.yml           # Sessions (:6379)
-│   ├── keycloak/                   # compose.yml, Dockerfile (+ .dockerignore), hka-realm.json, theme/hka/login (Login-Seite im Portal-Look), dev-IdP :8180
-│   ├── backend/compose.yml         # Portal-Container (Dockerfile.trixie, dev/gateway.compose.yml)
-│   └── server/compose.yml          # include: redis + keycloak + backend → docker compose up startet alles
+├── extras/compose/                 # Docker Compose (eingebunden vom Security-Gateway: server/ lokal, vm/ auf der VM)
+│   ├── backend/compose.yml         # Portal-Container (Dockerfile.local bzw. Dockerfile, dev/gateway.compose.yml bzw. gateway.vm.yml)
+│   └── vm/                         # nginx-portal.conf, deploy/ (portal-deploy); Redis und Keycloak liegen im Security-Gateway
 ├── uv.lock                         # GENERIERT durch uv – nicht von Hand editieren
 ├── Makefile                        # setup · kit · contrast · dev · test
 ├── README.md                       # Start, Aufbau, "Eine App hinzufügen", Platzhalter-Tabelle
@@ -76,8 +74,7 @@ intranet-portal/
 │   ├── users.yml                   # Testpersonen mit Rollen (auth_mode: dev)
 │   ├── gateway.oidc.yml            # Konfiguration für Keycloak + Redis (auth_mode: oidc)
 │   ├── roles.yml, grants.yml       # IdP-Claims → Rollen (02 §8), Rollen je Subject
-│   ├── gateway.compose.yml         # Konfiguration fürs Backend im Container (redis, keycloak über Compose-Netz)
-│   └── keycloak/portal-client-secret  # Client-Secret des dev-IdP (nur dev!)
+│   └── gateway.compose.yml         # Konfiguration fürs Backend im Container (lokaler Stack über das Security-Gateway)
 └── tests/
     ├── conftest.py
     ├── test_kit.py                 # Kit, "kein Hex außerhalb tokens.css"
@@ -139,7 +136,7 @@ Nie umgekehrt (z. B. importiert `service/` nie aus `web/` oder `router/`, `regis
 | Header, CSP, ETag, `X-Portal-Kit` | `web/middleware.py` / `router/nav_router.py` (Header-Namen in `router/constants.py`) |
 | Konfigurationswert | `core/config.py` (unbekannte Keys sind Fehler) + `dev/gateway.dev.yml` bzw. `dev/gateway.oidc.yml` |
 | neue Rollenzuordnung vom IdP | `dev/roles.yml` (Claim → Rolle), `dev/grants.yml` (je Subject) |
-| neuer Testbenutzer im dev-IdP | `extras/compose/keycloak/hka-realm.json`, danach `make idp-down idp-up` (baut das Image neu) |
+| neuer Testbenutzer im IdP | Security-Gateway-Repo `keycloak/hka-realm.json`, danach dort `make server-up` (baut das Keycloak-Image neu; der Realm wird nur importiert, wenn es ihn noch nicht gibt) |
 | UI-Text | `locales/messages.de.yml` – nie im Template hartkodieren |
 | wiederverwendbares HTML (Feld, Dialog, Tabelle) | `templates/macros/` |
 | CSS / Farbe / Schrift / Icon | `kit/` (Tokens nur in `kit/css/tokens.css`), danach `make kit contrast` |

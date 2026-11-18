@@ -142,3 +142,14 @@ def test_gateway_config_no_portal_session_requirements(env):
     assert cfg.auth_mode == 'gateway'
     with pytest.raises(ValueError, match='SERVICE_TOKEN_FILE'):
         create_app(cfg)
+
+
+def test_dev_banner_only_with_simulated_login(integrated, client):
+    # env: dev mit auth_mode: gateway (lokaler Stack, VM): echte Anmeldung, also kein Hinweis auf simulierte Anmeldung
+    gateway_client, app, token, _calls = integrated
+    assert app.state.portal.cfg.dev and app.state.portal.cfg.auth_mode == 'gateway'
+    page = gateway_client.get('/', headers=headers(token()))
+    assert page.status_code == 200 and 'dev-banner' not in page.text and 'simuliert' not in page.text
+    # auth_mode: dev (make dev): Testpersonen, das Banner bleibt
+    from conftest import login
+    assert 'Anmeldung ist simuliert' in login(client, 'alexandru').get('/').text

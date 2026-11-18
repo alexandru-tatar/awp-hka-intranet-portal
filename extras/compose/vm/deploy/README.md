@@ -25,15 +25,15 @@ und schreibt atomar. Ein abgelehntes Manifest ändert nichts am Menü.
 
 ## Einrichtung (einmal, als `sadmin`)
 
-1. **Neue Images einspielen.** Das Image enthält Prober und Befehl, die Konfiguration `dev/gateway.vm.yml` ist eingebaut. Ablauf wie in
-   `compose.yml` (bauen auf dem eigenen Rechner, `docker save`, `scp`, `docker load`).
+1. **Neue Images einspielen.** Das Image enthält Prober und Befehl, die Konfiguration `dev/gateway.vm.yml` ist eingebaut. Ablauf in
+   `awp-hka-security-gateway/docs/vm.md` (`make vm-images` auf dem eigenen Rechner, `scp`, `docker load`).
 2. **Ordner anlegen**, bevor das Portal startet (sonst bricht es ab, weil `manifests_dir` fehlt). Die Nummer ist die Benutzer-ID im Image:
    ```bash
-   UID_IMAGE=$(sudo docker run --rm --entrypoint python hka/portal:0.1.0-hardened -c "import os; print(os.getuid())")
+   UID_IMAGE=$(sudo docker run --rm --entrypoint python hka/portal:0.3.0-gateway -c "import os; print(os.getuid())")   # Tag wie PORTAL_IMAGE_TAG in vm/.env
    sudo install -d -m 0755 -o "$UID_IMAGE" -g "$UID_IMAGE" /srv/portal/manifests /srv/portal/registry /srv/portal/status
    install -d -m 0700 ~/manifests          # Ablage für die per scp kopierten Manifeste
    ```
-3. **Portal neu starten:** `sudo docker compose -f ~/compose.yml up -d --no-build`. Das Menü ist danach leer, bis die erste App registriert ist.
+3. **Portal neu starten:** `sudo docker compose -f ~/awp/awp-hka-security-gateway/vm/compose.yml up -d --no-build`. Das Menü ist danach leer, bis die erste App registriert ist.
 4. **Skript und Einstellungen** (vorher `portal-deploy` und `deploy.env.example` per `scp` nach `~` kopieren):
    ```bash
    sudo install -m 0755 -o root -g root portal-deploy /usr/local/sbin/portal-deploy
@@ -43,7 +43,7 @@ und schreibt atomar. Ein abgelehntes Manifest ändert nichts am Menü.
 
 ## App registrieren (je App und Version)
 
-Voraussetzung: Der Container `app-<slug>` läuft im Docker-Netz des Portals (Image ebenfalls per `docker save`/`scp`/`docker load`).
+Voraussetzung: Der Container `app-<slug>` läuft im Docker-Netz `hka-portal-apps` (Image ebenfalls per `docker save`/`scp`/`docker load`).
 
 ```bash
 # Mac
@@ -70,7 +70,7 @@ Nach `remove` darf dasselbe Repository den Namen sofort wieder registrieren, ein
 [`docs/07-registry-und-apps.md`](../../../../docs/07-registry-und-apps.md#verwalten-hka-56).
 
 **Umstellung einer bestehenden VM (einmal):** Ordner `/srv/portal/status` anlegen (Befehl oben in Schritt 2, nur dieser Ordner),
-neues Image und neue `compose.yml` einspielen, Portal neu starten, `portal-deploy` neu installieren und in `/etc/portal/deploy.env`
+neue Images einspielen und den Stack nach `awp-hka-security-gateway/docs/vm.md` starten, `portal-deploy` neu installieren und in `/etc/portal/deploy.env`
 die Zeile `STATUS_DIR=/srv/portal/status` ergänzen.
 
 ## Testanleitungen
@@ -98,7 +98,7 @@ erwartet etwa 10 s. Lokal (ohne VM) gemessen: 5 s.
 ```bash
 sudo docker stop app-<slug>      # nach etwa einer Minute: Menüeintrag mit „nicht verfügbar“, /apps/<slug>/ zeigt die 503-Seite
 sudo docker start app-<slug>     # nach etwa 30 s: Hinweis weg
-sudo docker compose -f ~/compose.yml logs backend | grep registry_change
+sudo docker compose -f ~/awp/awp-hka-security-gateway/vm/compose.yml logs backend | grep registry_change
 ```
 
 **AK3 und AK4, abgelehnte Manifeste:** `manifest.json` mit unbekannter Rolle (`"roles": ["dean"]`) oder Kategorie (`"category": "Freizeit"`)
@@ -106,7 +106,7 @@ registrieren: Der Aufruf endet mit `FEHLER PF-104` und nennt das Feld, das Menü
 `--owner` registrieren: `FEHLER PF-202`.
 
 **HKA-56 AK1, Anzeigen:** `sudo portal-deploy list` zeigt jede registrierte App mit Besitzer und Status (`healthy` usw.) und darunter
-„Status vom …“ mit einer Zeit von höchstens 30 s vorher. Portal stoppen (`sudo docker compose -f ~/compose.yml stop backend`), 2 Minuten
+„Status vom …“ mit einer Zeit von höchstens 30 s vorher. Portal stoppen (`sudo docker compose -f ~/awp/awp-hka-security-gateway/vm/compose.yml stop backend`), 2 Minuten
 warten: `list` zeigt „unbekannt“ und den Hinweis „Läuft das Portal?“. Danach wieder starten.
 
 **HKA-56 AK2, Aktualisieren:** Im Manifest `menu.label` ändern, per `scp` kopieren, `register` mit demselben `--owner`: Ausgabe

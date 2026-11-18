@@ -5,6 +5,7 @@
 const express = require("express");
 const path = require("node:path");
 const { Adapters } = require("./adapters");
+const bwsyncConnect = require("./adapters/bwsync/connect");
 const { Config } = require("./config");
 const devshim = require("./devshim");
 const { JwksCache } = require("./jwks");
@@ -34,11 +35,27 @@ class Portal {
     app.get("/healthz", (_req, res) => {
       res.json({ status: "ok" });
     });
+    // Browser-Skript des SDK (ohne Oberfläche); nur für angemeldete Personen, wie jede Seite der App
+    app.get(this.url(bwsyncConnect.SCRIPT), (_req, res) => {
+      res.set({ "X-Content-Type-Options": "nosniff", "Cache-Control": "no-cache" });
+      res.type("text/javascript; charset=utf-8").sendFile(bwsyncConnect.SCRIPT_FILE);
+    });
     if (this.config.dev) {
       // kit/ legt erst `make sdk-release` an; in den SDK-Tests fehlt es
       app.use("/__dev/kit", express.static(KIT_DIR));
       app.use("/__dev", devshim.router(this));
     }
+  }
+
+  /**
+   * Standardbehandlung aller Fehler, die die App nicht selbst abfängt (sdk/README.md, „Fehler: Standard“).
+   * Als **letzte** Zeile nach allen Routen aufrufen: Express ruft Fehler-Handler nur nach den Routen auf.
+   */
+  handleErrors(app) {
+    app.use((err, req, res, next) => {
+      if (res.headersSent) return next(err); // Antwort läuft schon (z. B. Strom): Express bricht sie ab
+      return pages.fallback(err, req, res);
+    });
   }
 
   /** Router der App; die App hängt ihn unter `portal.url("/")` ein. */

@@ -1,5 +1,10 @@
 # 08 – C4-Modell: Container (Level 2)
 
+> **Überholt.** Beschreibt den Stand vor dem Security-Gateway (Portal mit eigener Anmeldung, Redis und Keycloak).
+> Heute: Anmeldung, Sessions und Keycloak im Security-Gateway, das Portal prüft nur dessen Assertion. Aktueller Aufbau
+> (Dienste, Netze, Ports): README des Repos `awp-hka-security-gateway`, Abschnitt „Aufbau“; Portal-Teil in
+> [05 Compose](05-compose.md).
+
 Container des Portals im jetzigen Stand, wie `make server-up` sie startet (`extras/compose/server`). Bausteine, die es
 noch nicht gibt (Traefik, SQLite-Registry, Prober, echte Apps), stehen unter [Noch nicht im Diagramm](#noch-nicht-im-diagramm).
 
@@ -35,7 +40,7 @@ C4Container
 | Portal-Backend | Python, FastAPI, Jinja2, uvicorn; Image aus `Dockerfile.trixie` | Seiten (`/`, `/_portal/*`), Menü-Fragment `/nav`, Anmeldung (`/login`, `/oidc/callback`, `/logout`), `/readyz`, Fehlerseiten, Kit-Assets unter `/static` | `src/portal/`, `extras/compose/backend/` |
 | Session-Store | Redis 8 (`redis:8-alpine`), speichert nichts auf Platte | Sessions mit Idle- und Absolut-Timeout, Login-Transaktionen (State, Nonce, PKCE-Verifier) | `auth/redis_sessions.py`, `extras/compose/redis/` |
 | Registry- und Konfigurationsdateien | Dateien im Backend-Image, kein eigener Prozess | App-Manifeste, Status je App, Rollenzuordnung, Schema, gebautes Kit | `dev/`, `schemas/`, `kit/dist/` |
-| Identity Provider (extern) | Keycloak 26 mit Realm `hka` und Login-Theme `hka` | Authorization Code mit PKCE, ID-Token, RP-initiated Logout | `extras/compose/keycloak/` |
+| Identity Provider (extern) | Keycloak 26 mit Realm `hka` und Login-Theme `hka` | Authorization Code mit PKCE, ID-Token, RP-initiated Logout Security-Gateway-Repo `keycloak/` |
 
 ## Beziehungen
 

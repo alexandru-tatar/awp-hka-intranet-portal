@@ -1,8 +1,6 @@
 PORT ?= 8000
 
-.PHONY: setup kit contrast dev idp-up idp-down test docs sdk-test sdk-release
-
-COMPOSE = extras/compose
+.PHONY: setup kit contrast dev test docs sdk-test sdk-release keycloak-theme-release
 
 setup:
 	uv sync
@@ -16,13 +14,6 @@ contrast:
 dev: kit
 	uv run uvicorn portal.dev:app --reload --reload-dir src --reload-dir dev --port $(PORT)
 
-# Keycloak als IdP für das separate Security-Gateway (Repo security-gateway), nicht für das Portal selbst.
-idp-up:
-	docker compose -f $(COMPOSE)/keycloak/compose.yml up -d --build
-
-idp-down:
-	docker compose -f $(COMPOSE)/keycloak/compose.yml down
-
 test: contrast sdk-test
 	uv run pytest -q tests
 
@@ -33,6 +24,11 @@ sdk-test:
 
 sdk-release: sdk-test
 	uv run python sdk/tools/release.py
+
+# Design-Kit für das Keycloak-Login-Theme im Security-Gateway: kit.css + fonts/ nach sdk/dist/keycloak-theme/
+# (mit VERSION und SHA256). Im Gateway-Repository: make keycloak-theme-update THEME_DIST=…/sdk/dist/keycloak-theme
+keycloak-theme-release:
+	uv run python sdk/tools/keycloak_theme_release.py
 
 # API-Dokumentation als HTML aus den Docstrings: docs/api/_build/html/index.html
 # portal.dev bleibt draußen, weil der Import die Anwendung erzeugt.

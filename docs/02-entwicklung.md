@@ -10,7 +10,6 @@ Python ≥ 3.13, [uv](https://docs.astral.sh/uv/), für Anmeldung und Container 
 |---|---|
 | `make setup` | `uv sync`: `.venv` und Abhängigkeiten aus `uv.lock` |
 | `make dev` | baut das Kit, startet mit Testpersonen-Login auf `:8000` (`dev/gateway.dev.yml`) |
-| `make idp-up` / `idp-down` | Keycloak als IdP für das separate Security-Gateway |
 | `make kit` / `make contrast` | Design-Kit bauen / Kontrast-Gate |
 | `make test` | Kontrast-Gate und pytest |
 | `make docs` | API-Dokumentation als HTML aus den Docstrings: `docs/api/_build/html/index.html` |

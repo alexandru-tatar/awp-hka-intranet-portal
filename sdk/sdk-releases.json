@@ -14,5 +14,53 @@
       1
     ],
     "released": "2026-11-04"
+  },
+  "1.0.2-dev": {
+    "python": "sha256:e5cd4d80ba5abe6954c2d6edac8bbd4cddb416e0894b9079ca0ef17dcc9bba6d",
+    "javascript": "sha256:aaac117a0c64c667ae684bc99fef1a8d3202dfe39a59a7971708e70f7bfefd28",
+    "assertion_versions": [
+      1
+    ],
+    "released": "2026-11-12"
+  },
+  "1.0.3-dev": {
+    "python": "sha256:369bc9b730b391e58d70beeddeddb966433c961a522c3f439e530f2052850bff",
+    "javascript": "sha256:402c0b6a92de7742774e807007fc3e1e9e91722dc02404fc354ab0d35c7efda3",
+    "assertion_versions": [
+      1
+    ],
+    "released": "2026-11-16"
+  },
+  "1.0.4-dev": {
+    "python": "sha256:6fa88effac60a248603c7cf13275c87fe445399446341dce897762bbd06ffca4",
+    "javascript": "sha256:bd349cb77230e0af690e0261a263a9645a6da389e5fbfac9d42989abd753c307",
+    "assertion_versions": [
+      1
+    ],
+    "released": "2026-11-16"
+  },
+  "1.0.5-dev": {
+    "python": "sha256:a993050db511c02d5cca3d8e4d424bb40bc1b355f0d6054e49e2775f67dcfa8d",
+    "javascript": "sha256:15882c5d221b64fe720260feed396e10505ffd53bcc05fbfad590d987d479528",
+    "assertion_versions": [
+      1
+    ],
+    "released": "2026-11-17"
+  },
+  "1.1.0-dev": {
+    "python": "sha256:c02a2505f86371d10d2ad1dc8a465b133b80f26a332c94669b310bb840f6e5ab",
+    "javascript": "sha256:44fe0bd1d704e619b0222ac11fbd64934f94d70abb58b374d64b7f33eb8f3fe2",
+    "assertion_versions": [
+      1
+    ],
+    "released": "2026-11-17"
+  },
+  "1.2.0-dev": {
+    "python": "sha256:087fdf8f13b8341220c8bc66704469591345b6133c8567b9cfb20db7bb11802e",
+    "javascript": "sha256:dc7d7f8b4ee6db68688329d4a95af4de17481764783acce40ba98f74159ba091",
+    "assertion_versions": [
+      1
+    ],
+    "released": "2026-11-18"
   }
 }

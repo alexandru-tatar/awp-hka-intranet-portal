@@ -18,8 +18,28 @@
     </a>
     <div class="site-header__user">
       <span class="muted"><span class="visually-hidden">Angemeldet als </span>{{ user.name }}</span>
-      <a href="{{ '/__dev/login' if dev else '/logout' }}">Abmelden</a>
+      {% if dev %}
+      <a href="/__dev/login">Abmelden</a>
+      {% else %}
+      <button type="button" class="btn btn--link" data-dialog-open="logout-dialog">Abmelden</button>
+      <noscript><a href="/logout">Abmelden</a></noscript>
+      {% endif %}
     </div>
+    {% if not dev %}
+    {#- Wie im Portal-Kopf: kit.js schickt das Formular nach „Abmelden“ im Dialog direkt an das Gateway (POST /logout).
+        Ohne CSRF-Token: das Gateway prüft dafür Origin und Sec-Fetch-Site (gleiche Herkunft). -#}
+    <form id="logout-form" method="post" action="/logout" hidden></form>
+    <dialog id="logout-dialog" aria-labelledby="logout-dialog-title" data-submit-form="logout-form">
+      <form method="dialog">
+        <h2 id="logout-dialog-title">Abmelden?</h2>
+        <p>Möchten Sie sich vom Portal abmelden?</p>
+        <div class="dialog__actions">
+          <button value="cancel" class="btn btn--secondary">Abbrechen</button>
+          <button value="confirm" class="btn btn--primary" autofocus>Abmelden</button>
+        </div>
+      </form>
+    </dialog>
+    {% endif %}
   </header>
   <div class="shell">
     {{ nav_html | safe }}
