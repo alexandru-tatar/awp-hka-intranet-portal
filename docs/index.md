@@ -32,7 +32,7 @@ make test
 - Kein Rate-Limit auf `/login`, kein `revoke-sessions` (02 §4, §9).
 - Keine Prod-Konfiguration (siehe [04 Anmeldung](04-anmeldung.md#umstieg-auf-prod)).
 - Keycloak-Compose ohne Healthcheck; das Backend wartet nicht auf Redis.
-- Das gehärtete `Dockerfile` (dhi.io) braucht Login. Die Pipeline baut es (`images.yml`, HKA-57), im Compose ist es nicht eingebunden.
+- Das gehärtete `Dockerfile` (dhi.io) braucht Login. Die Pipeline baut es (`images.yml`, HKA-57); im Backend-Compose ist es das Image für die VM (`PORTAL_DOCKERFILE`).
 
 ## API-Dokumentation
 

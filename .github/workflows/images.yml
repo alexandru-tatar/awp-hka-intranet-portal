@@ -1,11 +1,12 @@
 # Gehärtete Images bauen und nach GHCR hochladen (HKA-57)
 #
-# AK1: Merge auf main -> portal (Dockerfile, dhi.io) und portal-keycloak für linux/amd64 nach
-#      ghcr.io/<owner>/<image>:<commit-sha>. Den Digest jedes Images zeigt die Zusammenfassung des Laufs.
+# AK1: Merge auf main -> portal (Dockerfile, dhi.io) für linux/amd64 nach ghcr.io/<owner>/portal:<commit-sha>.
+#      Den Digest zeigt die Zusammenfassung des Laufs.
 # AK3: Pull Request -> nur bauen, nichts hochladen (kein Login bei GHCR).
 #
+# Keycloak und Redis liegen seit PR #17 im Repository awp-hka-security-gateway und werden dort gebaut.
 # Die VM erreicht keine Registry. Die Images werden lokal per Digest gezogen und per scp eingespielt
-# (Anleitung: extras/compose/vm/compose.yml).
+# (Ablauf: awp-hka-security-gateway, docs/vm.md).
 #
 # Benötigte Secrets (Repository): DHI_USERNAME, DHI_TOKEN für dhi.io (Basis-Images des gehärteten Dockerfile).
 
@@ -44,9 +45,6 @@ jobs:
           - image: portal
             dockerfile: Dockerfile
             dhi: true
-          - image: portal-keycloak
-            dockerfile: extras/compose/keycloak/Dockerfile
-            dhi: false
 
     steps:
       - name: Code holen
