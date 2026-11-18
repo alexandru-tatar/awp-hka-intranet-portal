@@ -125,7 +125,8 @@ nach allen Routen (Express ruft Fehler-Handler nur nach den Routen auf).
 | `AdapterError`, fachlich | Status vom Adapter (4xx) | „Das hat nicht geklappt“ – Die Aktion war nicht möglich. Bitte gehen Sie zurück, laden Sie die Seite neu und versuchen Sie es erneut. | WARN: `type`, `status`, Vorgangsnummer; die App behandelt diesen `type` nicht |
 | `AdapterError`, technisch | 503 (`backend-timeout`: 504) | „Gerade nicht erreichbar“ – Der Dienst ist gerade nicht erreichbar. Bitte versuchen Sie es später erneut. | WARN: `type`, `status`, Vorgangsnummer |
 | `AdapterError`, Aufruf | 500 | „Fehler in der Anwendung“ – In dieser Anwendung ist ein Fehler aufgetreten. Wenn das wieder passiert, nennen Sie bitte die Vorgangsnummer. | ERROR: `type`, `status`, `detail`, Vorgangsnummer |
-| jeder andere Fehler | 500 | wie „Aufruf“ | ERROR mit Stack, Vorgangsnummer |
+| anderer Fehler mit 4xx-Status (JavaScript: `err.status`/`err.statusCode`, z. B. ungültiges JSON 400; Python: `HTTPException` u. a. behandelt FastAPI selbst) | sein Status | wie „fachlich“ | WARN: Status, Vorgangsnummer |
+| jeder andere Fehler (ohne Status oder mit 5xx) | 500 | wie „Aufruf“ | ERROR mit Stack, Vorgangsnummer |
 
 - Die Seite zeigt immer die Vorgangsnummer. `detail`, Traceback und Stack stehen nie in der Antwort, nur im Log.
 - problem+json trägt bei einem `AdapterError` den ursprünglichen `type` (z. B. `urn:hka:problem:bwsync-locked`),

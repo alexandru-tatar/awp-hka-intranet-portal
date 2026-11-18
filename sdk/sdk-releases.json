@@ -57,7 +57,7 @@
   },
   "1.2.0-dev": {
     "python": "sha256:087fdf8f13b8341220c8bc66704469591345b6133c8567b9cfb20db7bb11802e",
-    "javascript": "sha256:61c0dcbcca320fa400391ec06187a934cff50c702ee88c19c9855cadc99f918b",
+    "javascript": "sha256:dc7d7f8b4ee6db68688329d4a95af4de17481764783acce40ba98f74159ba091",
     "assertion_versions": [
       1
     ],

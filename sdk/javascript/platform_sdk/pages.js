@@ -12,7 +12,8 @@ const { requestContext } = require("./context");
 const { AdapterError } = require("./errors");
 const { BACKEND_TIMEOUT, category } = require("./adapters/transport");
 
-// Titel und Text je Art (domain = fachlich, technical = technisch, call = Aufruf oder Programmierfehler)
+// Titel und Text je Art (domain = fachlich, technical = technisch, call = Aufruf oder Programmierfehler).
+// "request" (Fehler mit 4xx-Status, z. B. ungültiges JSON von Express) nutzt den allgemeinen Text von "domain".
 const FALLBACK_TEXTS = {
   domain: [
     "Das hat nicht geklappt",
@@ -38,7 +39,16 @@ function error(req, res, status, title, detail, { problemType = null, requestId 
   return res.end(JSON.stringify(body));
 }
 
-/** Antwort auf einen Fehler, den die App nicht abgefangen hat. Details nur ins Log, nie in die Antwort. */
+/** 4xx-Status eines anderen Fehlers (Express/body-parser: err.status oder err.statusCode), sonst null. */
+function clientStatus(err) {
+  const status = Number(err?.status ?? err?.statusCode);
+  return Number.isInteger(status) && status >= 400 && status < 500 ? status : null;
+}
+
+/**
+ * Antwort auf einen Fehler, den die App nicht abgefangen hat. Details nur ins Log, nie in die Antwort.
+ * Andere Fehler mit 4xx-Status behalten ihren Status (wie bei FastAPI); nur Fehler ohne Status werden 500.
+ */
 function fallback(err, req, res) {
   const requestId = req.portal?.requestId ?? req.headers["x-request-id"] ?? null;
   const entry = { path: req.path };
@@ -54,6 +64,10 @@ function fallback(err, req, res) {
     if (kind === "domain") entry.hint = "Die App behandelt diesen type nicht selbst.";
     if (kind === "call") entry.detail = err.detail;
     problemType = err.type;
+  } else if (clientStatus(err) !== null) {
+    kind = "domain";
+    status = clientStatus(err);
+    Object.assign(entry, { category: "request", error: err?.name ?? typeof err, status });
   } else {
     kind = "call";
     status = 500;

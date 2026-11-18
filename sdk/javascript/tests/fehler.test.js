@@ -64,6 +64,13 @@ before(async () => {
     if (req.params.art === "anderer") throw new Error("geheimer Text aus dem Stack");
     throw ERRORS[req.params.art]();
   });
+  router.post("/json", express.json(), (_req, res) => res.json({ ok: true }));
+  router.get("/status/:n", async (req) => {
+    const err = new Error("geheimer Text mit Status");
+    if (req.query.code) err.statusCode = Number(req.params.n);
+    else err.status = Number(req.params.n);
+    throw err;
+  });
   router.get("/abgefangen", async (_req, res) => {
     try {
       throw ERRORS.fachlich();
@@ -150,4 +157,37 @@ test("App fängt selbst ab: kein Fallback", async () => {
   assert.equal(response.status, 200);
   assert.match(await response.text(), /Eigener Text der App/);
   assert.equal(lines.length, 0);
+});
+
+test("Fehler mit 4xx-Status behält den Status: ungültiges JSON (express.json) 400", async () => {
+  const response = await fetch(`${server.base}/json`, {
+    method: "POST",
+    headers: { "X-Portal-Assertion": makeToken(), "X-Request-Id": "req-123", "Content-Type": "application/json",
+      Accept: "text/html" },
+    body: "{kaputt",
+  });
+  assert.equal(response.status, 400);
+  const html = await response.text();
+  assert.ok(html.includes("<h1>Das hat nicht geklappt</h1>") && html.includes("Vorgangsnummer: req-123"), html);
+  assert.ok(!html.includes("kaputt") && !html.includes("SyntaxError") && !/\n\s+at \S/.test(html), html);
+  assert.equal(lines.length, 1);
+  assert.deepEqual([lines[0].level, lines[0].category, lines[0].status], ["warning", "request", 400]);
+  assert.ok(!("stack" in lines[0]));
+});
+
+test("Fehler mit 4xx-Status (status oder statusCode) behält den Status, JSON mit type des Status", async () => {
+  for (const query of ["", "?code=1"]) {
+    const response = await get(`/status/413${query}`, "application/json");
+    assert.equal(response.status, 413);
+    const text = await response.text();
+    assert.equal(JSON.parse(text).type, "urn:hka:problem:413");
+    assert.ok(!text.includes("geheim"));
+  }
+});
+
+test("Fehler mit 5xx-Status oder ohne Status: 500 Fehler in der Anwendung", async () => {
+  const response = await get("/status/502");
+  assert.equal(response.status, 500);
+  assert.match(await response.text(), /Fehler in der Anwendung/);
+  assert.equal(lines[0].category, "other");
 });
