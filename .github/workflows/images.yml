@@ -1,0 +1,110 @@
+# Gehärtete Images bauen und nach GHCR hochladen (HKA-57)
+#
+# AK1: Merge auf main -> portal (Dockerfile, dhi.io) und portal-keycloak für linux/amd64 nach
+#      ghcr.io/<owner>/<image>:<commit-sha>. Den Digest jedes Images zeigt die Zusammenfassung des Laufs.
+# AK3: Pull Request -> nur bauen, nichts hochladen (kein Login bei GHCR).
+#
+# Die VM erreicht keine Registry. Die Images werden lokal per Digest gezogen und per scp eingespielt
+# (Anleitung: extras/compose/vm/compose.yml).
+#
+# Benötigte Secrets (Repository): DHI_USERNAME, DHI_TOKEN für dhi.io (Basis-Images des gehärteten Dockerfile).
+
+name: Images
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: images-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Hochladen nur beim Push auf main, nie bei Pull Requests (AK3)
+  PUSH: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+
+jobs:
+  build:
+    name: ${{ matrix.image }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: portal
+            dockerfile: Dockerfile
+            dhi: true
+          - image: portal-keycloak
+            dockerfile: extras/compose/keycloak/Dockerfile
+            dhi: false
+
+    steps:
+      - name: Code holen
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Buildx einrichten
+        uses: docker/setup-buildx-action@v4
+
+      - name: Anmelden bei dhi.io
+        if: ${{ matrix.dhi }}
+        uses: docker/login-action@v4
+        with:
+          registry: dhi.io
+          username: ${{ secrets.DHI_USERNAME }}
+          password: ${{ secrets.DHI_TOKEN }}
+
+      - name: Anmelden bei GHCR
+        if: ${{ env.PUSH == 'true' }}
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image-Name
+        id: name
+        run: echo "ref=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/${{ matrix.image }}" >>"$GITHUB_OUTPUT"
+
+      - name: Bauen (auf main auch hochladen)
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64
+          push: ${{ env.PUSH == 'true' }}
+          tags: ${{ steps.name.outputs.ref }}:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+      - name: Zusammenfassung
+        env:
+          REF: ${{ steps.name.outputs.ref }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          if [ "$PUSH" = true ]; then
+            {
+              echo "### ${{ matrix.image }}"
+              echo '```'
+              echo "$REF:$GITHUB_SHA"
+              echo "$REF@$DIGEST"
+              echo '```'
+            } >>"$GITHUB_STEP_SUMMARY"
+          else
+            echo "### ${{ matrix.image }}: gebaut, nicht hochgeladen (${GITHUB_EVENT_NAME})" >>"$GITHUB_STEP_SUMMARY"
+          fi
