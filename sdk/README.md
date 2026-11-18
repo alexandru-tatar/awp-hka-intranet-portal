@@ -51,7 +51,8 @@ Knopf, Texte und Dialog selbst; das Skript meldet nur Zustände (wartet, verbund
 
 1. **Reine Bibliothek.** Unter `adapters/` und `common/` gibt es kein HTML, kein CSS, keine Vorlagen und keine
    Texte für Nutzer. Oberfläche, Wortwahl und Muster dafür stehen im Golden Master (Skill `schnittstellen`) oder in
-   der App. Vom Portal vorgegeben und deshalb im SDK: Seitenrahmen (`layout`), Fehlerseite, Test-Anmeldung.
+   der App. Vom Portal vorgegeben und deshalb im SDK: Seitenrahmen (`layout`), Fehlerseite (auch für die
+   Standardbehandlung von Fehlern, siehe „Fehler: Standard“), Test-Anmeldung.
 2. **Andere Systeme nur über das SDK.** Eine App ruft nie selbst einen Dienst auf, sondern
    `portal.adapters.<system>.<aufruf>(…)`. Das SDK schickt die Anmeldung der Person mit; die App braucht kein
    Passwort und kein Token. Durchgesetzt durch Regel R-SCHN-1 im Golden Master: `make lint` meldet eigene
@@ -63,6 +64,8 @@ Knopf, Texte und Dialog selbst; das Skript meldet nur Zustände (wartet, verbund
    `request_id`. Jeder `type` steht als Konstante in `adapters/<system>/errors`; Bedeutung und typische Reaktion stehen
    in der Fehler-Tabelle der README des Systems. Allgemeine Typen (Konstanten in `adapters/transport`): `backend-unavailable`,
    `backend-timeout`, `contract-violation`, `not-implemented`, `download-too-large`, `no-user-context`.
+   - Einteilung in fachlich, technisch und Aufruf, Standardbehandlung und Regeln für neue Typen: Abschnitt
+     „Fehler: Standard“ unten.
    - Die App entscheidet **immer anhand von `type`** (und `status`), nie anhand eines Textes, und vergleicht mit der
      Konstante, nie mit einem selbst getippten String.
    - Den **Text für die Person schreibt die App** selbst.
@@ -82,6 +85,86 @@ Knopf, Texte und Dialog selbst; das Skript meldet nur Zustände (wartet, verbund
 7. **Unverändert in der App.** Apps bekommen eine Kopie in `platform_sdk/` und ändern sie nicht; `verify_tree`
    prüft die Prüfsumme gegen `sdk-releases.json`.
 
+## Fehler: Standard
+
+> **Kurz:** Fachliche Fehler (von einer Person bei normaler Bedienung ausgelöst) bekommen im Adapter immer einen
+> eigenen `type` mit 4xx, als Konstante im SDK. Technische Fehler und Aufruffehler fängt das SDK mit allgemeinen
+> Typen ab; den Text für die Person schreibt immer die App.
+
+Dass kein fachlicher Fall ohne `type` endet, soll ein gemeinsamer Vertragstest im Adapter prüfen (Jira HKA-78): Jedes
+Fachsystem liefert nur seine Liste von Fällen, der Prüfteil ist für alle gleich.
+
+### Drei Arten
+
+| Art | Wer legt den `type` fest | Konstante in | Beispiele | Reaktion der App |
+|---|---|---|---|---|
+| **Fachlich:** ein System lehnt eine Aktion ab oder kennt etwas nicht | nur der **Adapter** | `adapters/<system>/errors` | `bwsync-not-found`, `bwsync-locked`, `bwsync-link-invalid` | eigener Text je `type`, nächster Schritt für die Person |
+| **Technisch:** kann bei jedem System passieren | nur das **SDK** | `adapters/transport` (`TECHNICAL_TYPES`) | `backend-unavailable`, `backend-timeout`, `contract-violation` | ein gemeinsamer Text: später erneut versuchen |
+| **Aufruf:** die App hat eine Grenze oder Regel des SDK verletzt | nur das **SDK** | `adapters/transport` (`CALL_TYPES`) | `download-too-large`, `no-user-context`, `not-implemented` | Grenze nennen bzw. Programmierfehler beheben |
+
+- Ein fachlicher Fall hat **immer** einen eigenen `type` mit passendem 4xx-Status, nie 500 oder 502 ohne `type`.
+  Fehlt der `type`, ist das ein Fehler im Adapter, nicht in der App.
+- `backend-unavailable` heißt nur: keine verwertbare Antwort (Netz weg, Absturz, Antwort ohne `type`). Kommt er bei
+  normaler Bedienung, gehört ein `type` in den Adapter.
+- Jeder `type`, der nicht in `TECHNICAL_TYPES` oder `CALL_TYPES` steht, ist fachlich. `transport.category(err)` gibt
+  `"domain"`, `"technical"` oder `"call"` zurück.
+- Fakes in `testing` melden dieselben Typen wie der Adapter, als Konstante, nie als getippten Text.
+- Den Text für die Person schreibt die App (R-SCHN-3). `detail` ist für Logs.
+
+### Standardbehandlung (Fallback)
+
+Fängt die App einen Fehler nicht selbst ab, antwortet das SDK mit seiner Fehlerseite (Browser: HTML, sonst
+problem+json). Python: richtet `portal.install(app)` ein. JavaScript: `portal.handleErrors(app)` als **letzte** Zeile,
+nach allen Routen (Express ruft Fehler-Handler nur nach den Routen auf).
+
+| Fehler | Status | Titel und Text der Seite | Log |
+|---|---|---|---|
+| `AdapterError`, fachlich | Status vom Adapter (4xx) | „Das hat nicht geklappt“ – Die Aktion war nicht möglich. Bitte gehen Sie zurück, laden Sie die Seite neu und versuchen Sie es erneut. | WARN: `type`, `status`, Vorgangsnummer; die App behandelt diesen `type` nicht |
+| `AdapterError`, technisch | 503 (`backend-timeout`: 504) | „Gerade nicht erreichbar“ – Der Dienst ist gerade nicht erreichbar. Bitte versuchen Sie es später erneut. | WARN: `type`, `status`, Vorgangsnummer |
+| `AdapterError`, Aufruf | 500 | „Fehler in der Anwendung“ – In dieser Anwendung ist ein Fehler aufgetreten. Wenn das wieder passiert, nennen Sie bitte die Vorgangsnummer. | ERROR: `type`, `status`, `detail`, Vorgangsnummer |
+| jeder andere Fehler | 500 | wie „Aufruf“ | ERROR mit Stack, Vorgangsnummer |
+
+- Die Seite zeigt immer die Vorgangsnummer. `detail`, Traceback und Stack stehen nie in der Antwort, nur im Log.
+- problem+json trägt bei einem `AdapterError` den ursprünglichen `type` (z. B. `urn:hka:problem:bwsync-locked`),
+  sonst `urn:hka:problem:<status>`. So kann das Skript der App weiter nach `type` entscheiden.
+- Fängt die App den Fehler selbst ab, greift der Fallback nicht. Jeder Fall lässt sich so überschreiben.
+- Der Fallback ist ein **Sicherheitsnetz, kein Ersatz**: Jeder `type`, bei dem die Person etwas anderes tun soll,
+  bekommt in der App einen eigenen Text (Spalte „empfohlene Reaktion“ im README des Systems).
+- Die Texte stehen auf der Fehlerseite des SDK; das ist die Ausnahme aus Regel 1.
+- Grenze: Kommt ein Fehler erst, nachdem die Antwort begonnen hat (z. B. mitten in einem ZIP-Strom), bricht die
+  Antwort ab; eine Seite lässt sich dann nicht mehr zeigen.
+
+### Wann ein neuer Typ ins SDK kommt
+
+Nur wenn **alle drei** Punkte zutreffen:
+
+1. Eine Person kann den Fall bei normaler Bedienung auslösen.
+2. Eine App soll darauf anders reagieren als auf vorhandene Typen (anderer nächster Schritt, nicht nur anderer
+   Wortlaut).
+3. Der Adapter erkennt den Fall sicher.
+
+Kein neuer Typ für technische Ursachen (dafür gibt es die allgemeinen), für Einzelheiten aus dem Fachsystem (die
+gehören in `detail` bzw. ins Log) und für Prüfungen, die nur eine App braucht (die bleiben in der App).
+
+Name: `<system>-<fall>`, klein mit Bindestrich, gesendet als `urn:hka:problem:<name>`. Ein Typ wird nie umbenannt und
+bekommt nie eine neue Bedeutung, ohne dass die SDK-Version steigt.
+
+### Was ins SDK kommt
+
+Nur, was **jede** App braucht, die das System nutzt: Aufrufe, Modelle, Fehlertypen, Regeln, die der Adapter
+durchsetzt (z. B. `paths`), Fake, `connect`. Logik, Texte und HTML einer einzelnen App bleiben in der App. Beispiel:
+Die Verschieben-Prüfung und der Satz zum Ordnerinhalt von SyncShare stehen in SyncShare, nicht im SDK.
+
+### Neuen Typ hinzufügen
+
+- [ ] **Adapter:** Konstante anlegen, `ConnectorError(status, detail, kind)` werfen; Test, der Status **und** `type`
+      prüft; Fall in die Liste des Vertragstests (HKA-78); Fehlerliste in der Adapter-README.
+- [ ] **SDK, beide Sprachen:** Konstante in `adapters/<system>/errors`; der Fake wirft denselben Typ; Zeile in der
+      Fehler-Tabelle der System-README (`type`, `status`, Bedeutung, empfohlene Reaktion); Paritätstest grün;
+      Version erhöhen, `make sdk-release`.
+- [ ] **Golden Master und Apps:** `make sdk-update`; die App behandelt den Typ mit eigenem Text; Test mit
+      `Fake…(fail=(status, errors.NEU))`.
+
 ## README eines Systems
 
 Jede `adapters/<system>/README.md` hat dieselben Abschnitte:
@@ -90,7 +173,8 @@ Jede `adapters/<system>/README.md` hat dieselben Abschnitte:
 2. **Voraussetzungen:** Rechte im `manifest.json` (z. B. `bwsync:read`), ggf. Konto verbinden.
 3. **Aufrufe:** jede Funktion mit Parametern, Rückgabe, nötigem Recht und Grenzen.
 4. **Daten:** jedes Feld der Modelle mit Typ und Bedeutung.
-5. **Fehler:** Tabelle `type` · `status` · Bedeutung · empfohlene Reaktion.
+5. **Fehler:** Tabelle `type` · `status` · Bedeutung · empfohlene Reaktion, getrennt nach fachlichen Typen des
+   Systems und allgemeinen Typen.
 6. **Tests:** wie der Fake eingesetzt wird.
 7. **Beispiele:** zwei bis drei kurze, in Python und JavaScript.
 
@@ -101,7 +185,8 @@ Jede `adapters/<system>/README.md` hat dieselben Abschnitte:
       `connect` nur, wenn die Person ihr Konto selbst verbinden muss.
 - [ ] `client`: nur Aufrufe aus der OpenAPI-Beschreibung; Pfade und Parameter geprüft, bevor gesendet wird.
 - [ ] `models`: streng, nur Felder aus der Beschreibung.
-- [ ] `errors`: alle `type`, die der Adapter liefern kann, als Konstanten; Bedeutung und Reaktion in der README.
+- [ ] `errors`: alle `type`, die der Adapter liefern kann, als Konstanten; Bedeutung und Reaktion in der README;
+      jeder fachliche Fall hat einen `type` (siehe „Fehler: Standard“).
 - [ ] `testing`: Fake, der sich wie der Adapter verhält (gleiche Fehler); dazu feste Testdaten für `make dev`.
 - [ ] `adapters/__init__`: `portal.adapters.<system>` eintragen.
 - [ ] Rechte (`<system>:read` usw.) im Portal (`adapter_scopes`) und im Manifest-Schema.

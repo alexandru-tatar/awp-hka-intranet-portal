@@ -51,24 +51,33 @@ als 1000 Einträge, nur die ersten), `skipped` (int: Namen, die der Adapter nich
 
 ## Fehler
 
-Alle Fehler sind `AdapterError`. Entscheiden nach `type` (Konstante aus `errors`), Text schreibt die App.
+Alle Fehler sind `AdapterError`. Entscheiden nach `type` (Konstante aus `errors` bzw. `transport`), Text schreibt die
+App. Einteilung und Standardbehandlung nicht abgefangener Fehler: `sdk/README.md`, Abschnitt „Fehler: Standard“.
+
+Fachlich (bwSync&Share):
 
 | `type` (Konstante) | `status` | Bedeutung | empfohlene Reaktion |
 |---|---|---|---|
 | `bwsync-not-linked` (`NOT_LINKED`) | 403 | Konto nicht verbunden | „Verbinden“ anbieten |
 | `bwsync-link-invalid` (`LINK_INVALID`) | 403 | Verbindung gilt nicht mehr (App-Passwort widerrufen) | neu verbinden anbieten |
 | `bwsync-forbidden` (`FORBIDDEN`) | 403 | bwSync&Share verweigert die Aktion (z. B. nur lesbar geteilt) | sagen, dass es hier nicht geht |
-| `bwsync-not-found` (`NOT_FOUND`) | 404 | Datei oder Ordner gibt es nicht (mehr) | Liste neu laden |
+| `bwsync-not-found` (`NOT_FOUND`) | 404 | Datei oder Ordner gibt es nicht (mehr) | sagen, dass es das nicht mehr gibt; Liste neu laden |
 | `bwsync-exists` (`EXISTS`) | 409, 412 | Name gibt es dort schon | anderen Namen erbitten |
-| `bwsync-parent-missing` (`PARENT_MISSING`) | 409 | Zielordner fehlt | Liste neu laden |
-| `bwsync-conflict` (`CONFLICT`) | 409 | sonstiger Konflikt, z. B. Ordner als Datei gelöscht | Aktion prüfen |
-| `bwsync-too-large` (`TOO_LARGE`) | 413 | Upload über 10 MB | Grenze nennen |
-| `bwsync-locked` (`LOCKED`) | 423 | in bwSync&Share gesperrt (z. B. geöffnet) | später erneut |
-| `download-too-large` (`transport.DOWNLOAD_TOO_LARGE`) | 413 | größer als `max_bytes` | Grenze nennen |
-| `backend-unavailable` (`transport.BACKEND_UNAVAILABLE`) | 503 u. a. | Adapter nicht erreichbar oder Fehler ohne eigenen type (z. B. 400) | später erneut |
+| `bwsync-parent-missing` (`PARENT_MISSING`) | 409 | Zielordner fehlt | sagen, dass der Ordner fehlt; Liste neu laden |
+| `bwsync-conflict` (`CONFLICT`) | 409 | sonstiger Konflikt, z. B. Ordner als Datei gelöscht | sagen, dass es gerade nicht geht; Seite neu laden und erneut versuchen |
+| `bwsync-too-large` (`TOO_LARGE`) | 413 | Upload über 10 MB | Grenze nennen (10 MB) |
+| `bwsync-locked` (`LOCKED`) | 423 | in bwSync&Share gesperrt (z. B. geöffnet) | sagen, dass die Datei gesperrt ist; später erneut |
+
+Allgemein (Konstanten in `transport`):
+
+| `type` (Konstante) | `status` | Bedeutung | empfohlene Reaktion |
+|---|---|---|---|
+| `backend-unavailable` (`transport.BACKEND_UNAVAILABLE`) | 503 u. a. | Adapter nicht erreichbar, abgestürzt oder Antwort ohne eigenen `type` | später erneut. Kommt er bei normaler Bedienung, fehlt im Adapter ein `type`: als Fehler im Adapter melden |
 | `backend-timeout` (`transport.BACKEND_TIMEOUT`) | 504 | Adapter zu langsam | später erneut |
 | `contract-violation` (`transport.CONTRACT_VIOLATION`) | 502 | Antwort passt nicht zur Beschreibung | später erneut, Log prüfen |
+| `download-too-large` (`transport.DOWNLOAD_TOO_LARGE`) | 413 | größer als `max_bytes` der App | Grenze nennen |
 | `not-implemented` (`transport.NOT_IMPLEMENTED`) | 501 | `make dev` ohne Adapter: bwSync gibt es dort nicht | Gateway-Testbetrieb nutzen |
+| `no-user-context` (`transport.NO_USER_CONTEXT`) | 500 | Aufruf außerhalb einer Anfrage einer angemeldeten Person | Programmierfehler beheben |
 
 `errors.LINK_PROBLEMS` enthält `NOT_LINKED` und `LINK_INVALID` (in beiden Fällen: verbinden anbieten).
 

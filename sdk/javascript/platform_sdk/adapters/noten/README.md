@@ -25,11 +25,12 @@ Noten **der angemeldeten Person** aus dem Prüfungssystem, nur lesend. Fremde No
 
 ## Fehler
 
-Der Noten-Adapter hat keine eigenen Typen; es gelten die allgemeinen (Konstanten in `adapters/transport`).
+Der Noten-Adapter hat keine eigenen Typen; es gelten die allgemeinen (Konstanten in `adapters/transport`). Einteilung und Standardbehandlung
+nicht abgefangener Fehler: `sdk/README.md`, Abschnitt „Fehler: Standard“.
 
 | `type` | `status` | Bedeutung | empfohlene Reaktion |
 |---|---|---|---|
-| `backend-unavailable` | 503 u. a. | Adapter nicht erreichbar oder Fehler ohne eigenen type | später erneut |
+| `backend-unavailable` | 503 u. a. | Adapter nicht erreichbar, abgestürzt oder Antwort ohne eigenen `type` | später erneut |
 | `backend-timeout` | 504 | Adapter zu langsam | später erneut |
 | `contract-violation` | 502 | Antwort passt nicht zur Beschreibung | später erneut, Log prüfen |
 
