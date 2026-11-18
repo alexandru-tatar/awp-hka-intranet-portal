@@ -9,7 +9,7 @@
 </head>
 <body>
   <a class="skip" href="#main">{{ t('skip.link') }}</a>
-  {% if cfg.dev %}<div class="dev-banner">{{ t('dev.banner') }}</div>{% endif %}
+  {% if cfg.auth_mode == 'dev' %}<div class="dev-banner">{{ t('dev.banner') }}</div>{% endif %}
   {% include "partials/header.html" %}
   <div class="shell{% if not nav_html %} shell--plain{% endif %}">
     {% if nav_html %}{{ nav_html }}{% endif %}

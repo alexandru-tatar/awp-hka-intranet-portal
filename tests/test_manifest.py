@@ -93,3 +93,13 @@ def test_invalid_and_duplicate_manifests_are_skipped(env: Path, validator, caplo
     assert snap.apps["noten"].status == "healthy"
     assert snap.apps["raumbuchung"].status == "unhealthy"
     assert "duplicate slug 'noten'" in caplog.text
+
+
+def test_bwsync_scopes_in_gateway_configs():
+    # Datei-Explorer: Löschen ist ein eigener Scope; Konten verknüpfen (bwsync:link) bleibt für Apps gesperrt.
+    import yaml
+    for name in ("gateway.compose.yml", "gateway.vm.yml"):
+        cfg = yaml.safe_load((ROOT / "dev" / name).read_text())
+        v = ManifestValidator(ROOT / "schemas" / "manifest.schema.json", cfg["role_vocabulary"], cfg["adapter_scopes"])
+        assert v.problems(mutate(adapters=["bwsync:read", "bwsync:write", "bwsync:delete"])) == [], name
+        assert v.problems(mutate(adapters=["bwsync:link"])) == ["/adapters: unknown adapter scope 'bwsync:link'"], name

@@ -51,10 +51,9 @@ dev/
   users.yml                    Testpersonen mit Rollen
   roles.yml · grants.yml       IdP-Claims → Rollen (liest das Gateway), zusätzliche Rollen je Subject
   gateway.vm.yml               Konfiguration der Test-VM (auth_mode: gateway)
-  keycloak/portal-client-secret  Client-Secret des dev-IdP (nur dev!)
-extras/compose/                Docker Compose je Baustein
-  keycloak/                    IdP für dev (compose.yml, Dockerfile, hka-realm.json)
-  vm/                          Test-VM: nginx, Deploy-Skripte, compose.yml
+extras/compose/                Docker Compose (eingebunden vom Security-Gateway)
+  backend/                     Portal-Backend (Dienst backend)
+  vm/                          Test-VM: nginx-portal.conf, deploy/ (portal-deploy)
 Dockerfile                     Portal-Image (dhi.io, braucht Login) · Dockerfile.trixie: ohne dhi
 tests/                         UI1–UI14 (soweit ohne Browser prüfbar), REG4/5, Kit, Service, Fehlerseiten, Gateway-Identität
 ```
@@ -111,6 +110,6 @@ und passender Rolle; Kategorien in fester Reihenfolge, Einträge alphabetisch.
 
 `Dockerfile.local` verwendet öffentliche Python-3.14.3-/uv-Images. Das produktive
 `Dockerfile` und die VM-Konfiguration bleiben bei DHI. Die lokale Gateway-Integration
-wählt das lokale Dockerfile automatisch über `compose.portal.yml` aus; ihre
-Sicherheits- und Authentifizierungseinstellungen bleiben unverändert.
-Startbefehle und Secrets: [Gateway-Anleitung](../awp-hka-security-gateway/docs/gateway-portal.md).
+wählt das lokale Dockerfile automatisch über `extras/compose/backend/compose.yml` aus (Standard von
+`PORTAL_DOCKERFILE`; die VM setzt `Dockerfile`). Startbefehle und Secrets: README des Security-Gateways
+(Abschnitt „Erster Start“) und [05 Compose](docs/05-compose.md).

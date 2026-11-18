@@ -250,7 +250,7 @@ Alle Änderungen sind POST mit CSRF-Token der Session, laufen über `AdminServic
 der App; eine Änderung auf der Seite ist also nur vorläufig. Ohne `admin_write`, ohne `owners_file` oder ohne `grants_file` zeigt die Seite
 nur an (Hinweis „nur lesend“); die Grants fehlen dann ganz.
 
-**Auf der VM** ist `admin_write: true` gesetzt (`dev/gateway.vm.yml`). Dafür bindet `extras/compose/vm/compose.yml` `/srv/portal/manifests` und
+**Auf der VM** ist `admin_write: true` gesetzt (`dev/gateway.vm.yml`). Dafür bindet `extras/compose/backend/compose.yml` (über `vm/compose.yml` im Security-Gateway, Werte aus `vm/.env`) `/srv/portal/manifests` und
 `/srv/portal/registry` mit `:rw` ein, und die Grants liegen in `/srv/portal/registry/grants.yml` (fehlt die Datei, gilt „keine Grants“, die erste
 Änderung legt sie an). Die Ordner gehören der Benutzer-ID des Images, wie bei `portal-deploy`. `portal-deploy` und die Seite sperren dieselbe
 Datei `owners.json.lock`, es gibt also keine gleichzeitigen Schreibzugriffe. Das Portal hat damit Schreibrechte auf Manifeste und Besitzerdatei;
@@ -269,10 +269,10 @@ keine Änderung am bisherigen Registrierungs- oder Proberverhalten. Der Endpunkt
 ist ohne `PORTAL_REGISTRY_SERVICE_TOKEN_FILE` deaktiviert; Zugriff nur mit
 separatem Bearer-Service-Token. Benutzer-Cookies und Assertions genügen nicht.
 Öffentliches NGINX muss `/internal` und `/internal/…` sperren, bevor der Endpunkt
-aktiviert wird. Die VM-Compose-Ergänzung `compose.registry.yml` bindet Secret und
-internes Portal-Gateway-Netz optional ein; bestehende Stacks bleiben unverändert.
-Keine laufende VM-Konfiguration wurde geändert. Ablauf und Testgrenzen:
-[`Gateway-Integrationsdokumentation`](../../awp-hka-security-gateway/docs/internal-registry.md).
+aktiviert wird. Secret und internes Netz `portal` (nur Gateway und Portal) richtet
+`extras/compose/backend/compose.yml` ein, eingebunden vom Security-Gateway (`server/` lokal,
+`vm/` auf der VM). Historischer Ablauf der Einführung:
+[`internal-registry.md`](../../awp-hka-security-gateway/docs/internal-registry.md).
 
 ## Gateway-Betrieb mit Portal-Autorisierung
 

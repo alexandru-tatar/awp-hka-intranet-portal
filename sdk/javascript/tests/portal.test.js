@@ -84,6 +84,20 @@ test("gültige Assertion: Seitenrahmen mit Ersatz-Menü", async () => {
   assert.ok(html.includes('aria-label="Hauptnavigation"')); // Ersatz-Menü, weil das Portal nicht erreichbar ist
   assert.ok(html.includes("Erika Musterfrau"));
   assert.ok(html.includes("/static/app.css"));
+  // Abmelden ohne Zwischenseite: Dialog schickt POST /logout an das Gateway; kein Banner im Betrieb
+  assert.ok(html.includes('<form id="logout-form" method="post" action="/logout" hidden></form>'));
+  assert.ok(html.includes('data-dialog-open="logout-dialog"') && html.includes('data-submit-form="logout-form"'));
+  assert.ok(!html.includes("dev-banner") && !html.includes("/__dev/login"));
+});
+
+test("install liefert connect.js aus, nur angemeldet", async () => {
+  const { SCRIPT_FILE } = require("../platform_sdk/adapters/bwsync/connect");
+  const ok = await fetch(`${prod.base}/_sdk/bwsync/connect.js`, { headers: student() });
+  assert.equal(ok.status, 200);
+  assert.ok(ok.headers.get("content-type").startsWith("text/javascript"));
+  assert.equal(ok.headers.get("x-content-type-options"), "nosniff");
+  assert.equal(await ok.text(), fs.readFileSync(SCRIPT_FILE, "utf-8"));
+  assert.equal((await fetch(`${prod.base}/_sdk/bwsync/connect.js`)).status, 401);
 });
 
 test("requires: 403 ohne die Rolle", async () => {
@@ -95,7 +109,8 @@ test("Adapter nicht erreichbar", async () => {
   await assert.rejects(new HttpTransport("http://127.0.0.1:9").get(req, "/v1/noten/me/grades", null), (err) => {
     assert.ok(err instanceof AdapterError);
     assert.equal(err.type, "backend-unavailable");
-    assert.equal(err.detail, "Das System ist gerade nicht erreichbar.");
+    assert.equal(err.status, 503);
+    assert.equal(err.detail, ""); // kein Nutzertext im SDK; den Text wählt die App nach type
     return true;
   });
 });
@@ -140,7 +155,9 @@ test("Test-Anmeldung", async () => {
   const cookie = await devLogin([["sub", "student-test"], ["roles", "student"]]);
   const page = await fetch(`${dev.base}/`, { headers: cookie });
   assert.equal(page.status, 200);
-  assert.ok((await page.text()).includes("Entwicklungsmodus – Testperson: Erika Musterfrau"));
+  const devHtml = await page.text();
+  assert.ok(devHtml.includes("Entwicklungsmodus – Testperson: Erika Musterfrau"));
+  assert.ok(devHtml.includes('<a href="/__dev/login">Abmelden</a>') && !devHtml.includes("logout-form"));
   assert.deepEqual(await (await fetch(`${dev.base}/noten`, { headers: cookie })).json(), { count: 5 });
   assert.equal((await fetch(`${dev.base}/nur-professor`, { headers: cookie })).status, 403);
 });
