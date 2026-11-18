@@ -124,6 +124,11 @@ docker build --file Dockerfile.trixie --tag hka/portal:0.1.0-trixie .
 docker run --rm --publish 8000:8000 hka/portal:0.1.0-trixie
 ```
 
+**Pipeline (HKA-57):** `.github/workflows/images.yml` baut `portal` (`Dockerfile`) für `linux/amd64`. Bei einem Pull
+Request wird nur gebaut. Nach einem Merge auf `main` liegt das Image in `ghcr.io/alexandru-tatar/portal:<commit-sha>`;
+der Digest steht in der Zusammenfassung des Laufs. Für dhi.io braucht das Repository die Secrets `DHI_USERNAME` und
+`DHI_TOKEN`. Keycloak und Redis gehören zum Security-Gateway (`awp-hka-security-gateway`).
+
 ## Neue App anlegen
 
 `tools/neue-app.sh <slug> js|python` legt aus einem Golden Master ein fertig eingerichtetes App-Repository an
