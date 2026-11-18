@@ -1,3 +1,4 @@
+# NUR TEST (HKA-57): Upload von diesem Branch, Tag test-<sha>. Branch wird danach gelöscht.
 # Gehärtete Images bauen und nach GHCR hochladen (HKA-57)
 #
 # AK1: Merge auf main -> portal (Dockerfile, dhi.io) für linux/amd64 nach ghcr.io/<owner>/portal:<commit-sha>.
@@ -14,7 +15,7 @@ name: Images
 
 on:
   push:
-    branches: [main]
+    branches: [main, test/HKA-57-ghcr-upload]
   pull_request:
     branches: [main, develop]
   workflow_dispatch:
@@ -28,7 +29,7 @@ concurrency:
 
 env:
   # Hochladen nur beim Push auf main, nie bei Pull Requests (AK3)
-  PUSH: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+  PUSH: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/test/HKA-57-ghcr-upload') }}
 
 jobs:
   build:
@@ -83,7 +84,7 @@ jobs:
           file: ${{ matrix.dockerfile }}
           platforms: linux/amd64
           push: ${{ env.PUSH == 'true' }}
-          tags: ${{ steps.name.outputs.ref }}:${{ github.sha }}
+          tags: ${{ steps.name.outputs.ref }}:test-${{ github.sha }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
