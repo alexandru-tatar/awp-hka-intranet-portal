@@ -100,8 +100,10 @@ Fachsystem liefert nur seine Liste von Fällen, der Prüfteil ist für alle glei
 |---|---|---|---|---|
 | **Fachlich:** ein System lehnt eine Aktion ab oder kennt etwas nicht | nur der **Adapter** | `adapters/<system>/errors` | `bwsync-not-found`, `bwsync-locked`, `bwsync-link-invalid` | eigener Text je `type`, nächster Schritt für die Person |
 | **Technisch:** kann bei jedem System passieren | nur das **SDK** | `adapters/transport` (`TECHNICAL_TYPES`) | `backend-unavailable`, `backend-timeout`, `contract-violation` | ein gemeinsamer Text: später erneut versuchen |
-| **Aufruf:** die App hat eine Grenze oder Regel des SDK verletzt | nur das **SDK** | `adapters/transport` (`CALL_TYPES`) | `download-too-large`, `no-user-context`, `not-implemented` | Grenze nennen bzw. Programmierfehler beheben |
+| **Aufruf:** die App hat eine Grenze oder Regel des SDK verletzt | das **SDK** (Ausnahme siehe unten) | `adapters/transport` (`CALL_TYPES`) | `download-too-large`, `no-user-context`, `not-implemented` | Grenze nennen bzw. Programmierfehler beheben |
 
+- Aufruf-Typen legt das SDK fest, außer Plattform-Prüfungen im Adapter wie `scope-not-granted` (403: der App fehlt
+  das Recht im Manifest).
 - Ein fachlicher Fall hat **immer** einen eigenen `type` mit passendem 4xx-Status, nie 500 oder 502 ohne `type`.
   Fehlt der `type`, ist das ein Fehler im Adapter, nicht in der App.
 - `backend-unavailable` heißt nur: keine verwertbare Antwort (Netz weg, Absturz, Antwort ohne `type`). Kommt er bei
