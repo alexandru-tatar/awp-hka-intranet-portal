@@ -1556,7 +1556,10 @@ code .ph{font-family:var(--mono)}
   <h2>Repository aus der Vorlage</h2>
   <ol class="do">
     <li>Die gewählte Vorlage auf GitHub öffnen: <span class="lang-v py"><a href="https://github.com/alexandru-tatar/awp-hka-gold-python" target="_blank" rel="noopener">awp-hka-gold-python</a></span><span class="lang-v js"><a href="https://github.com/alexandru-tatar/awp-hka-gold-js" target="_blank" rel="noopener">awp-hka-gold-js</a></span>.</li>
-    <li><b>Use this template → Create a new repository</b> wählen. Als Namen Ihren Kurznamen eintragen, Sichtbarkeit <b>Private</b>.</li>
+    <li>Oben rechts den grünen Knopf <b>Use this template → Create a new repository</b> wählen. Gehen Sie <b>nicht</b> über <code>github.com/new</code>: Dort fehlt die Vorlage, und es entsteht ein leeres Repository.</li>
+    <li>Als Namen Ihren Kurznamen eintragen, Sichtbarkeit <b>Public</b>. <b>Include all branches</b> bleibt ausgeschaltet.</li>
+    <li><b>Create repository</b> klicken. Das neue Repository hat nur den Branch <code>main</code>.</li>
+    <li>Branch <code>develop</code> anlegen: Links oben auf das Branch-Menü (<code>main</code>) klicken, <code>develop</code> eintippen und <b>Create branch develop from main</b> wählen.</li>
     <li>Prüfen: Es gibt die Branches <code>main</code> und <code>develop</code>.</li>
   </ol>
   <div class="mock gh" aria-hidden="true">
@@ -1566,7 +1569,7 @@ code .ph{font-family:var(--mono)}
       <div class="gh-box">
         <div class="gh-row"><b style="min-width:120px">Template</b><span style="border:1px solid #d0d7de;padding:4px 10px;background:#f6f8fa;display:inline-flex;gap:6px;align-items:center"><svg class="i" aria-hidden="true"><use href="#i-repo"/></svg> <span class="lang-v py">alexandru-tatar/awp-hka-gold-python</span><span class="lang-v js">alexandru-tatar/awp-hka-gold-js</span></span></div>
         <div class="gh-row"><b style="min-width:120px">Repository name</b><span style="border:2px solid #0969da;padding:4px 10px">ihr-kurzname</span></div>
-        <div class="gh-row"><b style="min-width:120px">Sichtbarkeit</b><span><i class="radio"></i>Private</span></div>
+        <div class="gh-row"><b style="min-width:120px">Sichtbarkeit</b><span><i class="radio"></i>Public</span></div>
       </div>
       <div style="margin-top:14px;text-align:right"><span style="background:#1f883d;color:#fff;font-weight:600;font-size:13px;border-radius:6px;padding:7px 14px">Create repository</span></div>
     </div>
@@ -1575,13 +1578,17 @@ code .ph{font-family:var(--mono)}
   <h2>Auf den Rechner holen</h2>
   <p>Die Adresse des Repositorys steht auf GitHub unter <b>Code</b>. Ersetzen Sie damit <code>REPOSITORY-ADRESSE</code>.</p>
   <div class="tabs os" data-sync="os"><div class="tabs-bar" role="tablist" aria-label="Betriebssystem"><button type="button" role="tab" data-t="win" class="on"><svg class="i i-os" aria-hidden="true"><use href="#i-os-win"/></svg>Windows</button><button type="button" role="tab" data-t="mac"><svg class="i i-os" aria-hidden="true"><use href="#i-os-mac"/></svg>macOS</button><button type="button" role="tab" data-t="linux"><svg class="i i-os" aria-hidden="true"><use href="#i-os-linux"/></svg>Linux (Ubuntu)</button></div><div class="tab-p on" data-t="win" role="tabpanel"><p><b>PowerShell</b> öffnen: Startmenü, „PowerShell“ eintippen, Enter.</p><div class="code"><button class="copy" data-copy="cd $HOME\Projects&#10;git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname&#10;cd ihr-kurzname&#10;code .">Kopieren</button><span class="p">PS&gt; </span>cd $HOME\Projects<br><span class="p">PS&gt; </span>git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname<br><span class="p">PS&gt; </span>cd ihr-kurzname<br><span class="p">PS&gt; </span>code . <span class="c"># öffnet VS Code</span></div></div><div class="tab-p" data-t="mac" role="tabpanel"><p><b>Terminal</b> öffnen: <kbd>⌘</kbd>+<kbd>Leertaste</kbd>, „Terminal“ eintippen, Enter.</p><div class="code"><button class="copy" data-copy="cd ~/Projects&#10;git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname&#10;cd ihr-kurzname&#10;code .">Kopieren</button><span class="p">$ </span>cd ~/Projects<br><span class="p">$ </span>git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname<br><span class="p">$ </span>cd ihr-kurzname<br><span class="p">$ </span>code . <span class="c"># öffnet VS Code</span></div></div><div class="tab-p" data-t="linux" role="tabpanel"><p><b>Terminal</b> öffnen: <kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>T</kbd>.</p><div class="code"><button class="copy" data-copy="cd ~/Projects&#10;git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname&#10;cd ihr-kurzname&#10;code .">Kopieren</button><span class="p">$ </span>cd ~/Projects<br><span class="p">$ </span>git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname<br><span class="p">$ </span>cd ihr-kurzname<br><span class="p">$ </span>code . <span class="c"># öffnet VS Code</span></div></div></div>
+  <p class="small muted">Meldet das Terminal bei <code>code .</code> „command not found“, öffnen Sie den Ordner in VS Code über <b>Datei → Ordner öffnen</b>.</p>
+  <h2>Personen einladen</h2>
+  <p>Für das Review (<a href="#t9">Review</a>) und die Freigabe (<a href="#t10">Freigabe beantragen</a>) brauchen die Reviewerin und die Freigabe-Verantwortliche Zugriff auf Ihr Repository. Auf GitHub: <b>Settings → Collaborators → Add people</b>. Ohne Einladung können Sie niemanden um ein Review bitten.</p>
   <h2>Checkliste</h2>
-  <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 4</span></div>
+  <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 5</span></div>
   <ul class="check" data-store="awp-t2">
     <li><label><input type="checkbox"><span>Sprache gewählt (Python oder JavaScript) und Kurzname notiert</span><span class="pill">Sie</span></label></li>
-    <li><label><input type="checkbox"><span>Repository aus der Vorlage angelegt, Sichtbarkeit privat</span><span class="pill">GitHub</span></label></li>
+    <li><label><input type="checkbox"><span>Repository aus der Vorlage angelegt, Sichtbarkeit öffentlich</span><span class="pill">GitHub</span></label></li>
     <li><label><input type="checkbox"><span>Branches <code>main</code> und <code>develop</code> vorhanden</span><span class="pill">GitHub</span></label></li>
     <li><label><input type="checkbox"><span>Projekt geklont, VS Code ist geöffnet</span><span class="pill">Ihr Rechner</span></label></li>
+    <li><label><input type="checkbox"><span>Reviewerin und Freigabe-Verantwortliche sind eingeladen</span><span class="pill">GitHub</span></label></li>
   </ul>
 </article>
 
@@ -1592,9 +1599,9 @@ code .ph{font-family:var(--mono)}
   <ol class="do">
     <li>Befehlspalette öffnen: <span class="os-v win"><svg class="i" aria-hidden="true"><use href="#i-os-win"/></svg><kbd>Strg</kbd>+<kbd>Umschalt</kbd>+<kbd>P</kbd></span><span class="os-v linux"><svg class="i" aria-hidden="true"><use href="#i-os-linux"/></svg><kbd>Strg</kbd>+<kbd>Umschalt</kbd>+<kbd>P</kbd></span><span class="os-v mac"><svg class="i" aria-hidden="true"><use href="#i-os-mac"/></svg><kbd>⌘</kbd>+<kbd>Umschalt</kbd>+<kbd>P</kbd></span>.</li>
     <li><b>Dev Containers: Reopen in Container</b> wählen.</li>
-    <li>Docker Desktop muss laufen (Windows, macOS) bzw. der Docker-Dienst (Linux). Warten, bis unten links <b>„Dev Container“</b> steht. Beim ersten Mal dauert das einige Minuten.</li>
+    <li>Docker Desktop muss laufen (Windows, macOS) bzw. der Docker-Dienst (Linux). Warten, bis unten links <b>„Dev Container“</b> steht. Beim ersten Mal dauert das einige Minuten. Meldet VS Code „Docker returned an error“, starten Sie Docker neu und wählen Sie <b>Retry</b>.</li>
     <li><b>Terminal → Neues Terminal</b> öffnen. Es läuft jetzt im Container.</li>
-    <li>Claude Code öffnen und anmelden. Im Container ist das jedes Mal nötig.</li>
+    <li>Claude Code öffnen und anmelden. Im Container ist das jedes Mal nötig. Fehlt das Symbol in der linken Leiste: Erweiterungen öffnen, <code>Claude Code</code> (Anthropic) suchen und <b>Install in Dev Container</b> wählen.</li>
   </ol>
   <div class="mock" style="position:relative" aria-hidden="true">
     <div class="mock-bar"><span class="ttl">ihr-kurzname — Visual Studio Code</span></div>
@@ -1669,7 +1676,7 @@ code .ph{font-family:var(--mono)}
     <li><b>Beschreiben:</b> Prompt-Vorlage unten kopieren und mit Ihrem Ideen-Steckbrief füllen.</li>
     <li><b>Rückfragen beantworten:</b> Die KI fragt nach, wenn etwas offen ist. Antworten Sie fachlich, in eigenen Worten.</li>
     <li><b>Mitlesen:</b> Die KI zeigt, welche Dateien sie ändert. Sie müssen den Code nicht verstehen – aber wissen, was die App danach können soll.</li>
-    <li><b>Befehle nur erlauben, wenn klar ist, was sie tun.</b> Im Zweifel nachfragen: „Was macht dieser Befehl?“</li>
+    <li><b>Befehle nur erlauben, wenn klar ist, was sie tun.</b> Im Zweifel nachfragen: „Was macht dieser Befehl?“ Stellen Sie dafür im Eingabefeld von Claude Code den Modus <b>Manual</b> ein, dann fragt Claude vor jedem Befehl. Im Modus <b>Auto</b> entscheidet Claude selbst.</li>
     <li><b>Ausprobieren</b> (nächste Etappe) und dann die nächste Runde beginnen.</li>
   </ol>
   <div class="chat">
@@ -1706,14 +1713,14 @@ code .ph{font-family:var(--mono)}
   <p>Im Terminal von VS Code – also im Container. Dort ist der Befehl auf allen Systemen gleich.</p>
   <div class="code"><button class="copy" data-copy="make dev">Kopieren</button><span class="p">$ </span>make dev <span class="c"># → http://localhost:8080</span></div>
   <ol class="do">
-    <li>Terminal offen lassen und <code>http://localhost:8080</code> im Browser öffnen.</li>
-    <li>In der Test-Anmeldung eine Testperson mit passender Rolle wählen.</li>
+    <li>Terminal offen lassen und <code>http://localhost:8080</code> im Browser öffnen. Zeigt der Browser eine andere Anwendung, belegt ein anderes Programm den Port 8080. Im Reiter <b>Ports</b> von VS Code steht, unter welcher Adresse die App erreichbar ist.</li>
+    <li>In der Test-Anmeldung eine Testperson wählen und unter <b>Rollen aus dem Manifest</b> die Rolle ankreuzen, mit der Sie testen. Weitere Rollen tragen Sie im Feld darunter ein.</li>
     <li>Den Testplan unten durchgehen. Beenden mit <span class="os-v win"><svg class="i" aria-hidden="true"><use href="#i-os-win"/></svg><kbd>Strg</kbd>+<kbd>C</kbd></span><span class="os-v linux"><svg class="i" aria-hidden="true"><use href="#i-os-linux"/></svg><kbd>Strg</kbd>+<kbd>C</kbd></span><span class="os-v mac"><svg class="i" aria-hidden="true"><use href="#i-os-mac"/></svg><kbd>⌃ Control</kbd>+<kbd>C</kbd></span> im Terminal.</li>
   </ol>
   <div class="mock br" aria-hidden="true" style="max-width:26rem">
     <div class="mock-bar"><span class="url">localhost:8080/login</span></div>
     <div class="login"><div class="box"><b>Test-Anmeldung</b><div style="font-size:12px;color:var(--ink-muted)">Nur für die Entwicklung</div>
-      <div class="opt sel"><i></i>Test-Studentin · student</div><div class="opt"><i></i>Test-Mitarbeiter · employee</div><div class="opt"><i></i>Test-Admin · admin</div>
+      <div class="opt sel"><i></i>Erika Musterfrau (mit Noten)</div><div class="opt"><i></i>Max Mustermann (ohne Noten)</div><div class="opt"><i></i>Rolle aus dem Manifest: employee</div>
       <div class="go">Anmelden</div></div></div>
   </div>
   <h2>Testplan</h2>
@@ -1722,7 +1729,7 @@ code .ph{font-family:var(--mono)}
   <ul class="check" data-store="awp-t6">
     <li><label><input type="checkbox"><span><b>Hauptaufgabe</b> funktioniert von Anfang bis Ende</span><span class="pill">Sie</span></label></li>
     <li><label><input type="checkbox"><span><b>Jede Rolle</b> aus dem Steckbrief sieht, was sie sehen soll</span><span class="pill">Sie</span></label></li>
-    <li><label><input type="checkbox"><span>Eine <b>Rolle ohne Berechtigung</b> sieht die App nicht</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Eine <b>Rolle ohne Berechtigung</b> sieht die App nicht (Häkchen entfernen und im Feld „Weitere Rollen“ eine andere Rolle eintragen)</span><span class="pill">Sie</span></label></li>
     <li><label><input type="checkbox"><span><b>Leerer Zustand</b>: Was steht da, wenn noch nichts vorhanden ist?</span><span class="pill">Sie</span></label></li>
     <li><label><input type="checkbox"><span><b>Falsche Eingaben</b> führen zu einer verständlichen Meldung</span><span class="pill">Sie</span></label></li>
     <li><label><input type="checkbox"><span>Alles ist <b>mit der Tastatur</b> bedienbar (Tab, Enter)</span><span class="pill">Sie</span></label></li>
@@ -1739,22 +1746,23 @@ code .ph{font-family:var(--mono)}
     <div class="mock-bar"><span class="ttl">Terminal — make check</span></div>
     <div class="term reveal">
       <div class="ln2"><span class="p">$ </span>make check</div>
-      <div class="ln2"><span class="m">Code-Regeln und Formatierung</span> <span class="ok">ok</span></div>
-      <div class="ln2"><span class="m">Automatische Tests</span> <span class="ok">ok</span></div>
-      <div class="ln2"><span class="m">Vorgaben aus .agents/skills</span> <span class="ok">ok</span></div>
-      <div class="ln2"><span class="m">Manifest</span> <span class="ok">ok</span></div>
+      <div class="ln2"><span class="m">Prüfbericht Skills</span> <span class="ok">Gesamtergebnis: BESTANDEN</span></div>
+      <div class="ln2"><span class="m">Prüfbericht Starter</span> <span class="ok">Gesamtergebnis: BESTANDEN</span></div>
+      <div class="ln2"><span class="m">Code-Regeln (make lint), Tests (make test)</span> <span class="ok">bestanden</span></div>
+      <div class="ln2"><span class="m">… (die echte Ausgabe ist länger)</span></div>
       <div class="ln2">&nbsp;</div>
       <div class="ln2"><span class="hl">Prüfnachweis:</span> build/pruefberichte/pruefnachweis-aktuell.md</div>
     </div>
   </div>
-  <p>Die Datei <code>build/pruefberichte/pruefnachweis-aktuell.md</code> ist Ihr <b>Prüfnachweis</b>. Hängen Sie ihn an Ihr Ticket.</p>
+  <p>Die Ausgabe ist lang. Entscheidend ist die Zeile <b>Gesamtergebnis: BESTANDEN</b>. Prüfungen, die als <em>übersprungen</em> erscheinen, sind normal: Sie brauchen Dateien oder Programme, die auf Ihrem Rechner nicht liegen. Der automatische Lauf prüft nur einen Teil der Regeln (17 von 40). Den Rest prüft das Review.</p>
+  <p>Die Datei <code>build/pruefberichte/pruefnachweis-aktuell.md</code> ist Ihr <b>Prüfnachweis</b>. Hängen Sie ihn an Ihr Ticket. Haben Sie kein Ticket: Die Datei liegt nicht im Repository (<code>build/</code> ist ausgeschlossen). Kopieren Sie den Abschnitt „Prüfnachweis“ in die Beschreibung des Pull Requests. Die Zeilen mit <code>[OFFEN]</code> füllt die Reviewerin aus.</p>
   <div class="callout c-tip"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></div><div><h5>Rot? Kein Problem.</h5><p>Kopieren Sie die Meldung in Claude Code: „Das ist rot, bitte erkläre und behebe es.“ Danach erneut <code>make check</code>. Was Codes wie <code>PF-101</code> bedeuten: <a href="#fehlercodes">Fehlercodes</a>.</p></div></div>
   <h2>Checkliste</h2>
   <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 3</span></div>
   <ul class="check" data-store="awp-t7">
     <li><label><input type="checkbox"><span><code>make check</code> läuft ohne Fehler</span><span class="pill">Container</span></label></li>
     <li><label><input type="checkbox"><span>Prüfnachweis ist erzeugt</span><span class="pill">Container</span></label></li>
-    <li><label><input type="checkbox"><span>Prüfnachweis ans Ticket gehängt</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Prüfnachweis ans Ticket gehängt oder in den Pull Request kopiert</span><span class="pill">Sie</span></label></li>
   </ul>
 </article>
 
@@ -1763,9 +1771,9 @@ code .ph{font-family:var(--mono)}
   <p class="lede">Sie schauen sich an, was die KI geändert hat, und sichern den Stand auf <code>develop</code>. Ein Commit ist wie ein Speicherpunkt, zu dem Sie jederzeit zurückkönnen.</p>
   <h2>Commit</h2>
   <ol class="do">
-    <li>Unten links prüfen: Sie sind auf dem Branch <code>develop</code>.</li>
+    <li>Unten links prüfen: Sie sind auf dem Branch <code>develop</code>. Steht dort <code>main</code>, klicken Sie auf den Namen und wählen Sie <code>develop</code>. Gibt es ihn nicht, fehlt der Schritt „Branch <code>develop</code> anlegen“ aus <a href="#t2">Projekt anlegen</a>.</li>
     <li>Links <b>Quellcodeverwaltung</b> öffnen. Jede geänderte Datei einmal anklicken und <b>ansehen</b>. Rot = entfernt, grün = neu.</li>
-    <li>Eine Nachricht mit Ticket-Nummer schreiben, z. B. <code>HKA-123 Übersichtsseite und Formular</code>.</li>
+    <li>Eine kurze Nachricht schreiben. Haben Sie eine Ticket-Nummer, steht sie am Anfang, z. B. <code>HKA-123 Übersichtsseite und Formular</code>.</li>
     <li><b>Commit</b> klicken, dann <b>Synchronisieren</b>.</li>
   </ol>
   <div class="mock" aria-hidden="true">
@@ -1795,7 +1803,7 @@ code .ph{font-family:var(--mono)}
   <ul class="check" data-store="awp-t8">
     <li><label><input type="checkbox"><span>Branch ist <code>develop</code></span><span class="pill">VS Code</span></label></li>
     <li><label><input type="checkbox"><span>Jede geänderte Datei angesehen</span><span class="pill">Sie</span></label></li>
-    <li><label><input type="checkbox"><span>Commit-Nachricht mit Ticket-Nummer</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Commit-Nachricht geschrieben (mit Ticket-Nummer, falls vorhanden)</span><span class="pill">Sie</span></label></li>
     <li><label><input type="checkbox"><span>Synchronisiert – der Stand liegt auf GitHub</span><span class="pill">GitHub</span></label></li>
   </ul>
 </article>
@@ -1805,11 +1813,11 @@ code .ph{font-family:var(--mono)}
   <p class="lede">Bevor Ihre App weitergeht, liest eine zweite Person die Änderungen. Das Vier-Augen-Prinzip schützt Sie und die Daten der Hochschule.</p>
   <h2>Pull Request</h2>
   <ol class="do">
-    <li>Auf GitHub einen Pull Request von <code>develop</code> nach <code>main</code> anlegen.</li>
+    <li>Auf GitHub einen Pull Request von <code>develop</code> nach <code>main</code> anlegen. Rechts unter <b>Reviewers</b> die Reviewerin wählen. Die Liste ist leer, solange niemand in Ihr Repository eingeladen ist (siehe <a href="#t2">Projekt anlegen</a>).</li>
     <li>In die Beschreibung: Ticket-Nummer, was die App kann, Prüfnachweis.</li>
     <li>Warten, bis die Pipeline grün ist. Ist sie rot: <a href="#fehlercodes">Fehlercodes</a> nachschlagen oder Claude Code fragen.</li>
     <li>Kommentare der Reviewerin beantworten oder mit der KI umsetzen, neu sichern.</li>
-    <li>Nach der Freigabe im Review: <b>Merge</b>.</li>
+    <li>Nach der Freigabe im Review: <b>Merge</b>. GitHub erlaubt den Merge auch ohne Review, weil <code>main</code> noch nicht geschützt ist. Warten Sie auf die Freigabe der Reviewerin.</li>
   </ol>
   <div class="mock gh" aria-hidden="true">
     <div class="mock-bar"><span class="ttl">github.com · Pull request</span></div>
@@ -1850,7 +1858,7 @@ code .ph{font-family:var(--mono)}
   <ul class="check" data-store="awp-t10">
     <li><label><input type="checkbox"><span>Link zum Repository, Stand auf <code>main</code></span><span class="pill">GitHub</span></label></li>
     <li><label><input type="checkbox"><span>Link zum gemergten Pull Request mit Review</span><span class="pill">GitHub</span></label></li>
-    <li><label><input type="checkbox"><span>Ticket-Nummer und Prüfnachweis</span><span class="pill">Ticket</span></label></li>
+    <li><label><input type="checkbox"><span>Prüfnachweis (und Ticket-Nummer, falls vorhanden)</span><span class="pill">Ticket</span></label></li>
     <li><label><input type="checkbox"><span>Ideen-Steckbrief: wer, was, welche Daten</span><span class="pill">Sie</span></label></li>
     <li><label><input type="checkbox"><span>Rollen und Datenablage geklärt</span><span class="pill">Sie</span></label></li>
     <li><label><input type="checkbox"><span>Fachliche Ansprechperson für Rückfragen</span><span class="pill">Sie</span></label></li>
