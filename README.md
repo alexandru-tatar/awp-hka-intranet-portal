@@ -95,7 +95,7 @@ und passender Rolle; Kategorien in fester Reihenfolge, Einträge alphabetisch.
 
 ## Offene Punkte (aus 04 §13)
 
-- `{kontakt}` und Links für Hilfe/Datenschutz/Impressum — in `dev/gateway.dev.yml` Platzhalter.
+- `{kontakt}` — in `dev/gateway.dev.yml` Platzhalter. Footer verlinkt nur `/_portal/docs` (`src/portal/docs/awp-docs.html`, Kopie von `../AWP-Docs.html`).
 - Design: angelehnt an www.h-ka.de (HKA-Rot `#d72305`, eckige Formen, graue Kacheln, fette
   Mono-Links mit „>"). Schrift IBM Plex Sans (wie h-ka.de); für die lizenzpflichtige GT Pressura
   stehen IBM Plex Sans Condensed (Überschriften) und IBM Plex Mono (Buttons) — alle OFL, selbst
