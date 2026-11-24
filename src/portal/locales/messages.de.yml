@@ -19,9 +19,7 @@ logout.title: Abmelden?
 logout.body: Möchten Sie sich vom Portal abmelden?
 
 footer.label: Fußzeile
-footer.help: Hilfe
-footer.privacy: Datenschutz
-footer.imprint: Impressum
+footer.docs: Docs
 
 home.title: Startseite
 home.greeting: Willkommen, {name}

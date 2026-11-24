@@ -18,19 +18,6 @@ class ConfigError(Exception):
 
 
 @dataclass(frozen=True)
-class Links:
-    """Links im Footer.
-
-    :ivar help: Hilfe
-    :ivar privacy: Datenschutz
-    :ivar imprint: Impressum
-    """
-    help: str = "#"
-    privacy: str = "#"
-    imprint: str = "#"
-
-
-@dataclass(frozen=True)
 class LoggingConfig:
     """Einstellungen des Loggings (Abschnitt ``logging``).
 
@@ -120,7 +107,6 @@ class Config:
     :ivar auth_mode: ``dev`` (Testpersonen, Sessions im Speicher) oder ``gateway`` (Identität vom separaten Security-Gateway)
     :ivar logging: Einstellungen des Loggings
     :ivar grants_file: Zusätzliche Rollen je Subject
-    :ivar links: Footer-Links
     :ivar apps: Adressen der App-Container für den Prober, ``None`` ohne Abschnitt
     :ivar registry: Nachladen der Manifeste, Prober und Besitzerdatei
     """
@@ -138,7 +124,6 @@ class Config:
     auth_mode: str = "dev"
     logging: LoggingConfig = field(default_factory=LoggingConfig)
     grants_file: Path | None = None
-    links: Links = field(default_factory=Links)
     apps: AppsConfig | None = None
     registry: RegistryConfig = field(default_factory=RegistryConfig)
     gateway: GatewayConfig | None = None
@@ -155,7 +140,7 @@ class Config:
 
 _KEYS = {
     "env", "kontakt", "manifests_dir", "schema_path", "kit_dist", "role_vocabulary",
-    "adapter_scopes", "state_file", "dev_users_file", "session_cookie", "links",
+    "adapter_scopes", "state_file", "dev_users_file", "session_cookie",
     "cookie_secure", "auth_mode", "logging", "grants_file",
     "apps", "registry", "gateway",
 }
@@ -193,11 +178,6 @@ def load_config(path: Path) -> Config:
         if not raw.get(key):
             raise ConfigError(f"{path}: missing key {key}")
 
-    links_raw = raw.get("links") or {}
-    unknown_links = set(links_raw) - {"help", "privacy", "imprint"}
-    if unknown_links:
-        raise ConfigError(f"{path}: unknown links key(s) {', '.join(sorted(unknown_links))}")
-
     cfg = Config(
         env=env,
         kontakt=raw["kontakt"],
@@ -213,7 +193,6 @@ def load_config(path: Path) -> Config:
         auth_mode=auth_mode,
         logging=_load_logging(path, base, raw.get("logging"), env),
         grants_file=p("grants_file"),
-        links=Links(**links_raw),
         apps=_load_apps(path, raw.get("apps")),
         registry=_load_registry(path, base, raw.get("registry")),
         gateway=GatewayConfig(**raw["gateway"]) if raw.get("gateway") else None,
