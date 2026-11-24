@@ -11,8 +11,10 @@ from __future__ import annotations
 
 import asyncio
 import os
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Callable
 
 import httpx
 from fastapi import FastAPI
@@ -23,6 +25,7 @@ from .core.config import Config, load_config
 from .core.kit import STATIC_PREFIX, KitStaticFiles
 from .router import (
     admin_router,
+    app_creation_router,
     auth_router,
     dev_login_router,
     dev_router,
@@ -41,6 +44,8 @@ def create_app(
     app_transport: httpx.AsyncBaseTransport | None = None,
     registry_token_file: Path | None = None,
     gateway_http_client: httpx.Client | None = None,
+    github_http_client: httpx.Client | None = None,
+    sleep: Callable[[float], None] = time.sleep,
 ) -> FastAPI:
     """FastAPI-Anwendung aus der Konfiguration bauen.
 
@@ -51,13 +56,15 @@ def create_app(
     :param config: Fertige Konfiguration oder Pfad zur YAML-Datei
     :param app_transport: Transport zu den App-Containern, z. B. ``MockTransport`` in Tests
     :param registry_token_file: Optionale externe Secretdatei für die interne Registry-API
+    :param github_http_client: HTTP-Client für die GitHub-API statt des Netzwerks, für Tests
+    :param sleep: Wartefunktion beim Anlegen einer App, für Tests
     :return: Die konfigurierte Anwendung
     :rtype: FastAPI
     :raises ConfigError: Falls die Konfiguration ungültig ist
     """
     cfg = config if isinstance(config, Config) else load_config(Path(config))
 
-    portal = build_portal(cfg, app_transport=app_transport)
+    portal = build_portal(cfg, app_transport=app_transport, github_http_client=github_http_client, sleep=sleep)
 
     verifier = GatewayVerifier(cfg.gateway, gateway_http_client) if cfg.auth_mode == "gateway" else None
 
@@ -74,6 +81,8 @@ def create_app(
             await portal.prober.aclose()
         if verifier is not None:
             verifier.close()
+        if portal.github is not None:
+            portal.github.close()
 
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
     app.state.portal = portal
@@ -90,6 +99,7 @@ def create_app(
 
     app.include_router(page_router)
     app.include_router(admin_router)
+    app.include_router(app_creation_router)
     if cfg.auth_mode != "gateway":
         app.include_router(auth_router)
     app.include_router(nav_router)

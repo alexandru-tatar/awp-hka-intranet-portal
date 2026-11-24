@@ -242,6 +242,54 @@ class Registrar:
                 raise RegistryError(f"Schreiben nicht möglich: {exc}") from exc
         return manifest, known
 
+    def reserve(self, slug: str, owner: str) -> bool:
+        """Einen Namen für ein Repository reservieren, ohne ein Manifest abzulegen (HKA-82).
+
+        Die Reservierung bindet den Namen in der Besitzerdatei. Die spätere ``register``-Prüfung des Repositorys
+        gelingt damit, jedes andere Repository wird mit PF-202 abgelehnt. Gleicher Besitzer: nichts ändert sich.
+
+        :param slug: Name der App, schon auf Form und reservierte Namen geprüft
+        :param owner: Repository im Format ``owner/name``
+        :return: ``True``, wenn die Reservierung neu ist
+        :rtype: bool
+        :raises ValueError: Falls ``owner`` nicht das Format ``owner/name`` hat oder ``slug`` nicht passt
+        :raises Rejected: PF-202, falls der Name vergeben oder gesperrt ist; PF-204 bei laufender Registrierung
+        :raises RegistryError: Falls die Besitzerdatei kaputt ist oder nicht geschrieben werden kann
+        """
+        if SLUG_RE.fullmatch(slug) is None or OWNER_RE.fullmatch(owner) is None:
+            raise ValueError("slug oder owner ungültig")
+        with self._locked():
+            owners = self._read_owners()
+            self._check_name(slug, owner, owners, self._read_retired())
+            if owners.get(slug) == owner:
+                return False
+            try:
+                atomic_write(self._owners_file, json.dumps({**owners, slug: owner}, indent=2, sort_keys=True) + "\n")
+            except OSError as exc:
+                raise RegistryError(f"Schreiben nicht möglich: {exc}") from exc
+        return True
+
+    def release(self, slug: str, owner: str) -> bool:
+        """Eine Reservierung wieder aufheben, falls noch kein Manifest zum Namen gehört.
+
+        :param slug: Name der App
+        :param owner: Repository im Format ``owner/name``, das reserviert hat
+        :return: ``True``, wenn die Reservierung entfernt wurde
+        :rtype: bool
+        :raises Rejected: PF-204 bei laufender Registrierung
+        :raises RegistryError: Falls die Besitzerdatei kaputt ist oder nicht geschrieben werden kann
+        """
+        with self._locked():
+            owners = self._read_owners()
+            if owners.get(slug) != owner or (self._dir / f"{slug}.json").exists():
+                return False
+            try:
+                atomic_write(self._owners_file, json.dumps(
+                    {k: v for k, v in owners.items() if k != slug}, indent=2, sort_keys=True) + "\n")
+            except OSError as exc:
+                raise RegistryError(f"Schreiben nicht möglich: {exc}") from exc
+        return True
+
     def entries(self) -> list[Entry]:
         """Alle Apps: registrierte, von Hand eingerichtete und stillgelegte, nach Namen sortiert.
 

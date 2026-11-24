@@ -88,6 +88,12 @@ das Manifest auf der Standardeingabe (höchstens 64 KiB).
 Fehlerblöcke stehen im Format des Katalogs der Pipeline (`.agents/skills/pipeline-fehler/fehlercodes.md`) auf der Fehlerausgabe.
 Exit-Codes: 0 in Ordnung, 1 abgelehnt, 2 falscher Aufruf, 3 Fehler im Betrieb (Konfiguration, Besitzerdatei, Schreibrechte).
 
+**Reservierung (HKA-82).** Legt das Portal eine App an, bindet es den Namen schon vor dem Anlegen des Repositorys:
+`Registrar.reserve(slug, owner)` trägt `{slug: "<konto>/app-<slug>"}` in `owners.json` ein, ohne ein Manifest abzulegen (gleiche Sperre,
+gleiche Prüfung PF-202 wie `register`). Gleicher Besitzer: keine Änderung. Die spätere `register`-Prüfung desselben Repositorys
+gelingt, jedes andere Repository wird abgelehnt. `Registrar.release(slug, owner)` hebt eine Reservierung auf, solange noch kein
+Manifest zum Namen gehört. Die Verwaltungsseite zeigt reservierte Namen erst, wenn ein Manifest registriert ist.
+
 **Nachladen:** Eine Hintergrundaufgabe des Portals ruft alle `registry.refresh_seconds` (Standard 5) `Registry.refresh()` auf, in jeder
 Umgebung. Wird dieselbe Datei neu geschrieben (anderer Inhalt oder neue Änderungszeit), gilt das als neue Registrierung, und die App
 beginnt wieder bei `registering`.

@@ -130,6 +130,8 @@ Nie umgekehrt (z. B. importiert `service/` nie aus `web/` oder `router/`, `regis
 | neue Geschäftsregel | `service/<entity>_service.py` (lesen) bzw. `<entity>_write_service.py` (schreiben) |
 | neuer Rückgabetyp eines Services | `service/<entity>_dto.py`, Export in `service/__init__.py` |
 | neue fachliche Exception | `service/exceptions.py` + Status-Mapping in `web/errors.py` (`SERVICE_ERROR_STATUS`) |
+| neuer GitHub-Aufruf (App anlegen) | `github/client.py` (nur `GitHubError` mit Schritt und Status, nie Header oder Antworttext), Ablauf in `service/app_creation_service.py`, Test mit `tests/fakes/fake_github.py` |
+| Protokoll einer Verwaltungsaktion (wer, wann, welche App) | `service/audit.py` (`AuditLog`), nie Token oder Schlüssel hineinschreiben |
 | Service in Handler nutzen | `Depends`-Alias in `web/deps.py` (z. B. `AppServiceDep`), Instanz in `context.py` bauen |
 | Session-/Rollen-Prüfung | `web/deps.py` |
 | Fehlerseite / Statuscode-Mapping | `web/errors.py` |

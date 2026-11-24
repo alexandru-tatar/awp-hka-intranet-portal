@@ -113,6 +113,7 @@ def configure_logging(cfg: LoggingConfig) -> None:
         filter=_filter(cfg.console_level, cfg.levels),
         format=_CONSOLE_FORMAT,
         colorize={"auto": None, "always": True, "never": False}[cfg.color],
+        diagnose=False,  # sonst druckt loguru Werte lokaler Variablen (Schlüssel, Token) in Tracebacks
     )
     if cfg.file is not None:
         logger.add(
@@ -124,6 +125,7 @@ def configure_logging(cfg: LoggingConfig) -> None:
             retention=cfg.retention,
             compression="gz",
             encoding="utf-8",
+            diagnose=False,
         )
     logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
     for name in ("uvicorn", "uvicorn.error", "uvicorn.access"):

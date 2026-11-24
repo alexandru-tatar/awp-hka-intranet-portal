@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# VERALTET (HKA-82): Neue Apps legt das Portal an, über die Seite /_portal/neue-app oder die Schnittstelle
+# POST /_portal/api/apps (docs/02-entwicklung.md, "Neue App anlegen"). Dieses Skript bleibt für den Notfall und als
+# Vorlage für die Schritte, die das Portal ausführt, und fällt weg, sobald die GitHub App eingerichtet ist.
+#
 # Neue App aus dem Golden Master anlegen (HKA-54).
 #
 # Aufruf:  tools/neue-app.sh <slug> js|python [--pruefen] [--ohne-team]
@@ -26,6 +30,8 @@
 # Das Skript liest und schreibt keine Zugangsdaten. Weder das Repository noch das Log enthalten welche (Gitleaks, AK4).
 
 set -euo pipefail
+
+echo "HINWEIS: Dieses Skript ist veraltet (HKA-82). Neue Apps legt das Portal an: Seite /_portal/neue-app." >&2
 
 OWNER="${OWNER:-alexandru-tatar}"
 VORLAGE_OWNER="${VORLAGE_OWNER:-$OWNER}"

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "macros/fields.html" import field, error_summary %}
+
+{% block content %}
+{% if result %}
+<h1>{{ t('neue_app.done.title') }}</h1>
+<div class="notice" role="status">
+  <p>{{ t('neue_app.done.body', repo=result.repo) }}</p>
+  <p>{{ t('neue_app.done.invite', login=values.github_login) }}</p>
+</div>
+<p><a class="btn btn--primary" href="{{ result.url }}" rel="noopener">{{ t('neue_app.done.open') }}</a></p>
+<p>{{ t('neue_app.done.next') }}</p>
+{% else %}
+<h1>{{ t('neue_app.title') }}</h1>
+<p class="lead">{{ t('neue_app.intro') }}</p>
+
+{% if errors %}{{ error_summary(t('neue_app.error.title'), errors) }}{% endif %}
+
+<form id="neue-app-form" method="post" action="/_portal/neue-app" class="prose" tabindex="-1">
+  <input type="hidden" name="csrf" value="{{ user.csrf }}">
+  {% set slug_error = errors | selectattr(0, 'equalto', 'slug') | map(attribute=1) | first %}
+  {% set login_error = errors | selectattr(0, 'equalto', 'github-login') | map(attribute=1) | first %}
+  {% set language_error = errors | selectattr(0, 'equalto', 'language-python') | map(attribute=1) | first %}
+  {{ field('slug', t('neue_app.form.slug'), name='slug', value=values.slug, hint=t('neue_app.form.slug_hint'),
+           error=slug_error, required=True, maxlength='31', autocomplete='off', autocapitalize='none', spellcheck='false') }}
+  <fieldset class="checks">
+    <legend>{{ t('neue_app.form.language') }}</legend>
+    {%- if language_error %}<p class="field__error">{{ language_error }}</p>{% endif %}
+    <label><input id="language-python" type="radio" name="language" value="python"{% if values.language != 'js' %} checked{% endif %}> {{ t('neue_app.form.python') }}</label>
+    <label><input id="language-js" type="radio" name="language" value="js"{% if values.language == 'js' %} checked{% endif %}> {{ t('neue_app.form.js') }}</label>
+  </fieldset>
+  {{ field('github-login', t('neue_app.form.github_login'), name='github_login', value=values.github_login,
+           hint=t('neue_app.form.github_login_hint'), error=login_error, required=True, maxlength='39',
+           autocomplete='off', autocapitalize='none', spellcheck='false') }}
+  <div class="actions"><button type="submit" class="btn btn--primary">{{ t('neue_app.form.submit') }}</button></div>
+</form>
+{% endif %}
+{% endblock %}

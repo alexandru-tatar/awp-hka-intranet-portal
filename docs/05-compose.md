@@ -31,6 +31,7 @@ Portal: http://localhost:18080 (über das Gateway; das Portal hat keinen Hostpor
 | Konfiguration (`PORTAL_CONFIG`) | `/opt/app/dev/gateway.compose.yml` | `/opt/app/dev/gateway.vm.yml` |
 | Daten (Manifeste, Status, Registry) | `.local/portal/*` in diesem Repo | `/srv/portal/*` |
 | Service-Token für die Registry-API | `server/.secrets/registry-service-token` | `/srv/portal/gateway/secrets/registry-service-token` |
+| Privater Schlüssel der GitHub App (nur mit `app_creation`, HKA-82) | `HKA_GITHUB_APP_KEY_SOURCE`, Standard `/dev/null` (aus) | `HKA_GITHUB_APP_KEY_SOURCE` in `vm/.env`, Datei mit Rechten 0400, nie im Repository |
 
 Die Konfigurationen sind ins Image eingebaut: Nach Änderungen an `dev/gateway.compose.yml` oder `dev/gateway.vm.yml`
 das Image neu bauen (`make server-up` bzw. `make vm-images`). Netze: `portal` (nur Gateway ↔ Portal) und
