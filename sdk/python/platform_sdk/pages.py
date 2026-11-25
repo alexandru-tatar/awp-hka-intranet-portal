@@ -20,6 +20,7 @@ from starlette.responses import HTMLResponse, JSONResponse, Response
 from .adapters.transport import BACKEND_TIMEOUT, category
 from .context import current_request_id
 from .errors import AdapterError
+from .layout import Layout
 
 env = Environment(loader=FileSystemLoader(Path(__file__).parent / "templates"), autoescape=True)
 
@@ -63,6 +64,25 @@ def error(
     if request_id:
         body["request_id"] = request_id
     return JSONResponse(body, status_code=status, media_type="application/problem+json")
+
+
+async def error_in_layout(request: Request, layout: Layout, status: int, title: str, detail: str) -> Response:
+    """Wie `error`, aber die HTML-Seite steht im Seitenrahmen des Portals (Kopf, Menü, Fuß, Weg zur Startseite).
+
+    Ohne angemeldete Person oder ohne `text/html` gilt `error`; ebenso, wenn der Rahmen nicht gebaut werden kann.
+    """
+    user = getattr(request.state, "portal_user", None)
+    if user is None or "text/html" not in request.headers.get("accept", ""):
+        return error(request, status, title, detail)
+    try:
+        body = env.get_template("error_in_layout.html").render(
+            title=title, detail=detail, request_id=current_request_id.get()
+        )
+        html = await layout.render(title=title, body=body, current="", user=user)
+    except Exception as exc:  # die einfache Seite ist besser als ein zweiter Fehler
+        log.warning("Fehlerseite im Rahmen nicht möglich, einfache Seite: %s", type(exc).__name__)
+        return error(request, status, title, detail)
+    return HTMLResponse(html, status_code=status)
 
 
 def fallback(request: Request, exc: Exception) -> Response:

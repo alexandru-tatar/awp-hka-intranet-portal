@@ -52,7 +52,8 @@ Knopf, Texte und Dialog selbst; das Skript meldet nur Zustände (wartet, verbund
 1. **Reine Bibliothek.** Unter `adapters/` und `common/` gibt es kein HTML, kein CSS, keine Vorlagen und keine
    Texte für Nutzer. Oberfläche, Wortwahl und Muster dafür stehen im Golden Master (Skill `schnittstellen`) oder in
    der App. Vom Portal vorgegeben und deshalb im SDK: Seitenrahmen (`layout`), Fehlerseite (auch für die
-   Standardbehandlung von Fehlern, siehe „Fehler: Standard“), Test-Anmeldung.
+   Standardbehandlung von Fehlern, siehe „Fehler: Standard“), Test-Anmeldung. „Kein Zugriff“ (403 aus
+   `portal.requires`) erscheint im Browser als Seite im Seitenrahmen mit Weg zur Startseite, sonst als problem+json.
 2. **Andere Systeme nur über das SDK.** Eine App ruft nie selbst einen Dienst auf, sondern
    `portal.adapters.<system>.<aufruf>(…)`. Das SDK schickt die Anmeldung der Person mit; die App braucht kein
    Passwort und kein Token. Durchgesetzt durch Regel R-SCHN-1 im Golden Master: `make lint` meldet eigene
@@ -211,4 +212,4 @@ In einer App holt `make sdk-update SDK_DIST=<Portal-Repository>/sdk/dist/<sprach
 
 Eine Version für beide Sprachen, in `python/platform_sdk/VERSION`, `javascript/platform_sdk/VERSION` und
 `javascript/package.json`. Jede Änderung unter `platform_sdk/` braucht eine neue Version und `make sdk-release`.
-Aktuell: `1.2.0-dev`.
+Aktuell: `1.2.1-dev`.

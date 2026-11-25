@@ -104,6 +104,52 @@ test("requires: 403 ohne die Rolle", async () => {
   assert.equal((await fetch(`${prod.base}/nur-professor`, { headers: student() })).status, 403);
 });
 
+test("requires: 403 im Browser als Seite im Portal-Rahmen mit Weg zur Startseite (HKA-95)", async () => {
+  const response = await fetch(`${prod.base}/nur-professor`, { headers: { ...student(), Accept: "text/html" } });
+  const html = await response.text();
+  assert.equal(response.status, 403);
+  assert.ok(response.headers.get("content-type").startsWith("text/html"));
+  assert.ok(html.includes("<title>Kein Zugriff – HKA Portal</title>"));
+  assert.ok(html.includes('class="site-header"') && html.includes('aria-label="Hauptnavigation"')); // Rahmen und Menü
+  assert.ok(html.includes('href="/_portal/static/kit.css"')); // gestaltet mit dem Kit
+  assert.ok(html.includes("<h1>Kein Zugriff</h1>"));
+  assert.ok(html.includes("Diese Seite ist für Ihre Rolle nicht freigegeben."));
+  assert.ok(html.includes('<a href="/">Zur Startseite des Portals</a>'));
+  assert.ok(!html.includes("dev-banner"));
+});
+
+test("requires: 403 ohne text/html bleibt problem+json", async () => {
+  const response = await fetch(`${prod.base}/nur-professor`, { headers: student() });
+  assert.equal(response.status, 403);
+  assert.ok(response.headers.get("content-type").startsWith("application/problem+json"));
+  const body = await response.json();
+  assert.equal(body.type, "urn:hka:problem:403");
+  assert.equal(body.title, "Kein Zugriff");
+});
+
+test("requires: mit der Rolle erscheint die Fehlerseite nicht (HKA-95)", async () => {
+  const headers = { "X-Portal-Assertion": makeToken({ roles: ["professor"] }), Accept: "text/html" };
+  const response = await fetch(`${prod.base}/nur-professor`, { headers });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { ok: true });
+});
+
+test("requires: 403 fällt auf die einfache Seite zurück, wenn der Rahmen nicht gebaut werden kann", async () => {
+  const portal = makePortal();
+  portal._layout.render = async () => {
+    throw new Error("kaputt");
+  };
+  const app = await serve(makeApp(portal));
+  try {
+    const response = await fetch(`${app.base}/nur-professor`, { headers: { ...student(), Accept: "text/html" } });
+    const html = await response.text();
+    assert.equal(response.status, 403);
+    assert.ok(html.includes("<h1>Kein Zugriff</h1>") && !html.includes("site-header"));
+  } finally {
+    await app.close();
+  }
+});
+
 test("Adapter nicht erreichbar", async () => {
   const req = { portal: { assertion: makeToken(), requestId: null } };
   await assert.rejects(new HttpTransport("http://127.0.0.1:9").get(req, "/v1/noten/me/grades", null), (err) => {
@@ -160,6 +206,16 @@ test("Test-Anmeldung", async () => {
   assert.ok(devHtml.includes('<a href="/__dev/login">Abmelden</a>') && !devHtml.includes("logout-form"));
   assert.deepEqual(await (await fetch(`${dev.base}/noten`, { headers: cookie })).json(), { count: 5 });
   assert.equal((await fetch(`${dev.base}/nur-professor`, { headers: cookie })).status, 403);
+});
+
+test("Test-Anmeldung: Seite „Kein Zugriff“ im Rahmen zeigt den Entwicklungsmodus (HKA-95)", async () => {
+  const cookie = await devLogin([["sub", "student-test"], ["roles", "student"]]);
+  const response = await fetch(`${dev.base}/nur-professor`, { headers: { ...cookie, Accept: "text/html" } });
+  const html = await response.text();
+  assert.equal(response.status, 403);
+  assert.ok(html.includes("Entwicklungsmodus – Testperson: Erika Musterfrau"));
+  assert.ok(html.includes('href="/__dev/kit/kit.css"'));
+  assert.ok(html.includes('<a href="/">Zur Startseite des Portals</a>'));
 });
 
 test("Test-Anmeldung mit weiterer Rolle", async () => {

@@ -20,6 +20,10 @@ from .layout import Layout
 from .middleware import PortalMiddleware
 
 KIT_DIR = Path(__file__).parent / "kit"
+NO_ACCESS_TEXT = (
+    "Diese Seite ist für Ihre Rolle nicht freigegeben. "
+    "Auf der Startseite des Portals finden Sie die Anwendungen, die Sie nutzen dürfen."
+)
 
 
 class Portal:
@@ -71,7 +75,7 @@ class Portal:
         async def dependency(request: Request) -> User:
             user = self.user(request)
             if not set(user.roles) & set(roles):
-                raise PortalHTTPError(403, "Kein Zugriff", "Diese Seite ist für Ihre Rolle nicht freigegeben.")
+                raise PortalHTTPError(403, "Kein Zugriff", NO_ACCESS_TEXT)
             return user
 
         return dependency
@@ -86,6 +90,8 @@ class Portal:
 
     async def _error_response(self, request: Request, exc: Exception) -> Response:
         assert isinstance(exc, PortalHTTPError)
+        if exc.status == 403:  # im Browser als Seite im Seitenrahmen des Portals, mit Weg zur Startseite
+            return await pages.error_in_layout(request, self._layout, exc.status, exc.title, exc.detail)
         return pages.error(request, exc.status, exc.title, exc.detail)
 
     async def _unhandled(self, request: Request, exc: Exception) -> Response:

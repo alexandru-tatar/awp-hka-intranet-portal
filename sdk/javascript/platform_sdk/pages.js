@@ -39,6 +39,24 @@ function error(req, res, status, title, detail, { problemType = null, requestId 
   return res.end(JSON.stringify(body));
 }
 
+/**
+ * Wie `error`, aber die HTML-Seite steht im Seitenrahmen des Portals (Kopf, Menü, Fuß, Weg zur Startseite).
+ * Ohne angemeldete Person oder ohne `text/html` gilt `error`; ebenso, wenn der Rahmen nicht gebaut werden kann.
+ */
+async function errorInLayout(req, res, layout, status, title, detail) {
+  const user = req.portal?.user;
+  if (!user || !(req.headers.accept ?? "").includes("text/html")) return error(req, res, status, title, detail);
+  try {
+    const requestId = requestContext.getStore()?.requestId ?? null;
+    const body = env.render("error_in_layout.html", { title, detail, request_id: requestId });
+    const html = await layout.render({ title, body, current: "", user });
+    return res.status(status).type("html").send(html);
+  } catch (err) {
+    console.warn(`Fehlerseite im Rahmen nicht möglich, einfache Seite: ${err?.name ?? typeof err}`);
+    return error(req, res, status, title, detail);
+  }
+}
+
 /** 4xx-Status eines anderen Fehlers (Express/body-parser: err.status oder err.statusCode), sonst null. */
 function clientStatus(err) {
   const status = Number(err?.status ?? err?.statusCode);
@@ -87,4 +105,4 @@ function fallback(err, req, res) {
   return error(req, res, status, title, text, { problemType, requestId });
 }
 
-module.exports = { FALLBACK_TEXTS, error, fallback };
+module.exports = { FALLBACK_TEXTS, error, errorInLayout, fallback };
