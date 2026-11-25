@@ -32,7 +32,7 @@ doc = [
 where = ["src"]
 
 [tool.setuptools.package-data]
-portal = ["templates/**/*.html", "locales/*.yml"]
+portal = ["templates/**/*.html", "locales/*.yml", "docs/*.html"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -181,3 +181,18 @@ def test_header_logout_opens_a_confirmation_dialog_with_csrf(client):
     assert '<dialog id="logout-dialog"' in page and 'data-submit-form="logout-form"' in page
     form = re.search(r'<form id="logout-form" method="post" action="/logout"[^>]*>(.*?)</form>', page, re.S)
     assert form and re.search(r'name="csrf" value="[^"]+"', form.group(1))
+
+
+def test_footer_shows_only_docs_link(client):
+    html = login(client, "alexandru").get("/").text
+    footer = html.split('<footer class="site-footer">', 1)[1].split("</footer>", 1)[0]
+    assert re.findall(r'<a class="cta" href="([^"]+)">([^<]+)</a>', footer) == [("/_portal/docs", "Docs")]
+    assert "Impressum" not in html
+
+
+def test_docs_page_served_with_own_csp(client):
+    assert client.get("/_portal/docs").status_code == 302
+    r = login(client, "alexandru").get("/_portal/docs")
+    assert r.status_code == 200
+    assert "<title>AWP Docs" in r.text
+    assert "'unsafe-inline'" in r.headers["content-security-policy"]

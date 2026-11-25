@@ -9,8 +9,6 @@ kit_dist: ../kit/dist
 session_cookie: portal_sid
 role_vocabulary: [student, employee, professor, platform-admin, pilot-tester, app-creator]   # = roles.yml + grants.yml (02 §8)
 adapter_scopes: [noten:read, mail:send]                                         # later: x-required-scope from adapter OpenAPI (05)
-links: { help: "#", privacy: "#", imprint: "#" }
-
 # Logging (core/log.py): Konsole immer, Logdatei optional. Level je Logger überschreiben die Mindestlevel.
 logging:
   console_level: DEBUG          # TRACE | DEBUG | INFO | SUCCESS | WARNING | ERROR | CRITICAL
