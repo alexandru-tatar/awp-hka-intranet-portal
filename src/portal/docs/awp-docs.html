@@ -1580,7 +1580,7 @@ code .ph{font-family:var(--mono)}
   <div class="tabs os" data-sync="os"><div class="tabs-bar" role="tablist" aria-label="Betriebssystem"><button type="button" role="tab" data-t="win" class="on"><svg class="i i-os" aria-hidden="true"><use href="#i-os-win"/></svg>Windows</button><button type="button" role="tab" data-t="mac"><svg class="i i-os" aria-hidden="true"><use href="#i-os-mac"/></svg>macOS</button><button type="button" role="tab" data-t="linux"><svg class="i i-os" aria-hidden="true"><use href="#i-os-linux"/></svg>Linux (Ubuntu)</button></div><div class="tab-p on" data-t="win" role="tabpanel"><p><b>PowerShell</b> öffnen: Startmenü, „PowerShell“ eintippen, Enter.</p><div class="code"><button class="copy" data-copy="cd $HOME\Projects&#10;git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname&#10;cd ihr-kurzname&#10;code .">Kopieren</button><span class="p">PS&gt; </span>cd $HOME\Projects<br><span class="p">PS&gt; </span>git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname<br><span class="p">PS&gt; </span>cd ihr-kurzname<br><span class="p">PS&gt; </span>code . <span class="c"># öffnet VS Code</span></div></div><div class="tab-p" data-t="mac" role="tabpanel"><p><b>Terminal</b> öffnen: <kbd>⌘</kbd>+<kbd>Leertaste</kbd>, „Terminal“ eintippen, Enter.</p><div class="code"><button class="copy" data-copy="cd ~/Projects&#10;git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname&#10;cd ihr-kurzname&#10;code .">Kopieren</button><span class="p">$ </span>cd ~/Projects<br><span class="p">$ </span>git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname<br><span class="p">$ </span>cd ihr-kurzname<br><span class="p">$ </span>code . <span class="c"># öffnet VS Code</span></div></div><div class="tab-p" data-t="linux" role="tabpanel"><p><b>Terminal</b> öffnen: <kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>T</kbd>.</p><div class="code"><button class="copy" data-copy="cd ~/Projects&#10;git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname&#10;cd ihr-kurzname&#10;code .">Kopieren</button><span class="p">$ </span>cd ~/Projects<br><span class="p">$ </span>git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname<br><span class="p">$ </span>cd ihr-kurzname<br><span class="p">$ </span>code . <span class="c"># öffnet VS Code</span></div></div></div>
   <p class="small muted">Meldet das Terminal bei <code>code .</code> „command not found“, öffnen Sie den Ordner in VS Code über <b>Datei → Ordner öffnen</b>.</p>
   <h2>Personen einladen</h2>
-  <p>Für das Review (<a href="#t9">Review</a>) und die Freigabe (<a href="#t10">Freigabe beantragen</a>) brauchen die Reviewerin und die Freigabe-Verantwortliche Zugriff auf Ihr Repository. Auf GitHub: <b>Settings → Collaborators → Add people</b>. Ohne Einladung können Sie niemanden um ein Review bitten.</p>
+  <p>Für das Review (<a href="#t9">Review</a>) und die Freigabe (<a href="#t10">Freigabe beantragen</a>) brauchen die Reviewerin und die Freigabe-Verantwortliche Zugriff auf Ihr Repository. Laden Sie die Reviewerin am besten jetzt ein. Auf GitHub: <b>Settings → Collaborators → Add people</b>. Die Person muss die Einladung annehmen. Vorher hat sie keinen Zugriff, und Sie können sie nicht um ein Review bitten. Die Freigabe-Verantwortliche laden Sie später ein. Alles dazu steht unter <a href="#t10">Rechte geben</a>.</p>
   <h2>Checkliste</h2>
   <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 5</span></div>
   <ul class="check" data-store="awp-t2">
@@ -1588,7 +1588,7 @@ code .ph{font-family:var(--mono)}
     <li><label><input type="checkbox"><span>Repository aus der Vorlage angelegt, Sichtbarkeit öffentlich</span><span class="pill">GitHub</span></label></li>
     <li><label><input type="checkbox"><span>Branches <code>main</code> und <code>develop</code> vorhanden</span><span class="pill">GitHub</span></label></li>
     <li><label><input type="checkbox"><span>Projekt geklont, VS Code ist geöffnet</span><span class="pill">Ihr Rechner</span></label></li>
-    <li><label><input type="checkbox"><span>Reviewerin und Freigabe-Verantwortliche sind eingeladen</span><span class="pill">GitHub</span></label></li>
+    <li><label><input type="checkbox"><span>Reviewerin ist eingeladen (sie muss die Einladung noch annehmen)</span><span class="pill">GitHub</span></label></li>
   </ul>
 </article>
 
@@ -1713,7 +1713,7 @@ code .ph{font-family:var(--mono)}
   <p>Im Terminal von VS Code – also im Container. Dort ist der Befehl auf allen Systemen gleich.</p>
   <div class="code"><button class="copy" data-copy="make dev">Kopieren</button><span class="p">$ </span>make dev <span class="c"># → http://localhost:8080</span></div>
   <ol class="do">
-    <li>Terminal offen lassen und <code>http://localhost:8080</code> im Browser öffnen. Zeigt der Browser eine andere Anwendung, belegt ein anderes Programm den Port 8080. Im Reiter <b>Ports</b> von VS Code steht, unter welcher Adresse die App erreichbar ist.</li>
+    <li>Terminal offen lassen und <code>http://localhost:8080</code> im Browser öffnen. Zeigt der Browser eine andere Anwendung, belegt ein anderes Programm den Port 8080. Das kann auch der Dev Container einer früheren App sein, der noch offen ist. Öffnen Sie dann in dessen VS-Code-Fenster die Befehlspalette und wählen Sie <b>Remote: Close Remote Connection</b>. Im Reiter <b>Ports</b> von VS Code steht, unter welcher Adresse die App erreichbar ist.</li>
     <li>In der Test-Anmeldung eine Testperson wählen und unter <b>Rollen aus dem Manifest</b> die Rolle ankreuzen, mit der Sie testen. Weitere Rollen tragen Sie im Feld darunter ein.</li>
     <li>Den Testplan unten durchgehen. Beenden mit <span class="os-v win"><svg class="i" aria-hidden="true"><use href="#i-os-win"/></svg><kbd>Strg</kbd>+<kbd>C</kbd></span><span class="os-v linux"><svg class="i" aria-hidden="true"><use href="#i-os-linux"/></svg><kbd>Strg</kbd>+<kbd>C</kbd></span><span class="os-v mac"><svg class="i" aria-hidden="true"><use href="#i-os-mac"/></svg><kbd>⌃ Control</kbd>+<kbd>C</kbd></span> im Terminal.</li>
   </ol>
@@ -1729,7 +1729,7 @@ code .ph{font-family:var(--mono)}
   <ul class="check" data-store="awp-t6">
     <li><label><input type="checkbox"><span><b>Hauptaufgabe</b> funktioniert von Anfang bis Ende</span><span class="pill">Sie</span></label></li>
     <li><label><input type="checkbox"><span><b>Jede Rolle</b> aus dem Steckbrief sieht, was sie sehen soll</span><span class="pill">Sie</span></label></li>
-    <li><label><input type="checkbox"><span>Eine <b>Rolle ohne Berechtigung</b> sieht die App nicht (Häkchen entfernen und im Feld „Weitere Rollen“ eine andere Rolle eintragen)</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Eine <b>Rolle ohne Berechtigung</b> sieht die App nicht (Häkchen entfernen und im Feld „Weitere Rollen“ eine andere Rolle eintragen). Sie sehen die Seite <b>Kein Zugriff</b>. Das ist richtig und kein Fehler: Die App ist für diese Rolle gesperrt.</span><span class="pill">Sie</span></label></li>
     <li><label><input type="checkbox"><span><b>Leerer Zustand</b>: Was steht da, wenn noch nichts vorhanden ist?</span><span class="pill">Sie</span></label></li>
     <li><label><input type="checkbox"><span><b>Falsche Eingaben</b> führen zu einer verständlichen Meldung</span><span class="pill">Sie</span></label></li>
     <li><label><input type="checkbox"><span>Alles ist <b>mit der Tastatur</b> bedienbar (Tab, Enter)</span><span class="pill">Sie</span></label></li>
@@ -1746,15 +1746,18 @@ code .ph{font-family:var(--mono)}
     <div class="mock-bar"><span class="ttl">Terminal — make check</span></div>
     <div class="term reveal">
       <div class="ln2"><span class="p">$ </span>make check</div>
-      <div class="ln2"><span class="m">Prüfbericht Skills</span> <span class="ok">Gesamtergebnis: BESTANDEN</span></div>
-      <div class="ln2"><span class="m">Prüfbericht Starter</span> <span class="ok">Gesamtergebnis: BESTANDEN</span></div>
-      <div class="ln2"><span class="m">Code-Regeln (make lint), Tests (make test)</span> <span class="ok">bestanden</span></div>
-      <div class="ln2"><span class="m">… (die echte Ausgabe ist länger)</span></div>
+      <div class="ln2"><span class="m">… (viele Zeilen: zuerst der Prüfbericht Skills)</span></div>
+      <div class="ln2"><span class="ok">Gesamtergebnis: BESTANDEN</span> · <span class="lang-v py">37 Prüfungen</span><span class="lang-v js">36 Prüfungen</span> · 0 Fehler · 0 übersprungen</div>
+      <div class="ln2"><span class="m">… (dann der Prüfbericht Starter)</span></div>
+      <div class="ln2"><span class="m">Im Starter geprüft: 17 von 40. Die übrigen prüfen Pipeline oder Prüfskript.</span></div>
+      <div class="ln2"><span class="ok">Gesamtergebnis: BESTANDEN</span> · <span class="lang-v py">36 Prüfungen</span><span class="lang-v js">33 Prüfungen</span> · 0 Fehler · <span class="hl">1 übersprungen</span></div>
+      <div class="ln2"><span class="m">… (dann make lint und make test)</span></div>
       <div class="ln2">&nbsp;</div>
-      <div class="ln2"><span class="hl">Prüfnachweis:</span> build/pruefberichte/pruefnachweis-aktuell.md</div>
+      <div class="ln2"><span class="ok">Gesamtergebnis: BESTANDEN</span></div>
+      <div class="ln2"><span class="hl">Prüfnachweis gespeichert:</span> build/pruefberichte/pruefnachweis-aktuell.md</div>
     </div>
   </div>
-  <p>Die Ausgabe ist lang. Entscheidend ist die Zeile <b>Gesamtergebnis: BESTANDEN</b>. Prüfungen, die als <em>übersprungen</em> erscheinen, sind normal: Sie brauchen Dateien oder Programme, die auf Ihrem Rechner nicht liegen. Der automatische Lauf prüft nur einen Teil der Regeln (17 von 40). Den Rest prüft das Review.</p>
+  <p>Die Ausgabe ist lang. Entscheidend ist die letzte Zeile <b>Gesamtergebnis: BESTANDEN</b>. Jeder Prüfbericht hat außerdem eine eigene Zeile mit der Zahl der Prüfungen und der Fehler. Eine Prüfung, die als <em>übersprungen</em> erscheint, ist normal: Der Container-Test im Starter läuft nur, wenn Docker verfügbar ist und <code>CHECK_DOCKER=1</code> gesetzt ist. Sonst steht er als übersprungen da. Der automatische Lauf prüft nur einen Teil der Regeln (17 von 40). Den Rest prüfen die Pipeline und das Review.</p>
   <p>Die Datei <code>build/pruefberichte/pruefnachweis-aktuell.md</code> ist Ihr <b>Prüfnachweis</b>. Hängen Sie ihn an Ihr Ticket. Haben Sie kein Ticket: Die Datei liegt nicht im Repository (<code>build/</code> ist ausgeschlossen). Kopieren Sie den Abschnitt „Prüfnachweis“ in die Beschreibung des Pull Requests. Die Zeilen mit <code>[OFFEN]</code> füllt die Reviewerin aus.</p>
   <div class="callout c-tip"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></div><div><h5>Rot? Kein Problem.</h5><p>Kopieren Sie die Meldung in Claude Code: „Das ist rot, bitte erkläre und behebe es.“ Danach erneut <code>make check</code>. Was Codes wie <code>PF-101</code> bedeuten: <a href="#fehlercodes">Fehlercodes</a>.</p></div></div>
   <h2>Checkliste</h2>
@@ -1775,6 +1778,7 @@ code .ph{font-family:var(--mono)}
     <li>Links <b>Quellcodeverwaltung</b> öffnen. Jede geänderte Datei einmal anklicken und <b>ansehen</b>. Rot = entfernt, grün = neu.</li>
     <li>Eine kurze Nachricht schreiben. Haben Sie eine Ticket-Nummer, steht sie am Anfang, z. B. <code>HKA-123 Übersichtsseite und Formular</code>.</li>
     <li><b>Commit</b> klicken, dann <b>Synchronisieren</b>.</li>
+    <li>Im Terminal noch einmal <code>make check</code> ausführen. Der neue Prüfnachweis nennt jetzt Ihren Commit (<code>Version/Commit: … (sauber)</code>) statt „mit lokalen Änderungen“. Diesen Nachweis nehmen Sie für Review und Freigabe.</li>
   </ol>
   <div class="mock" aria-hidden="true">
     <div class="mock-bar"><span class="ttl">Quellcodeverwaltung — ihr-kurzname [Dev Container]</span></div>
@@ -1799,12 +1803,13 @@ code .ph{font-family:var(--mono)}
   </div>
   <div class="callout c-info"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-info"/></svg></div><div><h5>Sie verstehen eine Änderung nicht?</h5><p>Fragen Sie Claude Code: „Was bewirkt die Änderung in <code><span class="lang-v py">views.py</span><span class="lang-v js">routes.js</span></code>?“ Committen Sie erst, wenn Sie wissen, wofür jede Datei geändert wurde.</p></div></div>
   <h2>Checkliste</h2>
-  <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 4</span></div>
+  <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 5</span></div>
   <ul class="check" data-store="awp-t8">
     <li><label><input type="checkbox"><span>Branch ist <code>develop</code></span><span class="pill">VS Code</span></label></li>
     <li><label><input type="checkbox"><span>Jede geänderte Datei angesehen</span><span class="pill">Sie</span></label></li>
     <li><label><input type="checkbox"><span>Commit-Nachricht geschrieben (mit Ticket-Nummer, falls vorhanden)</span><span class="pill">Sie</span></label></li>
     <li><label><input type="checkbox"><span>Synchronisiert – der Stand liegt auf GitHub</span><span class="pill">GitHub</span></label></li>
+    <li><label><input type="checkbox"><span><code>make check</code> nach dem Commit erneut ausgeführt, Prüfnachweis erneuert</span><span class="pill">Container</span></label></li>
   </ul>
 </article>
 
@@ -1813,7 +1818,7 @@ code .ph{font-family:var(--mono)}
   <p class="lede">Bevor Ihre App weitergeht, liest eine zweite Person die Änderungen. Das Vier-Augen-Prinzip schützt Sie und die Daten der Hochschule.</p>
   <h2>Pull Request</h2>
   <ol class="do">
-    <li>Auf GitHub einen Pull Request von <code>develop</code> nach <code>main</code> anlegen. Rechts unter <b>Reviewers</b> die Reviewerin wählen. Die Liste ist leer, solange niemand in Ihr Repository eingeladen ist (siehe <a href="#t2">Projekt anlegen</a>).</li>
+    <li>Auf GitHub einen Pull Request von <code>develop</code> nach <code>main</code> anlegen. Rechts unter <b>Reviewers</b> die Reviewerin wählen. Die Liste ist leer, solange niemand in Ihr Repository eingeladen ist oder die Einladung nicht angenommen hat (siehe <a href="#t10">Rechte geben</a>).</li>
     <li>In die Beschreibung: Ticket-Nummer, was die App kann, Prüfnachweis.</li>
     <li>Warten, bis die Pipeline grün ist. Ist sie rot: <a href="#fehlercodes">Fehlercodes</a> nachschlagen oder Claude Code fragen.</li>
     <li>Kommentare der Reviewerin beantworten oder mit der KI umsetzen, neu sichern.</li>
@@ -1854,8 +1859,9 @@ code .ph{font-family:var(--mono)}
     <p class="contact-note">Platzhalter – die Kontaktdaten trägt das Plattform-Team ein.</p>
   </div>
   <h2>Was Sie schicken</h2>
-  <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 6</span></div>
+  <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 7</span></div>
   <ul class="check" data-store="awp-t10">
+    <li><label><input type="checkbox"><span>Freigabe-Verantwortliche ist in Ihr Repository eingeladen und hat angenommen (siehe unten: Rechte geben)</span><span class="pill">GitHub</span></label></li>
     <li><label><input type="checkbox"><span>Link zum Repository, Stand auf <code>main</code></span><span class="pill">GitHub</span></label></li>
     <li><label><input type="checkbox"><span>Link zum gemergten Pull Request mit Review</span><span class="pill">GitHub</span></label></li>
     <li><label><input type="checkbox"><span>Prüfnachweis (und Ticket-Nummer, falls vorhanden)</span><span class="pill">Ticket</span></label></li>
@@ -1865,6 +1871,16 @@ code .ph{font-family:var(--mono)}
   </ul>
   <h3>Vorlage für Ihre Nachricht</h3>
   <div class="code"><button class="copy" data-copy="Betreff: Freigabe-Antrag <Name der App> (<Ticket-Nummer>)&#10;&#10;Guten Tag,&#10;&#10;hiermit beantrage ich die Bereitstellung meiner App auf der Test-VM und die Prüfung für das Portal.&#10;&#10;App: <Name> · Kurzname: <slug>&#10;Repository: <Link>&#10;Pull Request: <Link>&#10;Ticket: <Nummer> · Prüfnachweis: angehängt&#10;Wer nutzt die App: <Rollen>&#10;Daten und Ablage: <...>&#10;Fachliche Ansprechperson: <Name>&#10;&#10;Mit freundlichen Grüßen&#10;<Ihr Name>">Kopieren</button><span class="c">Betreff:</span> Freigabe-Antrag &lt;Name der App&gt; (&lt;Ticket-Nummer&gt;)<br><br>Guten Tag,<br><br>hiermit beantrage ich die Bereitstellung meiner App auf der Test-VM<br>und die Prüfung für das Portal.<br><br><span class="c">App:</span> &lt;Name&gt; · <span class="c">Kurzname:</span> &lt;slug&gt;<br><span class="c">Repository:</span> &lt;Link&gt;<br><span class="c">Pull Request:</span> &lt;Link&gt;<br><span class="c">Ticket:</span> &lt;Nummer&gt; · <span class="c">Prüfnachweis:</span> angehängt<br><span class="c">Wer nutzt die App:</span> &lt;Rollen&gt;<br><span class="c">Daten und Ablage:</span> &lt;…&gt;<br><span class="c">Fachliche Ansprechperson:</span> &lt;Name&gt;<br><br>Mit freundlichen Grüßen<br>&lt;Ihr Name&gt;</div>
+
+  <h2>Rechte geben</h2>
+  <p>Damit Ihre Reviewerin und die Freigabe-Verantwortliche Ihr Repository öffnen dürfen, laden Sie beide als <em>Collaborator</em> ein. Das sind Personen, die am Repository mitarbeiten dürfen. Sie brauchen dafür den GitHub-Namen der Person. Die Reviewerin laden Sie schon in Etappe <a href="#t2">Projekt anlegen</a> ein, die Freigabe-Verantwortliche spätestens jetzt.</p>
+  <ol class="do">
+    <li>Auf GitHub Ihr Repository öffnen und oben <b>Settings</b> klicken. Fehlt der Reiter, öffnen Sie das Menü <b>…</b> daneben. Links unter <b>Access</b> auf <b>Collaborators</b> klicken.</li>
+    <li><b>Add people</b> klicken, den GitHub-Namen eintippen, die Person in der Liste anklicken und die Einladung bestätigen (Knopf <b>Add … to this repository</b>).</li>
+    <li>Die Person bekommt eine E-Mail von GitHub und muss die Einladung <b>annehmen</b>. Erst danach hat sie Zugriff, und erst danach können Sie sie im Pull Request unter <b>Reviewers</b> auswählen.</li>
+    <li>Warten Sie die Annahme ab. Wie lange das dauert, entscheidet die eingeladene Person. Laden Sie deshalb früh ein und fragen Sie nach, wenn sie nach einem Tag nicht angenommen hat.</li>
+  </ol>
+  <div class="callout c-warn"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-warn"/></svg></div><div><h5>Eingeladene dürfen schreiben</h5><p>Eingeladene Personen bekommen Schreibrecht. Ein reines Leserecht gibt es bei einem Repository in einem persönlichen GitHub-Konto nicht. Laden Sie nur Personen ein, die Ihnen als Reviewerin oder als Freigabe-Verantwortliche genannt wurden.</p></div></div>
 
   <h2>So geht es weiter</h2>
   <ol class="tl">
