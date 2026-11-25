@@ -126,6 +126,53 @@ docker run --rm --publish 8000:8000 hka/portal:0.1.0-trixie
 
 ## Neue App anlegen
 
-`tools/neue-app.sh <slug> js|python` legt aus einem Golden Master ein fertig eingerichtetes App-Repository an
-(Zweige, Branchschutz, Team). Aufruf, Voraussetzungen und Prüfanleitung: `tools/README.md`. Die Tests laufen
-mit `make test` (`tests/test_neue_app.py`, mit einer Attrappe für `gh`).
+Das Portal legt neue Apps selbst an (HKA-82). Zwei Eingänge, dieselbe Logik (`service/app_creation_service.py`):
+
+| Eingang | Adresse | Für wen |
+|---|---|---|
+| Portal-Seite „Neue App anlegen“ | `/_portal/neue-app`, Link „Neue App“ im Kopf | Fachkräfte mit der Rolle `app-creator` (und `platform-admin`) |
+| JSON-Schnittstelle | `POST /_portal/api/apps` mit `{"slug", "language", "github_login"}` und dem Header `X-CSRF-Token` | Werkzeuge, die mit der Portal-Anmeldung arbeiten. Der Befehl in der Entwicklungsumgebung folgt (braucht eine Anmeldung ohne Browser im Security-Gateway) |
+
+Wer darf: nur Personen mit einer Rolle aus `app_creation.creator_roles` (Standard `app-creator`, `platform-admin`). Alle anderen
+bekommen 403. Die Rolle `app-creator` vergibt ein Admin auf der Verwaltungsseite als zusätzliche Rolle (Grants).
+
+**Ablauf.** Alles, was nur liest, kommt zuerst; vor dem ersten Schreiben ist noch nichts entstanden:
+
+1. Rolle, Slug (`^[a-z][a-z0-9-]{2,30}$`, nicht reserviert, nicht `meine-app` oder `andere-app`), Sprache und GitHub-Name prüfen.
+2. Vorlage ist ein Template, das Repository `<owner>/app-<slug>` gibt es noch nicht.
+3. Slug in der Registry reservieren (`Registrar.reserve`, Besitzer `<owner>/app-<slug>`). Ein vergebener oder gesperrter Name wird abgelehnt (PF-202).
+4. Repository aus dem Golden Master anlegen, auf `manifest.json` warten, nur den Slug ersetzen, Zweig `develop`, Thema `hka-app`,
+   Person einladen (Push-Recht), zuletzt das Ruleset `main-schutz` auf `main` (danach ist kein direkter Push mehr möglich).
+
+Scheitert ein Schritt vor dem Anlegen, wird die Reservierung aufgehoben. Scheitert er danach, bleibt alles stehen und die Antwort
+nennt Schritt und Repository (`created: true`); es wird nie automatisch gelöscht. Jede Anlage, Ablehnung und jeder Fehler steht
+mit Person, Zeit und App in `app_creation.audit_file` (JSON-Zeilen) und im Log.
+
+**Antworten der Schnittstelle** (immer JSON, kein Token, kein Schlüssel):
+
+| Status | Antwort | Bedeutung |
+|---|---|---|
+| 201 | `{"slug", "repo", "url"}` | angelegt |
+| 401 | `{"error": "login_required"}` | keine Anmeldung |
+| 403 | `{"error": "forbidden"}` oder `{"error": "csrf"}` | falsche Rolle bzw. falsches CSRF-Token |
+| 404 | `{"error": "disabled"}` | Abschnitt `app_creation` fehlt |
+| 409 | `{"error": "slug_taken"}` | Name oder Repository vergeben, es wurde nichts angelegt |
+| 422 | `{"error": "invalid", "field", "reason"}` | ungültige Eingabe |
+| 502 | `{"error": "failed", "step", "created", "repo", "url"}` | ein Schritt ist gescheitert |
+
+**Einrichten** (einmal, durch das Plattform-Team). Ohne den Abschnitt ist die Funktion aus (Seite und Schnittstelle 404):
+
+1. GitHub App anlegen und im Konto bzw. in der Organisation der App-Repositories installieren. Die nötigen Rechte sind noch nicht
+   geprüft; vermutlich Administration (anlegen, Rulesets, Einladungen), Contents (schreiben) und Metadata (lesen), eventuell Workflows,
+   weil die Vorlage `.github/workflows/` enthält. Außerdem legt eine GitHub App Repositories vermutlich nur in einer Organisation an,
+   nicht in einem persönlichen Konto. Beides vor der Einrichtung in der GitHub-Dokumentation prüfen (ADR zur Selbstbedienung).
+2. Den privaten Schlüssel (PEM) als Docker-Secret auf den Server legen (`HKA_GITHUB_APP_KEY_SOURCE`, `docs/05-compose.md`). Er gehört nie
+   in dieses Repository, in eine Antwort oder in ein Log.
+3. In der Konfiguration den Abschnitt `app_creation` eintragen (Beispiel, auskommentiert, in `dev/gateway.dev.yml`) und `registry.owners_file` setzen.
+
+**Nachweis für AK1 und AK2** (nur mit echter GitHub App, bisher nicht gelaufen): als Person mit der Rolle `app-creator` die Seite benutzen,
+mit `curl` die Schnittstelle aufrufen und den Link des Repositorys in Jira festhalten. Erwartet: Repository mit `main`, `develop` und
+Branchschutz auf `main`, Einladung an den angegebenen GitHub-Namen, Zeile im Protokoll.
+
+Die Tests (`tests/test_app_creation.py`) laufen mit `make test` gegen ein erfundenes GitHub (`tests/fakes/fake_github.py`, `httpx.MockTransport`),
+ohne echten Aufruf. `tools/neue-app.sh` ist veraltet (`tools/README.md`), seine Tests laufen weiter (`tests/test_neue_app.py`).

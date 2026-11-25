@@ -13,11 +13,15 @@ from ..core.kit import is_static_path
 from ..registry.registration import RegistryError, Rejected
 from ..service import (
     AdminReadOnlyError,
+    AppCreationDisabledError,
+    AppCreationFailedError,
     ForbiddenError,
     InvalidCsrfError,
     LoginFailedError,
     LoginRequiredError,
+    NotAllowedError,
     NotFoundError,
+    SlugTakenError,
     UnavailableError,
     UnknownUserError,
 )
@@ -48,6 +52,10 @@ SERVICE_ERROR_STATUS = {
     AdminReadOnlyError: 403,
     RegistryError: 503,  # Verwaltungsseite: Dateien nicht beschreibbar oder Registrierung läuft
     Rejected: 503,
+    AppCreationDisabledError: 404,  # Funktion nicht eingeschaltet
+    NotAllowedError: 403,
+    SlugTakenError: 409,
+    AppCreationFailedError: 502,
 }
 
 

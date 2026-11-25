@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Mapping
+import time
+from typing import Callable, Mapping
 
 import httpx
 
@@ -14,9 +15,10 @@ from .auth.sessions import MemorySessionStore, SessionStore
 from .core.config import Config
 from .core.i18n import Messages
 from .core.kit import Kit
+from .github import GitHubClient
 from .registry import ManifestDirectorySource, ManifestValidator, Prober, Registry, StatusWriter
 from .registry.registration import Registrar
-from .service import AdminService, AppService, SessionService, SessionWriteService
+from .service import AdminService, AppCreationService, AppService, AuditLog, SessionService, SessionWriteService
 from .web.views import Views
 
 PACKAGE_DIR = Path(__file__).resolve().parent
@@ -40,6 +42,8 @@ class Portal:
     :ivar views: Rendert Seiten aus Templates
     :ivar dev_users: Testpersonen, leer bei ``auth_mode: gateway``
     :ivar prober: Prüft ``/healthz`` der Apps und setzt den Status, ``None`` ohne ``registry.probe``
+    :ivar app_creation_service: Legt neue Apps über die GitHub App an, ``None`` ohne Abschnitt ``app_creation``
+    :ivar github: Client der GitHub App, gehört dem Kontext und wird beim Beenden geschlossen
     """
     cfg: Config
     kit: Kit
@@ -53,6 +57,8 @@ class Portal:
     views: Views
     dev_users: Mapping[str, DevUser]
     prober: Prober | None = None
+    app_creation_service: AppCreationService | None = None
+    github: GitHubClient | None = None
 
 
 def build_portal(
@@ -60,6 +66,8 @@ def build_portal(
     *,
     http_client: httpx.Client | None = None,
     app_transport: httpx.AsyncBaseTransport | None = None,
+    github_http_client: httpx.Client | None = None,
+    sleep: Callable[[float], None] = time.sleep,
 ) -> Portal:
     """Den Kontext aus der Konfiguration bauen.
 
@@ -69,6 +77,8 @@ def build_portal(
     :param cfg: Konfiguration
     :param http_client: nicht mehr verwendet, bleibt für bestehende Aufrufer
     :param app_transport: Transport zu den App-Containern statt des Netzwerks (Prober), für Tests
+    :param github_http_client: HTTP-Client für die GitHub-API statt des Netzwerks, für Tests
+    :param sleep: Wartefunktion beim Anlegen einer App, für Tests
     :return: Der fertige Kontext
     :rtype: Portal
     """
@@ -87,6 +97,11 @@ def build_portal(
     )
     admin_service = AdminService(registry, registrar, grants, cfg.role_vocabulary, writable=cfg.registry.admin_write)
     session_write_service = SessionWriteService(sessions, dev_users) if sessions is not None else None
+    github = GitHubClient(cfg.app_creation, github_http_client) if cfg.app_creation is not None else None
+    app_creation_service = (
+        AppCreationService(cfg.app_creation, github, registrar, AuditLog(cfg.app_creation.audit_file), sleep=sleep)
+        if github is not None and registrar is not None else None
+    )
     return Portal(
         cfg=cfg,
         kit=kit,
@@ -104,6 +119,8 @@ def build_portal(
                    status_writer=StatusWriter(cfg.registry.status_file) if cfg.registry.status_file else None)
             if cfg.registry.probe and cfg.apps is not None else None
         ),
+        app_creation_service=app_creation_service,
+        github=github,
     )
 
 

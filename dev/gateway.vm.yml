@@ -9,7 +9,7 @@ kontakt: "dem IT-Servicedesk (Kontakt folgt)"
 manifests_dir: /var/lib/portal/manifests
 schema_path: ../schemas/manifest.schema.json
 kit_dist: ../kit/dist
-role_vocabulary: [student, employee, professor, platform-admin, pilot-tester]
+role_vocabulary: [student, employee, professor, platform-admin, pilot-tester, app-creator]
 adapter_scopes: [noten:read, mail:send, bwsync:read, bwsync:write, bwsync:delete]
 session_cookie: portal_sid
 cookie_secure: true
@@ -39,6 +39,19 @@ registry:
   owners_file: /var/lib/portal/registry/owners.json
   status_file: /var/lib/portal/status/status.json
   admin_write: true   # Verwaltungsseite /_portal/admin darf Apps entfernen, Rollen und Grants ändern (docs/07); braucht die :rw-Mounts
+
+# Neue Apps über die GitHub App hka-portal-app-creator anlegen (HKA-82, Seite /_portal/neue-app).
+# Schlüssel: HKA_GITHUB_APP_KEY_SOURCE in vm/.env zeigt auf die PEM-Datei auf der VM (docs/05-compose.md).
+# Repositories öffentlich: Rulesets auf privaten Repositories brauchen einen bezahlten GitHub-Tarif.
+app_creation:
+  app_id: 5921304
+  installation_id: 185774641
+  private_key_file: /run/secrets/github_app_private_key
+  owner: HKA-Test-Organization
+  template_owner: HKA-Test-Organization
+  templates: { python: awp-hka-gold-python, js: awp-hka-gold-js }
+  private: false
+  audit_file: /var/lib/portal/registry/app-creation.jsonl
 
 # Der Prober fragt /healthz des Containers "app-<slug>" im selben Docker-Netz (HKA-52).
 apps:

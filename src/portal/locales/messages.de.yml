@@ -159,3 +159,57 @@ dev.app.subject_error: Bitte geben Sie einen Betreff ein.
 dev.app.message: Nachricht
 dev.app.required: Pflichtfeld
 dev.app.error_summary: Bitte prüfen Sie Ihre Eingaben
+
+header.new_app: Neue App
+neue_app.title: Neue App anlegen
+neue_app.eyebrow: Selbstbedienung
+neue_app.intro: Hier legen Sie das Repository für Ihre App an. Es entsteht aus der Vorlage, hat die Zweige main und develop und ist sofort startklar. Sie brauchen dafür keine Befehle und keine besonderen Rechte auf GitHub.
+neue_app.form.slug: Kurzname
+neue_app.form.slug_hint: "Er steht später in der Adresse der App. Erlaubt sind 3 bis 31 Zeichen, nur Kleinbuchstaben, Ziffern und Bindestrich, der Anfang ist ein Buchstabe. Zum Beispiel urlaubsantrag. Das Repository heißt dann app-urlaubsantrag, schreiben Sie „app-“ also nicht selbst davor."
+neue_app.form.language: Vorlage
+neue_app.form.language_hint: Beide Vorlagen bringen einen DevContainer und eine automatische Prüfung mit. Wählen Sie die Sprache, die Ihr Team kennt.
+neue_app.form.python: Python
+neue_app.form.python_meta: FastAPI und uv
+neue_app.form.js: JavaScript
+neue_app.form.js_meta: Express und npm
+neue_app.form.github_login: Ihr GitHub-Name
+neue_app.form.github_login_hint: An diesen Namen geht die Einladung zum Repository. Sie finden ihn in Ihrem Profil auf github.com.
+neue_app.form.submit: App anlegen
+neue_app.form.submit_hint: Das Anlegen dauert meist 10 bis 20 Sekunden.
+neue_app.panel.title: Das bekommen Sie
+neue_app.panel.repo: Ein eigenes Repository auf GitHub, aus der Vorlage kopiert
+neue_app.panel.branches: Die Zweige main und develop
+neue_app.panel.protect: "Schutz für main: Änderungen nur über einen Pull Request"
+neue_app.panel.invite: Eine Einladung an Ihren GitHub-Namen
+neue_app.busy.eyebrow: Einen Moment bitte
+neue_app.busy.title: Ihre App entsteht
+neue_app.busy.body: Das Portal legt jetzt Ihr Repository auf GitHub an. Das dauert meist 10 bis 20 Sekunden. Bitte schließen Sie diese Seite nicht.
+neue_app.busy.steps: Fortschritt
+neue_app.busy.note: Die Seite wechselt von selbst, sobald alles fertig ist.
+neue_app.error.title: Die App wurde nicht angelegt
+neue_app.error.slug_form: Der Kurzname hat 3 bis 31 Zeichen, nur Kleinbuchstaben, Ziffern und Bindestrich, und beginnt mit einem Buchstaben.
+neue_app.error.slug_reserved: Diesen Kurznamen dürfen Sie nicht verwenden. Wählen Sie einen Namen, der sagt, worum es in Ihrer App geht.
+neue_app.error.language: Wählen Sie Python oder JavaScript.
+neue_app.error.github_login: Das ist kein GitHub-Name. Er besteht aus Buchstaben, Ziffern und einzelnen Bindestrichen und hat höchstens 39 Zeichen.
+neue_app.error.slug_taken: Der Kurzname ist schon vergeben oder gesperrt. Wählen Sie einen anderen. Es wurde nichts angelegt.
+neue_app.error.failed_before: "Beim Schritt „{step}“ ist etwas schiefgegangen. Es wurde nichts angelegt. Versuchen Sie es noch einmal oder melden Sie sich bei {kontakt}. Nennen Sie die Nummer {request_id}."
+neue_app.error.failed_after: "Das Repository „{repo}“ wurde angelegt, aber beim Schritt „{step}“ ist etwas schiefgegangen. Es wurde nichts gelöscht. Melden Sie sich bei {kontakt} und nennen Sie die Nummer {request_id}."
+neue_app.step.pruefen: Prüfen
+neue_app.step.vorlage: Vorlage prüfen
+neue_app.step.repository: Repository prüfen
+neue_app.step.reservieren: Namen reservieren
+neue_app.step.protokollieren: Anlage protokollieren
+neue_app.step.anlegen: Repository anlegen
+neue_app.step.warten: Auf die Dateien der Vorlage warten
+neue_app.step.slug: Kurznamen in manifest.json setzen
+neue_app.step.develop: Zweig develop anlegen
+neue_app.step.topic: Thema setzen
+neue_app.step.einladen: Person einladen
+neue_app.step.ruleset: Schutz für main einrichten
+neue_app.done.eyebrow: Fertig
+neue_app.done.title: Ihre App ist angelegt
+neue_app.done.next_title: So geht es weiter
+neue_app.done.body: "Das Repository „{repo}“ ist fertig. Es hat die Zweige main und develop. Der Zweig main ist geschützt: Änderungen kommen nur über einen Pull Request mit einer Freigabe."
+neue_app.done.invite: Die Einladung ist an „{login}“ gegangen. Nehmen Sie sie auf GitHub an, dann können Sie das Repository klonen.
+neue_app.done.open: Repository auf GitHub öffnen
+neue_app.done.next: Wie es weitergeht, steht in der Anleitung unter „Arbeitsplatz öffnen“.
