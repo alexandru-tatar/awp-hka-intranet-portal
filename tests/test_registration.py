@@ -209,8 +209,11 @@ def test_vm_config_loads_with_probe_registry_and_gateway(env, kit_dist):
     text = text.replace("/var/lib/portal/registry/grants.yml", str(env / "grants-vm.yml"))  # fehlt: erlaubt mit admin_write
     text = text.replace("../schemas/manifest.schema.json", str(ROOT / "schemas" / "manifest.schema.json"))
     text = text.replace("../kit/dist", str(kit_dist))
+    (env / "github-app.pem").write_text("kein echter Schlüssel", encoding="utf-8")
+    text = text.replace("/run/secrets/github_app_private_key", str(env / "github-app.pem"))
     (env / "gateway.vm.yml").write_text(text, encoding="utf-8")
     cfg = load_config(env / "gateway.vm.yml")
+    assert cfg.app_creation and cfg.app_creation.owner == "HKA-Test-Organization" and not cfg.app_creation.private
     assert cfg.registry.probe and cfg.registry.refresh_seconds == 5
     assert cfg.registry.owners_file == Path("/var/lib/portal/registry/owners.json").resolve()
     assert cfg.registry.admin_write and cfg.grants_file == (env / "grants-vm.yml").resolve()
