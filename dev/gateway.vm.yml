@@ -40,18 +40,19 @@ registry:
   status_file: /var/lib/portal/status/status.json
   admin_write: true   # Verwaltungsseite /_portal/admin darf Apps entfernen, Rollen und Grants ändern (docs/07); braucht die :rw-Mounts
 
-# Neue Apps über die GitHub App hka-portal-app-creator anlegen (HKA-82, Seite /_portal/neue-app).
-# Schlüssel: HKA_GITHUB_APP_KEY_SOURCE in vm/.env zeigt auf die PEM-Datei auf der VM (docs/05-compose.md).
-# Repositories öffentlich: Rulesets auf privaten Repositories brauchen einen bezahlten GitHub-Tarif.
-app_creation:
-  app_id: 5921304
-  installation_id: 185774641
-  private_key_file: /run/secrets/github_app_private_key
-  owner: HKA-Test-Organization
-  template_owner: HKA-Test-Organization
-  templates: { python: awp-hka-gold-python, js: awp-hka-gold-js }
-  private: false
-  audit_file: /var/lib/portal/registry/app-creation.jsonl
+# Neue Apps über die GitHub App hka-portal-app-creator anlegen (HKA-82, Seite /_portal/neue-app): AUS.
+# Die VM erreicht api.github.com nicht (direkt Zeitüberschreitung, apt-proxy.hs-karlsruhe.de:3142 antwortet auf
+# CONNECT mit 403, geprüft am 25.11.2026). Einschalten, sobald die HKA-IT ausgehendes HTTPS zu api.github.com
+# freigibt: Block einkommentieren, HKA_GITHUB_APP_KEY_SOURCE in vm/.env setzen (docs/05-compose.md), Image neu bauen.
+# app_creation:
+#   app_id: 5921304
+#   installation_id: 185774641
+#   private_key_file: /run/secrets/github_app_private_key
+#   owner: HKA-Test-Organization
+#   template_owner: HKA-Test-Organization
+#   templates: { python: awp-hka-gold-python, js: awp-hka-gold-js }
+#   private: false
+#   audit_file: /var/lib/portal/registry/app-creation.jsonl
 
 # Der Prober fragt /healthz des Containers "app-<slug>" im selben Docker-Netz (HKA-52).
 apps:
