@@ -94,6 +94,33 @@ def test_messages_follow_current_language():
         current_language.reset(token)
 
 
+def test_messages_default_can_differ_per_language():
+    t = Messages(LOCALES, defaults={"kontakt": {"de": "den Servicedesk", "en": "the service desk"}})
+    assert t("nav.empty").endswith("melden Sie sich bei den Servicedesk.")
+    token = current_language.set("en")
+    try:
+        assert t("nav.empty").endswith("contact the service desk.")
+    finally:
+        current_language.reset(token)
+
+
+def test_messages_default_without_english_falls_back_to_german():
+    t = Messages(LOCALES, defaults={"kontakt": {"de": "den Servicedesk"}})
+    token = current_language.set("en")
+    try:
+        assert t("nav.empty").endswith("contact den Servicedesk.")
+    finally:
+        current_language.reset(token)
+
+
+@pytest.mark.parametrize("name", ["gateway.dev.yml", "gateway.compose.yml", "gateway.vm.yml"])
+def test_dev_configs_have_english_contact(name):
+    """Sonst stünde in englischen Meldungen der deutsche Kontakttext."""
+    raw = yaml.safe_load((ROOT / "dev" / name).read_text(encoding="utf-8"))
+    assert raw.get("kontakt_en")
+    assert raw["kontakt_en"] != raw["kontakt"]
+
+
 def test_messages_unknown_key_still_raises():
     t = Messages(LOCALES)
     token = current_language.set("en")

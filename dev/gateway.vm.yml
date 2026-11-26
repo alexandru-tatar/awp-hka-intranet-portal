@@ -4,6 +4,7 @@
 env: dev
 auth_mode: gateway
 kontakt: "dem IT-Servicedesk (Kontakt folgt)"
+kontakt_en: "the IT service desk (contact details to follow)"
 # Die Manifeste der Apps legt die Pipeline ab (extras/compose/vm/deploy/README.md), das Portal liest sie nur.
 # Der Prober setzt den Status (registry.probe), deshalb gibt es hier keine state.yml.
 manifests_dir: /var/lib/portal/manifests

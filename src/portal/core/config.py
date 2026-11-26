@@ -146,6 +146,7 @@ class Config:
     :ivar registry: Nachladen der Manifeste, Prober und Besitzerdatei
     :ivar app_creation: Neue Apps über eine GitHub App anlegen, ``None`` ohne Abschnitt (Funktion aus)
     :ivar language_switch: Umschalter Deutsch/Englisch im Kopf auch im Gateway-Modus zeigen (braucht ``/sprache/<code>`` im Gateway)
+    :ivar kontakt_en: Kontaktangabe für Fehlerseiten auf Englisch; leer heißt: ``kontakt`` gilt in beiden Sprachen
     """
     env: str
     kontakt: str
@@ -166,6 +167,7 @@ class Config:
     gateway: GatewayConfig | None = None
     app_creation: AppCreationConfig | None = None
     language_switch: bool = False
+    kontakt_en: str = ""
 
     @property
     def show_language_switch(self) -> bool:
@@ -190,7 +192,7 @@ _KEYS = {
     "env", "kontakt", "manifests_dir", "schema_path", "kit_dist", "role_vocabulary",
     "adapter_scopes", "state_file", "dev_users_file", "session_cookie",
     "cookie_secure", "auth_mode", "logging", "grants_file",
-    "apps", "registry", "gateway", "app_creation", "language_switch",
+    "apps", "registry", "gateway", "app_creation", "language_switch", "kontakt_en",
 }
 _REGISTRY_KEYS = {"refresh_seconds", "probe", "owners_file", "status_file", "admin_write"}
 _APP_CREATION_KEYS = {
@@ -250,6 +252,7 @@ def load_config(path: Path) -> Config:
         gateway=GatewayConfig(**raw["gateway"]) if raw.get("gateway") else None,
         app_creation=_load_app_creation(path, base, raw.get("app_creation"), raw.get("role_vocabulary") or ()),
         language_switch=bool(raw.get("language_switch", False)),
+        kontakt_en=str(raw.get("kontakt_en") or ""),
     )
     if cfg.registry.probe:
         if cfg.apps is None:

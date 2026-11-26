@@ -83,7 +83,7 @@ def build_portal(
     :rtype: Portal
     """
     kit = Kit.load(cfg.kit_dist)
-    t = Messages(LOCALES_DIR, defaults={"kontakt": cfg.kontakt})
+    t = Messages(LOCALES_DIR, defaults={"kontakt": {"de": cfg.kontakt, "en": cfg.kontakt_en or cfg.kontakt}})
     registry = _build_registry(cfg)
     registry.reload()
     sessions: SessionStore | None = MemorySessionStore() if cfg.auth_mode == "dev" else None

@@ -45,7 +45,7 @@ Alle sichtbaren Texte stehen in diesen Dateien, nicht in Templates oder Code. De
 Sätze, einfache Sprache), Englisch die zweite Sprache (Anrede „you", ebenfalls kurze Sätze). Beide Dateien haben dieselben Schlüssel
 und dieselben Platzhalter; `tests/test_i18n.py` schlägt fehl, wenn ein Schlüssel oder Platzhalter in einer Sprache fehlt.
 Aufruf im Template `{{ t('home.title') }}`, im Code `portal.t("home.title")`. Platzhalter in `{geschweiften Klammern}`;
-`{kontakt}` kommt aus der Konfiguration. Ein unbekannter Schlüssel löst einen Fehler (`KeyError`) aus, ein fehlender Platzhalter
+`{kontakt}` kommt aus der Konfiguration (`kontakt` für Deutsch, `kontakt_en` für Englisch; ist `kontakt_en` leer, gilt `kontakt` in beiden Sprachen). Ein unbekannter Schlüssel löst einen Fehler (`KeyError`) aus, ein fehlender Platzhalter
 bleibt als `{name}` stehen. Neue Seite: Schlüssel in **beiden** Dateien anlegen, dann im Template verwenden.
 
 **Welche Sprache gilt (HKA-101):** `portal.core.i18n.pick_language` entscheidet je Anfrage, die Middleware setzt das Ergebnis

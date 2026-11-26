@@ -71,11 +71,12 @@ class _Defaults(dict):
 
 class Messages:
     """Zugriff auf die UI-Texte; ein Aufruf liefert den Text zu einem Schlüssel in der Sprache der Anfrage."""
-    def __init__(self, locales_dir: Path, defaults: dict[str, str] | None = None):
+    def __init__(self, locales_dir: Path, defaults: dict[str, str | dict[str, str]] | None = None):
         """Die Texte aller Sprachen aus ``messages.<sprache>.yml`` laden.
 
         :param locales_dir: Ordner mit je einer Datei pro Sprache aus ``LANGUAGES``
-        :param defaults: Vorgabewerte für Platzhalter, z. B. ``{"kontakt": …}``
+        :param defaults: Vorgabewerte für Platzhalter, z. B. ``{"kontakt": …}``; ein Wert ist ein Text oder ein
+            Wörterbuch ``{"de": …, "en": …}`` (dann gilt der Text der Anfragesprache, sonst der deutsche)
         """
         self._msgs: dict[str, dict[str, str]] = {}
         for code in LANGUAGES:
@@ -118,4 +119,8 @@ class Messages:
             raise KeyError(f"missing message key {key!r}") from None
         if not any(name for _, name, _, _ in string.Formatter().parse(template)):
             return template
-        return template.format_map(_Defaults({**self._defaults, **kwargs}))
+        defaults = {
+            name: (value.get(self.lang) or value[DEFAULT_LANGUAGE]) if isinstance(value, dict) else value
+            for name, value in self._defaults.items()
+        }
+        return template.format_map(_Defaults({**defaults, **kwargs}))
