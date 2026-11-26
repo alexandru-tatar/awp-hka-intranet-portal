@@ -8,11 +8,11 @@ skip.link: Skip to content
 
 nav.label: Main navigation
 nav.menu_button: Menu
-nav.empty: No application is available to you at the moment. If you expect one, contact {kontakt}.
+nav.empty: No app is available to you at the moment. If you expect one, contact {kontakt}.
 nav.unavailable: not available
 
 header.logout: Log out
-header.signed_in_as: Signed in as
+header.signed_in_as: Logged in as
 header.admin: Administration
 
 logout.title: Log out?
@@ -31,8 +31,8 @@ footer.docs: Docs
 
 home.title: Home
 home.greeting: Welcome, {name}
-home.intro: Here you find all applications that are available to you. Choose an application.
-home.apps_heading: Your applications
+home.intro: Here you find all apps that are available to you. Choose an app.
+home.apps_heading: Your apps
 home.open: open
 
 login.title: Log in
@@ -47,11 +47,11 @@ error.request_id: Error number
 error.400.title: Request not possible
 error.400.body: The portal could not process this request. Please try again.
 error.403.title: You do not have permission for this
-error.403.body: This application is not available for your role. If you think this is a mistake, contact {kontakt}.
+error.403.body: This app is not available for your role. If you think this is a mistake, contact {kontakt}.
 error.404.title: Page not found
-error.404.body: This address does not exist (any more). Use the menu to get to your application.
-error.503.title: Application temporarily unavailable
-error.503.body: This application is not answering at the moment. Please try again in a few minutes. If it takes longer, contact {kontakt}.
+error.404.body: This address does not exist (any more). Use the menu to get to your app.
+error.503.title: App temporarily unavailable
+error.503.body: This app is not answering at the moment. Please try again in a few minutes. If it takes longer, contact {kontakt}.
 error.401.title: Please log in
 error.401.body: You must be logged in to see this page. Log in and try again.
 error.405.title: This action is not possible here
@@ -61,7 +61,7 @@ error.408.body: The portal did not receive your request in time. Please try agai
 error.409.title: The change does not match the current state
 error.409.body: Something has changed since you opened the page. Reload the page and try again.
 error.410.title: No longer available
-error.410.body: This page no longer exists. Use the menu to get to your application.
+error.410.body: This page no longer exists. Use the menu to get to your app.
 error.413.title: The input is too large
 error.413.body: The data you sent is larger than allowed. Please send less data or a smaller file.
 error.414.title: The address is too long
@@ -74,10 +74,10 @@ error.429.title: Too many requests
 error.429.body: You sent a lot of requests in a short time. Please wait a moment and try again.
 error.501.title: This function does not exist yet
 error.501.body: The portal cannot answer this request. Please contact {kontakt}.
-error.502.title: Application not reachable
-error.502.body: The portal did not get a usable answer from the application. Please try again in a few minutes. If it takes longer, contact {kontakt}.
+error.502.title: App not reachable
+error.502.body: The portal did not get a usable answer from the app. Please try again in a few minutes. If it takes longer, contact {kontakt}.
 error.504.title: The answer takes too long
-error.504.body: The application did not answer in time. Please try again in a few minutes. If it takes longer, contact {kontakt}.
+error.504.body: The app did not answer in time. Please try again in a few minutes. If it takes longer, contact {kontakt}.
 error.4xx.title: The request was not possible
 error.4xx.body: The portal could not process this request. Please try again. If it fails again, contact {kontakt}.
 error.login: Log in
@@ -88,8 +88,8 @@ maintenance.title: Maintenance
 maintenance.body: The portal is not reachable right now. Please try again later.
 
 status.title: Operating status
-status.caption: All registered applications
-status.col.app: Application
+status.caption: All registered apps
+status.col.app: App
 status.col.version: Version
 status.col.status: Status
 status.col.last_probe: Last check
@@ -99,25 +99,25 @@ status.unhealthy: faulty
 status.failed: failed
 status.registering: being checked
 status.retired: retired
-status.none: No applications are registered yet.
+status.none: No apps are registered yet.
 status.unknown: –
 
 admin.title: Administration
-admin.intro: Here you see all applications in the portal. You can change the roles of an application, remove applications and give people extra roles.
+admin.intro: Here you see all apps in the portal. You can change the roles of an app, remove apps and give people extra roles.
 admin.read_only: Administration is read-only here. Changes are not possible.
-admin.notice.app_removed: The application was removed. It is no longer in the menu.
-admin.notice.app_roles: The roles of the application were saved. The menu shows them right away.
+admin.notice.app_removed: The app was removed. It is no longer in the menu.
+admin.notice.app_roles: The roles of the app were saved. The menu shows them right away.
 admin.notice.grant_set: The extra roles were saved. They apply from the person's next login.
 admin.notice.grant_deleted: The extra roles were deleted. This applies from the person's next login.
 admin.error.title: Your input could not be saved
-admin.error.app_roles_empty: Choose at least one role. Nobody can see an application without a role.
+admin.error.app_roles_empty: Choose at least one role. Nobody can see an app without a role.
 admin.error.app_roles_unknown: One of the chosen roles does not exist. Please reload the page.
 admin.error.grant_sub: Enter the subject of the person (at most 200 characters).
 admin.error.grant_roles_unknown: One of the chosen roles does not exist. Please reload the page.
-admin.apps.heading: Applications
-admin.apps.caption: All applications with owner, status and roles
-admin.apps.note: If the pipeline registers a manifest again, the roles from the application's repository apply again.
-admin.col.app: Application
+admin.apps.heading: Apps
+admin.apps.caption: All apps with owner, status and roles
+admin.apps.note: If the pipeline registers a manifest again, the roles from the app's repository apply again.
+admin.col.app: App
 admin.col.owner: Owner
 admin.col.version: Version
 admin.col.status: Status
@@ -130,7 +130,7 @@ admin.roles.legend: Roles
 admin.roles.save: Save
 admin.remove.button: Remove
 admin.remove.title: Remove “{name}”?
-admin.remove.body: The application “{slug}” disappears from the menu at once. The same repository can register the name again later.
+admin.remove.body: The app “{slug}” disappears from the menu at once. The same repository can register the name again later.
 admin.remove.confirm: Remove
 admin.grants.heading: Extra roles per person
 admin.grants.intro: A person gets these roles in addition to the roles from the login. They apply from the next login.
@@ -145,16 +145,16 @@ admin.grants.delete_body: The person loses their extra roles from the next login
 admin.grants.delete_confirm: Delete
 
 connections.title: My connections
-connections.intro: For some systems the portal needs your password once, so that applications can read there for you. The password is encrypted and stored only for this session.
-connections.none: No application needs a connection at the moment.
+connections.intro: For some systems the portal needs your password once, so that apps can read there for you. The password is encrypted and stored only for this session.
+connections.none: No app needs a connection at the moment.
 
 dialog.cancel: Cancel
 
 # ── Development mode only ─────────────────────────────────────
-dev.banner: Development mode – login is simulated, applications are placeholders.
+dev.banner: Development mode – login is simulated, apps are placeholders.
 dev.login.intro: There is no real login in development mode. Choose a test person.
 dev.login.no_roles: no role
-dev.app.notice: Placeholder. The application “{name}” will appear here later. The examples below show the patterns from the design kit.
+dev.app.notice: Placeholder. The app “{name}” will appear here later. The examples below show the patterns from the design kit.
 dev.app.table_caption: My grades
 dev.app.form_heading: Send message
 dev.app.dialog_title: Send message?

@@ -47,7 +47,7 @@ test("Texte: beide Sprachen, gleiche Schlüssel, in Python und JavaScript diesel
 test("Seitenrahmen auf Englisch", async () => {
   const html = await (await fetch(`${prod.base}/`, { headers: student(EN) })).text();
   assert.match(html, /<html lang="en">/);
-  assert.ok(html.includes("Skip to content") && html.includes("Signed in as"));
+  assert.ok(html.includes("Skip to content") && html.includes("Logged in as"));
   assert.ok(html.includes('aria-label="Main navigation"') && html.includes("<summary>Menu</summary>"));
   assert.ok(html.includes("Do you want to log out of the portal?") && html.includes(">Cancel</button>"));
   assert.ok(!html.includes("Zum Inhalt") && !html.includes("Abmelden"));

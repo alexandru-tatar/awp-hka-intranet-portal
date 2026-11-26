@@ -126,8 +126,8 @@ for (const [art, status, title, text] of [
 for (const [art, status, title, text] of [
   ["fachlich", 423, "That did not work", "The action was not possible."],
   ["technisch", 503, "Not reachable right now", "try again later"],
-  ["aufruf", 500, "Error in the application", "give the reference number"],
-  ["anderer", 500, "Error in the application", "give the reference number"],
+  ["aufruf", 500, "Error in the app", "give the reference number"],
+  ["anderer", 500, "Error in the app", "give the reference number"],
 ]) {
   test(`Fallback als HTML auf Englisch (HKA-101): ${art}`, async () => {
     const response = await fetch(`${server.base}/fehler/${art}`, {

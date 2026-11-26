@@ -152,8 +152,8 @@ def test_portal_fehler_bleiben_wie_bisher(client):
 @pytest.mark.parametrize("art,status,title,text", [
     ("fachlich", 423, "That did not work", "The action was not possible."),
     ("technisch", 503, "Not reachable right now", "try again later"),
-    ("aufruf", 500, "Error in the application", "give the reference number"),
-    ("anderer", 500, "Error in the application", "give the reference number"),
+    ("aufruf", 500, "Error in the app", "give the reference number"),
+    ("anderer", 500, "Error in the app", "give the reference number"),
 ])
 def test_fallback_html_englisch(client, log_lines, art, status, title, text):
     """HKA-101: Die Standardfehlerseite folgt Accept-Language."""

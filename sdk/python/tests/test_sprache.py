@@ -39,7 +39,7 @@ def test_texts_json_in_python_und_javascript_gleich():
 def test_rahmen_auf_englisch(client):
     html = client.get("/", headers=student(**EN)).text
     assert '<html lang="en">' in html
-    assert "Skip to content" in html and "Signed in as" in html
+    assert "Skip to content" in html and "Logged in as" in html
     assert 'aria-label="Main navigation"' in html and "<summary>Menu</summary>" in html
     assert "Do you want to log out of the portal?" in html and ">Cancel</button>" in html
     assert "Zum Inhalt" not in html and "Abmelden" not in html

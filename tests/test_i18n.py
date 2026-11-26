@@ -88,7 +88,7 @@ def test_messages_follow_current_language():
     try:
         assert t("home.title") == "Home"
         assert t.lang == "en"
-        assert t("nav.empty") == "No application is available to you at the moment. If you expect one, contact IT."
+        assert t("nav.empty") == "No app is available to you at the moment. If you expect one, contact IT."
     finally:
         current_language.reset(token)
 
