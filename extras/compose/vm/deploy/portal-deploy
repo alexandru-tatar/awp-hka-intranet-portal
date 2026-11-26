@@ -12,6 +12,9 @@
 #
 # Installation: sudo install -m 0755 -o root -g root portal-deploy /usr/local/sbin/portal-deploy
 # Einstellungen: /etc/portal/deploy.env (README.md in diesem Ordner)
+#
+# Sprache der Ausgabe, Deutsch oder Englisch (HKA-101): PORTAL_LANG=de|en (Umgebung oder deploy.env), sonst LC_ALL,
+# LC_MESSAGES, LANG ("en…" = Englisch), sonst Deutsch. Der Wert geht mit "-e PORTAL_LANG=…" in den Container.
 set -euo pipefail
 
 if [ "$(id -u)" -eq 0 ]; then
@@ -22,37 +25,69 @@ else
   ENV_FILE=${PORTAL_DEPLOY_ENV:-/etc/portal/deploy.env}
 fi
 
-usage="Aufruf: sudo portal-deploy check|register --owner <owner/repo> < manifest.json
+# Sprache: de oder en. PORTAL_LANG aus der Umgebung, sonst aus deploy.env (nur gelesen, nicht ausgeführt), sonst LC_*.
+pick_lang() {
+  local value=${PORTAL_LANG:-}
+  if [ -z "$value" ] && [ -r "$ENV_FILE" ]; then
+    value=$(sed -n 's/^PORTAL_LANG=\([A-Za-z]*\).*/\1/p' "$ENV_FILE" | head -n 1)
+  fi
+  case "$value" in
+    en|EN) echo en; return ;;
+    de|DE) echo de; return ;;
+  esac
+  for value in "${LC_ALL:-}" "${LC_MESSAGES:-}" "${LANG:-}"; do
+    if [ -n "$value" ]; then
+      case "$value" in en|en_*|en.*) echo en ;; *) echo de ;; esac
+      return
+    fi
+  done
+  echo de
+}
+LANG_CODE=$(pick_lang)
+
+if [ "$LANG_CODE" = en ]; then
+  usage="Usage: sudo portal-deploy check|register --owner <owner/repo> < manifest.json
+       sudo portal-deploy list
+       sudo portal-deploy remove <slug> --owner <owner/repo>"
+  M_REFUSED="refused"; M_ARGS="wrong number of arguments"; M_NO_OWNER="call without --owner"
+  M_BAD_SLUG="invalid app name"; M_ONLY="only check, register, list or remove allowed"; M_BAD_OWNER="invalid owner"
+  M_NO_STDIN="manifest missing on standard input"; M_MISSING="is missing in"
+else
+  usage="Aufruf: sudo portal-deploy check|register --owner <owner/repo> < manifest.json
         sudo portal-deploy list
         sudo portal-deploy remove <slug> --owner <owner/repo>"
+  M_REFUSED="abgelehnt"; M_ARGS="falsche Anzahl Argumente"; M_NO_OWNER="Aufruf ohne --owner"
+  M_BAD_SLUG="ungültiger Name der App"; M_ONLY="nur check, register, list oder remove erlaubt"; M_BAD_OWNER="ungültiger Besitzer"
+  M_NO_STDIN="Manifest fehlt auf der Standardeingabe"; M_MISSING="fehlt in"
+fi
 log() { command -v logger >/dev/null 2>&1 && logger -t portal-deploy -- "$*" || true; }
-refuse() { log "abgelehnt: $1 (owner=${OWNER:-?})"; echo "portal-deploy: $1" >&2; echo "$usage" >&2; exit 2; }
+refuse() { log "$M_REFUSED: $1 (owner=${OWNER:-?})"; echo "portal-deploy: $1" >&2; echo "$usage" >&2; exit 2; }
 
 OWNER=
 SLUG=
 COMMAND=${1-}
 case "$COMMAND" in
   check|register)
-    if [ "$#" -ne 3 ]; then refuse "falsche Anzahl Argumente"; fi
-    if [ "$2" != "--owner" ]; then refuse "Aufruf ohne --owner"; fi
+    if [ "$#" -ne 3 ]; then refuse "$M_ARGS"; fi
+    if [ "$2" != "--owner" ]; then refuse "$M_NO_OWNER"; fi
     OWNER=$3 ;;
   list)
-    if [ "$#" -ne 1 ]; then refuse "falsche Anzahl Argumente"; fi ;;
+    if [ "$#" -ne 1 ]; then refuse "$M_ARGS"; fi ;;
   remove)
-    if [ "$#" -ne 4 ]; then refuse "falsche Anzahl Argumente"; fi
+    if [ "$#" -ne 4 ]; then refuse "$M_ARGS"; fi
     SLUG=$2
-    if [ "$3" != "--owner" ]; then refuse "Aufruf ohne --owner"; fi
+    if [ "$3" != "--owner" ]; then refuse "$M_NO_OWNER"; fi
     OWNER=$4
-    if ! [[ "$SLUG" =~ ^[a-z][a-z0-9-]{2,30}$ ]]; then refuse "ungültiger Name der App"; fi ;;
+    if ! [[ "$SLUG" =~ ^[a-z][a-z0-9-]{2,30}$ ]]; then refuse "$M_BAD_SLUG"; fi ;;
   *)
-    if [ "$#" -lt 1 ] || [ "$#" -gt 4 ]; then refuse "falsche Anzahl Argumente"; fi
-    refuse "nur check, register, list oder remove erlaubt" ;;
+    if [ "$#" -lt 1 ] || [ "$#" -gt 4 ]; then refuse "$M_ARGS"; fi
+    refuse "$M_ONLY" ;;
 esac
 if [ "$COMMAND" != list ]; then
-  if ! [[ "$OWNER" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9._-]+$ ]]; then refuse "ungültiger Besitzer"; fi
+  if ! [[ "$OWNER" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9._-]+$ ]]; then refuse "$M_BAD_OWNER"; fi
 fi
 case "$COMMAND" in
-  check|register) if [ -t 0 ]; then refuse "Manifest fehlt auf der Standardeingabe"; fi ;;
+  check|register) if [ -t 0 ]; then refuse "$M_NO_STDIN"; fi ;;
 esac
 case "$COMMAND" in
   register|remove) WRITABLE=rw ;;
@@ -61,9 +96,9 @@ esac
 
 # shellcheck source=/dev/null
 . "$ENV_FILE"
-: "${PORTAL_IMAGE:?PORTAL_IMAGE fehlt in $ENV_FILE}"
-: "${MANIFESTS_DIR:?MANIFESTS_DIR fehlt in $ENV_FILE}"
-: "${REGISTRY_DIR:?REGISTRY_DIR fehlt in $ENV_FILE}"
+: "${PORTAL_IMAGE:?PORTAL_IMAGE $M_MISSING $ENV_FILE}"
+: "${MANIFESTS_DIR:?MANIFESTS_DIR $M_MISSING $ENV_FILE}"
+: "${REGISTRY_DIR:?REGISTRY_DIR $M_MISSING $ENV_FILE}"
 PORTAL_CONFIG_IN_IMAGE=${PORTAL_CONFIG_IN_IMAGE:-/opt/app/dev/gateway.vm.yml}
 
 # Statusdatei des Portals (HKA-56): nur lesen, nur für list. Ohne STATUS_DIR zeigt list den Status als unbekannt.
@@ -80,6 +115,7 @@ log "$COMMAND ${SLUG:+slug=$SLUG }owner=${OWNER:--} user=${SUDO_USER:-$(id -un)}
 exec docker run --rm -i \
   --network none --read-only --tmpfs /tmp \
   --cap-drop ALL --security-opt no-new-privileges \
+  -e "PORTAL_LANG=$LANG_CODE" \
   --memory 256m --pids-limit 64 \
   -v "$MANIFESTS_DIR:/var/lib/portal/manifests:$WRITABLE" \
   -v "$REGISTRY_DIR:/var/lib/portal/registry:$WRITABLE" \

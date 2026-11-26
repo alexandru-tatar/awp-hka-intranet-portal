@@ -1,8 +1,9 @@
 {
   "slug": "stundenplan",
   "name": "Stundenplan",
+  "name_en": "Timetable",
   "category": "Studium",
-  "menu": { "label": "Stundenplan", "icon": "calendar" },
+  "menu": { "label": "Stundenplan", "label_en": "Timetable", "icon": "calendar" },
   "roles": ["student", "professor"],
   "version": "0.3.1"
 }

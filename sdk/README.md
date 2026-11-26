@@ -99,6 +99,10 @@ Deutsch und Englisch (HKA-101). Sie stehen in `platform_sdk/texts.json`, in Pyth
   dieselbe Sprache hat.
 - **Eigene Texte der App** gibt es ebenfalls auf Deutsch und Englisch (Regel R-UI-7). Die App liest die Sprache mit
   `portal.language(request)` (Python) bzw. `portal.language(req)` (JavaScript): `"de"` oder `"en"`, Standard `"de"`.
+- **Manifest:** `name_en` und `menu.label_en` sind Pflicht (Schema im Portal-Repository). Der Ersatz-Rahmen zeigt bei Englisch `menu.label_en`
+  und die übersetzte Überschrift der Kategorie (`category_<name>` in `texts.json`), die Test-Anmeldung den englischen Namen.
+- **Befehle ohne Anfrage** (`python -m platform_sdk.verify_tree`, `node platform_sdk/verify-tree.js`, Meldung PF-103): Sprache nach `PORTAL_LANG`
+  (`de` oder `en`), sonst `LC_ALL`, `LC_MESSAGES`, `LANG`, sonst Deutsch (`env_language` bzw. `envLanguage`).
 - Neuer Text des SDK: Schlüssel in **beiden** Sprachen in `texts.json` (beide SDK-Kopien), in der Vorlage `{{ tx.<schlüssel> }}`, im Code
   `t("<schlüssel>")`. Eigene Texte der App gehören der App.
 

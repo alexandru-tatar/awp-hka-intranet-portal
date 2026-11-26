@@ -83,7 +83,7 @@ def test_set_app_roles_rewrites_manifest_and_menu(env, admin):
     import json
     manifest = json.loads((env / "manifests" / "noten.json").read_text(encoding="utf-8"))
     assert manifest["roles"] == ["pilot-tester", "student"] and manifest["slug"] == "noten"
-    assert manifest["menu"] == {"label": "Meine Noten", "icon": "grades"}      # alles andere bleibt
+    assert manifest["menu"] == {"label": "Meine Noten", "label_en": "My grades", "icon": "grades"}      # alles andere bleibt
     client = login(TestClient(admin.app, follow_redirects=False), "neumann")    # Rolle professor
     assert "/apps/noten/" not in client.get("/").text
 

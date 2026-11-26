@@ -13,6 +13,7 @@
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
+const { TEXTS, envLanguage } = require("./i18n");
 
 const ROOT = __dirname;
 const SUM_FILE_NAME = "SHA256";
@@ -50,10 +51,7 @@ function main() {
   const sumFile = path.join(ROOT, SUM_FILE_NAME);
   const expected = fs.existsSync(sumFile) ? fs.readFileSync(sumFile, "utf-8").trim() : "";
   if (treeHash() === expected) return 0;
-  console.error(
-    "FEHLER PF-103  –  Portal-Bibliothek verändert\n" +
-      "Was tun: Änderungen in platform_sdk/ zurücknehmen oder `make sdk-update` ausführen.",
-  );
+  console.error(TEXTS[envLanguage()].pf103); // PORTAL_LANG=de|en (HKA-101)
   return 1;
 }
 

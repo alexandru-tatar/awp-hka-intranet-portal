@@ -12,6 +12,8 @@ import hashlib
 import sys
 from pathlib import Path
 
+from .i18n import TEXTS, env_language
+
 ROOT = Path(__file__).parent
 SUM_FILE_NAME = "SHA256"
 SKIP_DIRS = {"__pycache__", "node_modules"}
@@ -36,11 +38,7 @@ def main() -> int:
     expected = sum_file.read_text(encoding="utf-8").strip() if sum_file.is_file() else ""
     if tree_hash() == expected:
         return 0
-    print(
-        "FEHLER PF-103  –  Portal-Bibliothek verändert\n"
-        "Was tun: Änderungen in platform_sdk/ zurücknehmen oder `make sdk-update` ausführen.",
-        file=sys.stderr,
-    )
+    print(TEXTS[env_language()]["pf103"], file=sys.stderr)  # PORTAL_LANG=de|en (HKA-101)
     return 1
 
 

@@ -18,6 +18,11 @@ header.admin: Administration
 logout.title: Log out?
 logout.body: Do you want to log out of the portal?
 
+category.Studium: Studies
+category.Verwaltung: Administration
+category.Kommunikation: Communication
+category.Sonstiges: Other
+
 lang.name.de: Deutsch
 lang.name.en: English
 

@@ -103,3 +103,52 @@ def test_portal_language_fuer_eigene_texte(header, expected):
     headers = [(b"accept-language", header.encode())] if header else []
     request = Request({"type": "http", "method": "GET", "path": "/", "headers": headers})
     assert make_portal().language(request) == expected
+
+
+def test_ersatz_menue_auf_englisch(client):
+    de = client.get("/", headers=student()).text
+    en = client.get("/", headers=student(**EN)).text
+    assert "Meine Noten" in de and ">Studium<" in de
+    assert "My grades" in en and ">Studies<" in en and "Meine Noten" not in en
+
+
+def test_ersatz_menue_ohne_englische_felder_zeigt_deutsch():
+    """Ältere Manifeste ohne label_en: die Beschriftung bleibt Deutsch, auch bei englischer Anfrage."""
+    from conftest import MANIFEST, make_portal
+    from platform_sdk.context import current_language
+
+    portal = make_portal()
+    portal.config.manifest["menu"] = {k: v for k, v in MANIFEST["menu"].items() if k != "label_en"}
+    token = current_language.set("en")
+    try:
+        assert portal._layout._menu_item()["label"] == "Meine Noten"
+    finally:
+        current_language.reset(token)
+
+
+def test_test_anmeldung_titel_englisch(dev_client):
+    assert "Test login – Grades overview" in dev_client.get("/__dev/login", headers=EN).text
+
+
+@pytest.mark.parametrize("env, marker", [
+    ({"PORTAL_LANG": "en"}, "ERROR PF-103  –  Portal library changed"),
+    ({"LANG": "en_US.UTF-8"}, "ERROR PF-103"),
+    ({"PORTAL_LANG": "de", "LANG": "en_US.UTF-8"}, "FEHLER PF-103  –  Portal-Bibliothek verändert"),
+    ({}, "FEHLER PF-103"),
+])
+def test_pf103_in_der_sprache_der_umgebung(tmp_path, env, marker):
+    """HKA-101: ``python -m platform_sdk.verify_tree`` meldet PF-103 nach PORTAL_LANG bzw. LC_ALL, LC_MESSAGES, LANG."""
+    import os
+    import shutil
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    source = Path(__file__).resolve().parent.parent / "platform_sdk"
+    copy = tmp_path / "platform_sdk"
+    shutil.copytree(source, copy, ignore=shutil.ignore_patterns("__pycache__"))
+    (copy / "SHA256").write_text("sha256:falsch\n")
+    clean = {k: v for k, v in os.environ.items() if k not in ("PORTAL_LANG", "LC_ALL", "LC_MESSAGES", "LANG")}
+    result = subprocess.run([sys.executable, "-m", "platform_sdk.verify_tree"], cwd=tmp_path, env={**clean, **env},
+                            capture_output=True, text=True)
+    assert result.returncode == 1 and marker in result.stderr

@@ -5,6 +5,7 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const http = require("node:http");
+const os = require("node:os");
 const path = require("node:path");
 const { after, before, test } = require("node:test");
 const { LANGUAGES, TEXTS, pickLanguage } = require("../platform_sdk/i18n");
@@ -114,3 +115,43 @@ test("portal.language(req) für eigene Texte der App (R-UI-7)", () => {
   assert.equal(portal.language(req("fr")), "de");
   assert.equal(portal.language(req("de,en;q=0.5")), "de");
 });
+
+test("Ersatz-Menü auf Englisch mit label_en und übersetzter Kategorie", async () => {
+  const de = await (await fetch(`${prod.base}/`, { headers: student() })).text();
+  const en = await (await fetch(`${prod.base}/`, { headers: student(EN) })).text();
+  assert.ok(de.includes("Meine Noten") && de.includes(">Studium<"));
+  assert.ok(en.includes("My grades") && en.includes(">Studies<") && !en.includes("Meine Noten"));
+});
+
+test("Test-Anmeldung: Titel mit englischem Namen der App", async () => {
+  const en = await (await fetch(`${dev.base}/__dev/login`, { headers: EN })).text();
+  assert.ok(en.includes("Test login – Grades overview"));
+});
+
+test("envLanguage: PORTAL_LANG vor LC_ALL, LC_MESSAGES, LANG", () => {
+  const { envLanguage } = require("../platform_sdk/i18n");
+  const cases = [
+    [{}, "de"], [{ PORTAL_LANG: "en" }, "en"], [{ PORTAL_LANG: "de", LANG: "en_US.UTF-8" }, "de"], [{ LANG: "en_US.UTF-8" }, "en"],
+    [{ LC_ALL: "C", LANG: "en_US.UTF-8" }, "de"], [{ LC_MESSAGES: "en_GB" }, "en"], [{ PORTAL_LANG: "fr", LANG: "en" }, "en"],
+  ];
+  for (const [env, expected] of cases) assert.equal(envLanguage(env), expected, JSON.stringify(env));
+});
+
+for (const [env, marker] of [
+  [{ PORTAL_LANG: "en" }, "ERROR PF-103  –  Portal library changed"],
+  [{ LANG: "en_US.UTF-8" }, "ERROR PF-103"],
+  [{ PORTAL_LANG: "de", LANG: "en_US.UTF-8" }, "FEHLER PF-103  –  Portal-Bibliothek verändert"],
+  [{}, "FEHLER PF-103"],
+]) {
+  test(`PF-103 in der Sprache der Umgebung: ${JSON.stringify(env)}`, () => {
+    const copy = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "sdk-")), "platform_sdk");
+    fs.cpSync(path.join(__dirname, "..", "platform_sdk"), copy, { recursive: true });
+    fs.writeFileSync(path.join(copy, "SHA256"), "sha256:falsch\n");
+    const clean = Object.fromEntries(Object.entries(process.env).filter(([k]) => !["PORTAL_LANG", "LC_ALL", "LC_MESSAGES", "LANG"].includes(k)));
+    const result = require("node:child_process").spawnSync(process.execPath, [path.join(copy, "verify-tree.js")], {
+      env: { ...clean, ...env }, encoding: "utf-8",
+    });
+    assert.equal(result.status, 1);
+    assert.ok(result.stderr.includes(marker), result.stderr);
+  });
+}

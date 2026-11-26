@@ -5,7 +5,7 @@
   "description": "Manifest für HKA Portal micro-apps",
   "type": "object",
   "additionalProperties": false,
-  "required": ["slug", "name", "category", "menu", "roles", "version"],
+  "required": ["slug", "name", "name_en", "category", "menu", "roles", "version"],
   "properties": {
     "slug": {
       "type": "string",
@@ -17,15 +17,29 @@
       "maxLength": 60,
       "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
     },
+    "name_en": {
+      "description": "Name der App auf Englisch (HKA-101); das Portal zeigt ihn bei englischer Sprache",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
     "category": {
       "enum": ["Studium", "Verwaltung", "Kommunikation", "Sonstiges"]
     },
     "menu": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["label", "icon"],
+      "required": ["label", "label_en", "icon"],
       "properties": {
         "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40,
+          "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "label_en": {
+          "description": "Beschriftung im Menü auf Englisch (HKA-101)",
           "type": "string",
           "minLength": 1,
           "maxLength": 40,

@@ -116,7 +116,10 @@ class ManifestDirectorySource:
         """
         try:
             manifest = json.loads(path.read_text(encoding="utf-8"))
-            self.validator.validate(manifest)
+            self.validator.validate(manifest, lenient=True)
+            missing = self.validator.missing_english(manifest)
+            if missing:
+                logger.warning("manifest_missing_english file={} missing={}", path.name, ",".join(missing))
         except (OSError, UnicodeDecodeError, json.JSONDecodeError, ManifestInvalid) as exc:
             logger.error("manifest_rejected file={} reason={}", path.name, exc)
             return None

@@ -86,3 +86,10 @@ def caplog(caplog):
     handler_id = logger.add(caplog.handler, format="{message}", level=0)
     yield caplog
     logger.remove(handler_id)
+
+
+@pytest.fixture(autouse=True)
+def german_cli(monkeypatch):
+    """Die Befehle (``python -m portal.registry``, ``portal-deploy``) sprechen nach der Umgebung; Tests laufen auf Deutsch."""
+    for name in ("PORTAL_LANG", "LC_ALL", "LC_MESSAGES", "LANG"):
+        monkeypatch.delenv(name, raising=False)

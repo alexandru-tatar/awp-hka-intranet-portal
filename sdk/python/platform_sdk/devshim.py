@@ -48,7 +48,8 @@ def router(portal: Portal) -> APIRouter:
     @r.get("/login", response_class=HTMLResponse)
     async def login_form() -> str:
         return env.get_template("dev_login.html").render(
-            persons=TEST_PERSONS, roles=manifest_roles, app=portal.manifest["name"], lang=language(), tx=texts()
+            persons=TEST_PERSONS, roles=manifest_roles, app=(portal.manifest.get("name_en") if language() == "en" else None) or portal.manifest["name"],
+            lang=language(), tx=texts()
         )
 
     @r.post("/login")

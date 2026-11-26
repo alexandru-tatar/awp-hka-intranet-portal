@@ -35,6 +35,20 @@ function pickLanguage(acceptLanguage) {
   return ranked.length ? ranked[0][2] : DEFAULT_LANGUAGE;
 }
 
+/**
+ * Sprache der Ausgabe von Befehlen (ohne Anfrage): `PORTAL_LANG` ("de"/"en"), sonst `LC_ALL`, `LC_MESSAGES`, `LANG`.
+ * Beginnt die erste gesetzte Variable mit "en", gilt Englisch, sonst Deutsch.
+ */
+function envLanguage(env = process.env) {
+  const explicit = (env.PORTAL_LANG ?? "").trim().toLowerCase();
+  if (LANGUAGES.includes(explicit)) return explicit;
+  for (const name of ["LC_ALL", "LC_MESSAGES", "LANG"]) {
+    const value = (env[name] ?? "").trim().toLowerCase();
+    if (value) return value.split("_")[0].split(".")[0] === "en" ? "en" : DEFAULT_LANGUAGE;
+  }
+  return DEFAULT_LANGUAGE;
+}
+
 /** Sprache der laufenden Anfrage: aus dem Kontext der Middleware, sonst aus dem Header von `req`, sonst Deutsch. */
 function language(req = null) {
   return requestContext.getStore()?.language ?? pickLanguage(req?.headers?.["accept-language"]);
@@ -50,4 +64,4 @@ function t(key, req = null) {
   return TEXTS[language(req)][key];
 }
 
-module.exports = { LANGUAGES, DEFAULT_LANGUAGE, TEXTS, pickLanguage, language, texts, t };
+module.exports = { LANGUAGES, DEFAULT_LANGUAGE, TEXTS, pickLanguage, envLanguage, language, texts, t };

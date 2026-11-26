@@ -14,8 +14,8 @@ from portal.registry.models import AppView, Snapshot
 
 OWNER = "alexandru-tatar/pruefungen"
 OTHER = "jemand/anderes-repo"
-GOOD = {"slug": "pruefung", "name": "Prüfungen", "category": "Studium",
-        "menu": {"label": "Prüfungen", "icon": "grades"}, "roles": ["student"], "version": "1.0.0"}
+GOOD = {"slug": "pruefung", "name": "Prüfungen", "name_en": "Examinations", "category": "Studium",
+        "menu": {"label": "Prüfungen", "label_en": "Examinations", "icon": "grades"}, "roles": ["student"], "version": "1.0.0"}
 T0 = datetime(2026, 11, 8, 15, 0, 0, tzinfo=timezone.utc)
 
 
@@ -152,7 +152,7 @@ def test_ak2_changed_manifest_of_the_same_owner_shows_up_without_restart(cfg_pat
     registry = registry_for(cfg_path, manifests)
     assert registry.reload().apps["pruefung"].menu_label == "Prüfungen"
     code, out, _ = run(cfg_path, clock, "register", manifest={**GOOD, "version": "1.1.0",
-                                                              "menu": {"label": "Prüfungen neu", "icon": "grades"}})
+                                                              "menu": {"label": "Prüfungen neu", "label_en": "Examinations new", "icon": "grades"}})
     assert code == 0 and "Aktualisiert" in out
     app = registry.refresh().apps["pruefung"]                   # dasselbe Registry-Objekt: kein Neustart
     assert (app.menu_label, app.version, app.status) == ("Prüfungen neu", "1.1.0", "registering")

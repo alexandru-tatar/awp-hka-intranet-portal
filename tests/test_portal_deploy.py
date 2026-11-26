@@ -42,8 +42,9 @@ def box(tmp_path):
         log_file = Path(base["LOG_FILE"])
 
         @staticmethod
-        def run(*args: str, stdin: bytes = b'{"slug": "x"}'):
-            return subprocess.run([str(SCRIPT), *args], env=dict(base), input=stdin, capture_output=True, timeout=30)
+        def run(*args: str, stdin: bytes = b'{"slug": "x"}', env: dict[str, str] | None = None):
+            return subprocess.run([str(SCRIPT), *args], env={**base, **(env or {})}, input=stdin, capture_output=True,
+                                  timeout=30)
 
         @staticmethod
         def docker_args() -> list[str]:
@@ -144,6 +145,55 @@ def test_script_is_executable_and_settings_example_is_complete():
     assert SCRIPT.read_text().startswith("#!/bin/bash\n")
     settings = (DEPLOY / "deploy.env.example").read_text()
     assert all(key in settings for key in ("PORTAL_IMAGE=", "MANIFESTS_DIR=", "REGISTRY_DIR="))
+
+
+def test_container_gets_the_language_german_by_default(box):
+    assert box.run("check", "--owner", OWNER).returncode == 0
+    args = box.docker_args()
+    assert args[args.index("-e") + 1] == "PORTAL_LANG=de"
+    assert args.index("-e") < args.index("hka/portal:test")            # eine Option von docker, kein Argument des Befehls
+
+
+@pytest.mark.parametrize("env, expected", [
+    ({"PORTAL_LANG": "en"}, "en"), ({"PORTAL_LANG": "de", "LANG": "en_US.UTF-8"}, "de"), ({"LANG": "en_US.UTF-8"}, "en"),
+    ({"LANG": "en_GB"}, "en"), ({"LC_ALL": "C", "LANG": "en_US.UTF-8"}, "de"), ({"LC_MESSAGES": "en_US.UTF-8"}, "en"),
+    ({"LANG": "de_DE.UTF-8"}, "de"), ({"PORTAL_LANG": "fr", "LANG": "en_US.UTF-8"}, "en"),
+    ({"PORTAL_LANG": "en; id"}, "de"),
+])
+def test_language_goes_into_the_container(box, env, expected):
+    assert box.run("list", stdin=b"", env=env).returncode == 0
+    args = box.docker_args()
+    assert args[args.index("-e") + 1] == f"PORTAL_LANG={expected}"
+
+
+def test_language_from_the_settings_file(box, tmp_path):
+    (tmp_path / "deploy.env").write_text(
+        "PORTAL_IMAGE=hka/portal:test\nMANIFESTS_DIR=/srv/m\nREGISTRY_DIR=/srv/r\nPORTAL_LANG=en\n")
+    assert box.run("list", stdin=b"").returncode == 0
+    args = box.docker_args()
+    assert args[args.index("-e") + 1] == "PORTAL_LANG=en"
+    refused = box.run("bash", "--owner", OWNER)
+    assert "only check, register, list or remove allowed" in refused.stderr.decode()
+
+
+@pytest.mark.parametrize("args, text", [
+    (("bash", "--owner", OWNER), "only check, register, list or remove allowed"),
+    (("check",), "wrong number of arguments"),
+    (("check", "--eigentuemer", OWNER), "call without --owner"),
+    (("check", "--owner", "a/b;id"), "invalid owner"),
+    (("remove", "Noten", "--owner", OWNER), "invalid app name"),
+])
+def test_refusals_in_english(box, args, text):
+    result = box.run(*args, env={"LANG": "en_US.UTF-8"})
+    stderr = result.stderr.decode()
+    assert result.returncode == 2 and text in stderr and "Usage: sudo portal-deploy" in stderr
+    assert "refused" in box.log_file.read_text() and not box.args_file.exists()
+
+
+def test_missing_settings_in_english(box, tmp_path):
+    (tmp_path / "deploy.env").write_text("PORTAL_IMAGE=hka/portal:test\n")
+    result = box.run("check", "--owner", OWNER, env={"PORTAL_LANG": "en"})
+    assert result.returncode != 0 and b"MANIFESTS_DIR is missing in" in result.stderr
 
 
 def test_script_passes_bash_syntax_check():

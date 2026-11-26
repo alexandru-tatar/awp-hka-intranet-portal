@@ -16,8 +16,8 @@ from portal.registry.registration import Registrar, Rejected, fcntl
 
 ROOT = Path(__file__).resolve().parent.parent
 OWNER = "alexandru-tatar/pruefungen"
-GOOD = {"slug": "pruefung", "name": "Prüfungen", "category": "Studium",
-        "menu": {"label": "Prüfungen", "icon": "grades"}, "roles": ["student"], "version": "1.0.0"}
+GOOD = {"slug": "pruefung", "name": "Prüfungen", "name_en": "Examinations", "category": "Studium",
+        "menu": {"label": "Prüfungen", "label_en": "Examinations", "icon": "grades"}, "roles": ["student"], "version": "1.0.0"}
 
 
 @pytest.fixture

@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import json
 import math
+import os
 from pathlib import Path
+from typing import Mapping
 
 from .context import current_language
 
@@ -40,6 +42,22 @@ def pick_language(accept_language: str | None) -> str:
         if weight > 0 and primary in LANGUAGES:
             ranked.append((-weight, position, primary))
     return min(ranked)[2] if ranked else DEFAULT_LANGUAGE
+
+
+def env_language(env: Mapping[str, str] | None = None) -> str:
+    """Sprache der Ausgabe von Befehlen (ohne Anfrage): ``PORTAL_LANG`` (``de``/``en``), sonst ``LC_ALL``, ``LC_MESSAGES``, ``LANG``.
+
+    Beginnt die erste gesetzte Variable mit ``en``, gilt Englisch, sonst Deutsch.
+    """
+    env = os.environ if env is None else env
+    explicit = (env.get("PORTAL_LANG") or "").strip().lower()
+    if explicit in LANGUAGES:
+        return explicit
+    for name in ("LC_ALL", "LC_MESSAGES", "LANG"):
+        value = (env.get(name) or "").strip().lower()
+        if value:
+            return "en" if value.split("_")[0].split(".")[0] == "en" else DEFAULT_LANGUAGE
+    return DEFAULT_LANGUAGE
 
 
 def language() -> str:

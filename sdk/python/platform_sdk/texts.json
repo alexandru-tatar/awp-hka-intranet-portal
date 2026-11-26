@@ -32,7 +32,12 @@
     "dev_login_roles": "Rollen aus dem Manifest",
     "dev_login_extra": "Weitere Rollen",
     "dev_login_extra_hint": "Zum Beispiel „employee“. Mehrere mit Leerzeichen trennen.",
-    "dev_login_submit": "Anmelden"
+    "dev_login_submit": "Anmelden",
+    "category_Studium": "Studium",
+    "category_Verwaltung": "Verwaltung",
+    "category_Kommunikation": "Kommunikation",
+    "category_Sonstiges": "Sonstiges",
+    "pf103": "FEHLER PF-103  –  Portal-Bibliothek verändert\nWas tun: Änderungen in platform_sdk/ zurücknehmen oder `make sdk-update` ausführen."
   },
   "en": {
     "skip": "Skip to content",
@@ -67,6 +72,11 @@
     "dev_login_roles": "Roles from the manifest",
     "dev_login_extra": "More roles",
     "dev_login_extra_hint": "For example “employee”. Separate several with spaces.",
-    "dev_login_submit": "Log in"
+    "dev_login_submit": "Log in",
+    "category_Studium": "Studies",
+    "category_Verwaltung": "Administration",
+    "category_Kommunikation": "Communication",
+    "category_Sonstiges": "Other",
+    "pf103": "ERROR PF-103  –  Portal library changed\nWhat to do: Undo changes in platform_sdk/ or run `make sdk-update`."
   }
 }

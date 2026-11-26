@@ -48,7 +48,13 @@ class Layout {
 
   _menuItem() {
     const m = this.config.manifest;
-    return { category: m.category, label: m.menu.label, icon: m.menu.icon, path: this.config.basePath || "/" };
+    const label = (language() === "en" ? m.menu.label_en : null) || m.menu.label;
+    return {
+      category: texts()[`category_${m.category}`] ?? m.category,
+      label,
+      icon: m.menu.icon,
+      path: this.config.basePath || "/",
+    };
   }
 
   async _fetchNav() {

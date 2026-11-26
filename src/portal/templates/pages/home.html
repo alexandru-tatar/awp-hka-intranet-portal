@@ -6,7 +6,7 @@
 <div class="app-groups">
   {%- for g in groups %}
   <section class="app-group" aria-labelledby="cat-{{ loop.index }}">
-    <h2 id="cat-{{ loop.index }}">{{ g.category }}</h2>
+    <h2 id="cat-{{ loop.index }}">{{ t('category.' ~ g.category) }}</h2>
     <ul class="app-list">
       {%- for a in g.items %}
       <li>

@@ -57,9 +57,10 @@ class Layout:
 
     def _menu_item(self) -> dict:
         m = self.config.manifest
+        english = language() == "en"
         return {
-            "category": m["category"],
-            "label": m["menu"]["label"],
+            "category": texts().get(f"category_{m['category']}", m["category"]),
+            "label": (m["menu"].get("label_en") if english else None) or m["menu"]["label"],
             "icon": m["menu"]["icon"],
             "path": self.config.base_path or "/",
         }

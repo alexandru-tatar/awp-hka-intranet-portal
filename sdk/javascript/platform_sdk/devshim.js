@@ -47,7 +47,8 @@ function router(portal) {
 
   r.get("/login", (req, res) => {
     res.type("html").send(env.render("dev_login.html", {
-      persons: TEST_PERSONS, roles: manifestRoles, app: portal.manifest.name, lang: language(req), tx: texts(req),
+      persons: TEST_PERSONS, roles: manifestRoles, app: (language(req) === "en" ? portal.manifest.name_en : null) || portal.manifest.name, lang: language(req),
+      tx: texts(req),
     }));
   });
 

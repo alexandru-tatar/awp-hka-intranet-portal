@@ -3,12 +3,18 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Iterable
 
 from jsonschema import Draft202012Validator, ValidationError
 
 from .models import RESERVED_SLUGS
+
+
+# Die englischen Felder (HKA-101) sind Pflicht für neue Registrierungen. Beim Laden bereits registrierter Manifeste (lenient)
+# fehlen sie noch erlaubt: sonst verschwänden alle schon registrierten Apps nach dem Update aus dem Menü.
+_MISSING_ENGLISH = re.compile(r"^'(name_en|label_en)' is a required property$")
 
 
 class ManifestInvalid(Exception):
@@ -50,38 +56,57 @@ class ManifestValidator:
         self._roles = frozenset(role_vocabulary)
         self._scopes = frozenset(adapter_scopes)
 
-    def problems(self, manifest: object) -> list[str]:
+    def problems(self, manifest: object, *, lenient: bool = False) -> list[str]:
         """Alle Probleme eines Manifests als ``<json-pointer>: <meldung>``.
 
         Bei Schemafehlern werden nur diese gemeldet, die weiteren Regeln erst danach.
 
         :param manifest: Geparstes Manifest
+        :param lenient: ``True`` lässt fehlende englische Felder (``name_en``, ``menu.label_en``) zu, für bereits registrierte Manifeste
         :return: Probleme, leer bei gültigem Manifest
         :rtype: list[str]
         """
-        schema_problems = self._schema_problems(manifest)
+        schema_problems = self._schema_problems(manifest, lenient)
         if schema_problems:
             return schema_problems
         return self._registration_problems(manifest)
 
-    def validate(self, manifest: object) -> None:
+    def validate(self, manifest: object, *, lenient: bool = False) -> None:
         """Manifest prüfen.
 
         :param manifest: Geparstes Manifest
+        :param lenient: siehe ``problems``
         :raises ManifestInvalid: Falls es Probleme gibt
         """
-        problems = self.problems(manifest)
+        problems = self.problems(manifest, lenient=lenient)
         if problems:
             raise ManifestInvalid(problems)
 
-    def _schema_problems(self, manifest: object) -> list[str]:
+    @staticmethod
+    def missing_english(manifest: dict) -> list[str]:
+        """Welche englischen Felder fehlen.
+
+        :param manifest: Geparstes Manifest
+        :return: Pointer wie ``/name_en`` und ``/menu/label_en``, leer wenn beide da sind
+        :rtype: list[str]
+        """
+        missing = [] if manifest.get("name_en") else ["/name_en"]
+        menu = manifest.get("menu")
+        if not (isinstance(menu, dict) and menu.get("label_en")):
+            missing.append("/menu/label_en")
+        return missing
+
+    def _schema_problems(self, manifest: object, lenient: bool = False) -> list[str]:
         """Probleme gegen das JSON-Schema.
 
         :param manifest: Geparstes Manifest
+        :param lenient: lässt fehlende englische Felder zu
         :return: Probleme, nach Pointer sortiert
         :rtype: list[str]
         """
         errors = sorted(self._schema.iter_errors(manifest), key=_pointer)
+        if lenient:
+            errors = [e for e in errors if not (e.validator == "required" and _MISSING_ENGLISH.match(e.message))]
         return [f"{_pointer(e)}: {e.message}" for e in errors]
 
     def _registration_problems(self, manifest: dict) -> list[str]:
