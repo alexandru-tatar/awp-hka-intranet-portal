@@ -1,7 +1,6 @@
 """Englische Namen in den Manifesten (HKA-101): Pflicht bei neuer Registrierung, beim Laden bereits registrierter Apps nicht."""
 
 import copy
-import json
 
 import pytest
 from conftest import ROOT, login, write_manifest

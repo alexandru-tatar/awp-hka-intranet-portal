@@ -1,7 +1,6 @@
 """Deutsch und Englisch (HKA-101): Textdateien, Sprachwahl, Umschalter, Menü und Fehlerseiten."""
 
 import string
-from pathlib import Path
 
 import pytest
 import yaml

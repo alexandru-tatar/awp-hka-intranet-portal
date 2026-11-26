@@ -1,7 +1,5 @@
 """Deutsch und Englisch im SDK (HKA-101): Sprache aus Accept-Language, Rahmen, Fehlerseiten, Test-Anmeldung."""
 
-import json
-import re
 from pathlib import Path
 
 import httpx
@@ -70,6 +68,9 @@ def test_kein_zugriff_auf_englisch(client):
     assert r.status_code == 403
     assert "No access" in r.text and "This page is not available for your role." in r.text
     assert "Kein Zugriff" not in r.text
+    # HKA-95: Seite im Seitenrahmen mit Weg zur Startseite, auch auf Englisch
+    assert 'class="site-header"' in r.text and '<html lang="en">' in r.text
+    assert '<a href="/">To the portal home page</a>' in r.text and "Zur Startseite" not in r.text
 
 
 def test_menue_anfrage_traegt_sprache(client, monkeypatch):

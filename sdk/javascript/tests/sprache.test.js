@@ -78,6 +78,9 @@ test("kein Zugriff auf Englisch", async () => {
   const text = await response.text();
   assert.ok(text.includes("No access") && text.includes("This page is not available for your role."));
   assert.ok(!text.includes("Kein Zugriff"));
+  // HKA-95: Seite im Seitenrahmen mit Weg zur Startseite, auch auf Englisch
+  assert.ok(text.includes('class="site-header"') && text.includes('<html lang="en">'));
+  assert.ok(text.includes('<a href="/">To the portal home page</a>') && !text.includes("Zur Startseite"));
 });
 
 test("Menü-Anfrage an das Portal trägt die Sprache", async () => {
