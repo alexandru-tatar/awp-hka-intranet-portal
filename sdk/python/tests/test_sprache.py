@@ -92,3 +92,14 @@ def test_test_anmeldung_auf_englisch(dev_client):
     assert "Testperson" not in r.text
     de = dev_client.get("/__dev/login").text
     assert '<html lang="de">' in de and "Test-Anmeldung" in de
+
+
+@pytest.mark.parametrize("header, expected", [(None, "de"), ("en-GB,en;q=0.9", "en"), ("fr", "de"), ("de,en;q=0.5", "de")])
+def test_portal_language_fuer_eigene_texte(header, expected):
+    """Apps lesen die Sprache mit portal.language(request) (Regel R-UI-7: alle Texte in beiden Sprachen)."""
+    from conftest import make_portal
+    from starlette.requests import Request
+
+    headers = [(b"accept-language", header.encode())] if header else []
+    request = Request({"type": "http", "method": "GET", "path": "/", "headers": headers})
+    assert make_portal().language(request) == expected

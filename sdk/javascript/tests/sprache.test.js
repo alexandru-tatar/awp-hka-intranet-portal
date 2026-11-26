@@ -105,3 +105,12 @@ test("Test-Anmeldung auf Englisch", async () => {
   const de = await (await fetch(`${dev.base}/__dev/login`)).text();
   assert.ok(/<html lang="de">/.test(de) && de.includes("Test-Anmeldung"));
 });
+
+test("portal.language(req) für eigene Texte der App (R-UI-7)", () => {
+  const portal = makePortal();
+  const req = (header) => ({ headers: header === undefined ? {} : { "accept-language": header } });
+  assert.equal(portal.language(req()), "de");
+  assert.equal(portal.language(req("en-GB,en;q=0.9")), "en");
+  assert.equal(portal.language(req("fr")), "de");
+  assert.equal(portal.language(req("de,en;q=0.5")), "de");
+});

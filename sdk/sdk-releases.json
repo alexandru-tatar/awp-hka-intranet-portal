@@ -72,8 +72,8 @@
     "released": "2026-11-25"
   },
   "1.3.0-dev": {
-    "python": "sha256:c9bc6d8d8325411a4f5ba8718252311b7d2571649cd03add4faf0a26c4767824",
-    "javascript": "sha256:3f6d909a6dbf11391fcc389c1887e5cce0abfe83b29f550099e7f287fe894c33",
+    "python": "sha256:7e8a70fa41dd73fd2b42d81ac966064dc6493e44cd8180152856e79e0dc8d1c0",
+    "javascript": "sha256:15c85134c01741a117de3538824d1454be46f5aaf63995f0dc6f942286e72214",
     "assertion_versions": [
       1
     ],

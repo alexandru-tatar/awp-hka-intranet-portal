@@ -15,7 +15,7 @@ from .adapters.bwsync import connect as bwsync_connect
 from .config import Config
 from .context import User
 from .errors import AdapterError, PortalHTTPError
-from .i18n import t
+from .i18n import pick_language, t
 from .jwks import JwksCache
 from .layout import Layout
 from .middleware import PortalMiddleware
@@ -76,6 +76,14 @@ class Portal:
             return user
 
         return dependency
+
+    def language(self, request: Request) -> str:
+        """Sprache der Person für diese Anfrage: ``"de"`` oder ``"en"`` (Standard Deutsch).
+
+        Sie kommt aus ``Accept-Language``; das Security-Gateway setzt den Header nach der Wahl im Portal. Eigene Texte der App
+        folgen ihr (Regel R-UI-7: alle Texte auf Deutsch und Englisch).
+        """
+        return pick_language(request.headers.get("accept-language"))
 
     def url(self, path: str) -> str:
         if not path.startswith("/"):

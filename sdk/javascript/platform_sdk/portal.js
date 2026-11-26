@@ -8,7 +8,7 @@ const { Adapters } = require("./adapters");
 const bwsyncConnect = require("./adapters/bwsync/connect");
 const { Config } = require("./config");
 const devshim = require("./devshim");
-const { t } = require("./i18n");
+const { language, t } = require("./i18n");
 const { JwksCache } = require("./jwks");
 const { Layout } = require("./layout");
 const { portalMiddleware } = require("./middleware");
@@ -79,6 +79,14 @@ class Portal {
       }
       return next();
     };
+  }
+
+  /**
+   * Sprache der Person für diese Anfrage: "de" oder "en" (Standard Deutsch). Sie kommt aus `Accept-Language`; das
+   * Security-Gateway setzt den Header nach der Wahl im Portal. Eigene Texte der App folgen ihr (Regel R-UI-7).
+   */
+  language(req) {
+    return language(req);
   }
 
   url(pathName) {

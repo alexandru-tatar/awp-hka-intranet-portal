@@ -61,6 +61,9 @@ Startseite (`auth/redirects.py`, `sanitize_local_path`). Im Dev-Modus macht das 
 entfernt dieses Cookies auf dem Weg zum Portal; dort speichert das Gateway die Wahl und gibt sie als `Accept-Language` weiter.
 Der Umschalter erscheint dann mit `language_switch: true` in der Konfiguration.
 
+Die Regel R-UI-7 (`docs/qualitaet/regeln.md` im docs-Repository) verlangt für Apps beide Sprachen; sie lesen die Sprache mit
+`portal.language(request)` aus dem SDK (`sdk/README.md`, Abschnitt „Sprache“).
+
 Neue Sprache: Datei `messages.<code>.yml`, Eintrag in `LANGUAGES` (`core/i18n.py`), Name der Sprache als `lang.name.<code>` in allen
 Dateien. Fehlt ein Text in der gewählten Sprache, zeigt das Portal den deutschen (der Test verhindert das).
 

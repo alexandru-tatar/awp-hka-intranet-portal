@@ -97,7 +97,9 @@ Deutsch und Englisch (HKA-101). Sie stehen in `platform_sdk/texts.json`, in Pyth
   Portal). Das SDK liest keine Cookies.
 - `<html lang>` und alle Texte folgen der Sprache. `layout()` schickt sie auch mit der Menü-Anfrage an `GET /nav`, damit das Menü
   dieselbe Sprache hat.
-- Neuer Text: Schlüssel in **beiden** Sprachen in `texts.json` (beide SDK-Kopien), in der Vorlage `{{ tx.<schlüssel> }}`, im Code
+- **Eigene Texte der App** gibt es ebenfalls auf Deutsch und Englisch (Regel R-UI-7). Die App liest die Sprache mit
+  `portal.language(request)` (Python) bzw. `portal.language(req)` (JavaScript): `"de"` oder `"en"`, Standard `"de"`.
+- Neuer Text des SDK: Schlüssel in **beiden** Sprachen in `texts.json` (beide SDK-Kopien), in der Vorlage `{{ tx.<schlüssel> }}`, im Code
   `t("<schlüssel>")`. Eigene Texte der App gehören der App.
 
 ## Fehler: Standard
