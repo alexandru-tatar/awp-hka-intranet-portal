@@ -23,3 +23,4 @@ class User:
 current_user: ContextVar[User | None] = ContextVar("portal_user", default=None)
 current_assertion: ContextVar[str | None] = ContextVar("portal_assertion", default=None)
 current_request_id: ContextVar[str | None] = ContextVar("portal_request_id", default=None)
+current_language: ContextVar[str] = ContextVar("portal_language", default="de")

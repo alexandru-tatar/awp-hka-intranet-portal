@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de">
+<html lang="{{ lang }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,7 +9,7 @@
   <main id="main">
     <h1>{{ title }}</h1>
     <p>{{ detail }}</p>
-    {% if request_id %}<p>Vorgangsnummer: {{ request_id }}</p>{% endif %}
+    {% if request_id %}<p>{{ tx.request_id }}: {{ request_id }}</p>{% endif %}
   </main>
 </body>
 </html>

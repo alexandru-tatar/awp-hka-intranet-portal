@@ -1,7 +1,7 @@
 """Fehlerantworten des SDK: HTML-Seite für Browser, sonst problem+json (06 §4).
 
-Dazu die Standardbehandlung nicht abgefangener Fehler (sdk/README.md, „Fehler: Standard“). Ihre Texte stehen nur
-hier, auf der Fehlerseite des Portals (Ausnahme aus Regel 1).
+Dazu die Standardbehandlung nicht abgefangener Fehler (sdk/README.md, „Fehler: Standard“). Ihre Texte stehen in
+``texts.json`` auf Deutsch und Englisch (HKA-101), wie auf der Fehlerseite des Portals (Ausnahme aus Regel 1).
 """
 
 from __future__ import annotations
@@ -20,6 +20,7 @@ from starlette.responses import HTMLResponse, JSONResponse, Response
 from .adapters.transport import BACKEND_TIMEOUT, category
 from .context import current_request_id
 from .errors import AdapterError
+from .i18n import language, t, texts
 from .layout import Layout
 
 env = Environment(loader=FileSystemLoader(Path(__file__).parent / "templates"), autoescape=True)
@@ -29,23 +30,6 @@ if not log.handlers:  # JSON-Zeilen auf stdout, wie das Zugriffslog
     log.addHandler(logging.StreamHandler(sys.stdout))
     log.setLevel(logging.INFO)
     log.propagate = False
-
-# Titel und Text je Art (domain = fachlich, technical = technisch, call = Aufruf oder Programmierfehler)
-FALLBACK_TEXTS = {
-    "domain": (
-        "Das hat nicht geklappt",
-        "Die Aktion war nicht möglich. Bitte gehen Sie zurück, laden Sie die Seite neu und versuchen Sie es erneut.",
-    ),
-    "technical": (
-        "Gerade nicht erreichbar",
-        "Der Dienst ist gerade nicht erreichbar. Bitte versuchen Sie es später erneut.",
-    ),
-    "call": (
-        "Fehler in der Anwendung",
-        "In dieser Anwendung ist ein Fehler aufgetreten. Wenn das wieder passiert, nennen Sie bitte die Vorgangsnummer.",
-    ),
-}
-
 
 def error(
     request: Request,
@@ -58,7 +42,9 @@ def error(
 ) -> Response:
     request_id = request_id or current_request_id.get()
     if "text/html" in request.headers.get("accept", ""):
-        html = env.get_template("error.html").render(title=title, detail=detail, request_id=request_id)
+        html = env.get_template("error.html").render(
+            title=title, detail=detail, request_id=request_id, lang=language(), tx=texts()
+        )
         return HTMLResponse(html, status_code=status)
     body = {"type": f"urn:hka:problem:{problem_type or status}", "title": title, "status": status, "detail": detail}
     if request_id:
@@ -76,7 +62,7 @@ async def error_in_layout(request: Request, layout: Layout, status: int, title: 
         return error(request, status, title, detail)
     try:
         body = env.get_template("error_in_layout.html").render(
-            title=title, detail=detail, request_id=current_request_id.get()
+            title=title, detail=detail, request_id=current_request_id.get(), tx=texts()
         )
         html = await layout.render(title=title, body=body, current="", user=user)
     except Exception as exc:  # die einfache Seite ist besser als ein zweiter Fehler
@@ -113,5 +99,5 @@ def fallback(request: Request, exc: Exception) -> Response:
         json.dumps({"ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "level": level,
                     "event": "unhandled-error", "request_id": request_id, **entry}),
     )
-    title, text = FALLBACK_TEXTS[kind]
+    title, text = t(f"fallback_{kind}_title"), t(f"fallback_{kind}_text")
     return error(request, status, title, text, problem_type=problem_type, request_id=request_id)

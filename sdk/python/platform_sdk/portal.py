@@ -15,15 +15,12 @@ from .adapters.bwsync import connect as bwsync_connect
 from .config import Config
 from .context import User
 from .errors import AdapterError, PortalHTTPError
+from .i18n import t
 from .jwks import JwksCache
 from .layout import Layout
 from .middleware import PortalMiddleware
 
 KIT_DIR = Path(__file__).parent / "kit"
-NO_ACCESS_TEXT = (
-    "Diese Seite ist für Ihre Rolle nicht freigegeben. "
-    "Auf der Startseite des Portals finden Sie die Anwendungen, die Sie nutzen dürfen."
-)
 
 
 class Portal:
@@ -68,14 +65,14 @@ class Portal:
     def user(self, request: Request) -> User:
         user = getattr(request.state, "portal_user", None)
         if user is None:
-            raise PortalHTTPError(401, "Anmeldung fehlt", "Bitte melden Sie sich im Portal an.")
+            raise PortalHTTPError(401, t("login_missing_title"), t("login_required_detail"))
         return user
 
     def requires(self, *roles: str) -> Callable[[Request], Awaitable[User]]:
         async def dependency(request: Request) -> User:
             user = self.user(request)
             if not set(user.roles) & set(roles):
-                raise PortalHTTPError(403, "Kein Zugriff", NO_ACCESS_TEXT)
+                raise PortalHTTPError(403, t("no_access_title"), t("no_access_detail"))
             return user
 
         return dependency

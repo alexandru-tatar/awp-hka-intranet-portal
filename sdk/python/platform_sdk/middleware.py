@@ -13,8 +13,9 @@ from starlette.requests import Request
 from starlette.responses import RedirectResponse, Response
 
 from . import devshim, pages
-from .context import User, current_assertion, current_request_id, current_user
+from .context import User, current_assertion, current_language, current_request_id, current_user
 from .errors import VerifyError
+from .i18n import pick_language, t
 from .verify import verify
 
 if TYPE_CHECKING:
@@ -36,6 +37,7 @@ class PortalMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         started = time.perf_counter()
         current_request_id.set(request.headers.get("x-request-id"))
+        current_language.set(pick_language(request.headers.get("accept-language")))
         path = request.url.path
         if path == "/healthz" and request.method in ("GET", "HEAD"):
             return await call_next(request)
@@ -50,11 +52,11 @@ class PortalMiddleware(BaseHTTPMiddleware):
                 return RedirectResponse("/__dev/login", status_code=303)
         else:
             if token is None:
-                return self._finish(request, pages.error(request, 401, "Anmeldung fehlt", _LOGIN_HINT), started)
+                return self._finish(request, pages.error(request, 401, t("login_missing_title"), t("login_hint")), started)
             try:
                 claims = await verify(token, keys=self.portal.jwks, issuer=cfg.issuer, audience=cfg.slug)
             except VerifyError:
-                return self._finish(request, pages.error(request, 401, "Anmeldung ungültig", _LOGIN_HINT), started)
+                return self._finish(request, pages.error(request, 401, t("login_invalid_title"), t("login_hint")), started)
             user = User(
                 sub=claims["sub"],
                 name=str(claims.get("name") or ""),
@@ -85,5 +87,3 @@ class PortalMiddleware(BaseHTTPMiddleware):
         )
         return response
 
-
-_LOGIN_HINT = "Bitte öffnen Sie die Anwendung über das Portal und melden Sie sich dort an."

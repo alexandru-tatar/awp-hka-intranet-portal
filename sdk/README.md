@@ -21,7 +21,7 @@ In beiden Sprachen gleich:
 
 ```text
 platform_sdk/
-├── portal, layout, middleware, verify, jwks, config, context, errors, pages, devshim
+├── portal, layout, middleware, verify, jwks, config, context, errors, pages, devshim, i18n (+ texts.json)
 ├── adapters/
 │   ├── __init__            portal.adapters.<system>
 │   ├── transport           HTTP zum Adapter-Dienst; im Entwicklungsmodus feste Testdaten
@@ -86,6 +86,19 @@ Knopf, Texte und Dialog selbst; das Skript meldet nur Zustände (wartet, verbund
 
 7. **Unverändert in der App.** Apps bekommen eine Kopie in `platform_sdk/` und ändern sie nicht; `verify_tree`
    prüft die Prüfsumme gegen `sdk-releases.json`.
+
+## Sprache: Deutsch und Englisch
+
+Die Texte, die das SDK selbst ausgibt (Seitenrahmen mit Abmelde-Dialog, Ersatz-Menü, Fehlerseiten und Test-Anmeldung), gibt es auf
+Deutsch und Englisch (HKA-101). Sie stehen in `platform_sdk/texts.json`, in Python und JavaScript byte-gleich (ein Test prüft das).
+
+- Die Sprache kommt aus dem Header `Accept-Language` der Anfrage (`i18n.pick_language`): die erste unterstützte Sprache nach
+  Gewicht, `en-GB` zählt als `en`, sonst Deutsch. Das Security-Gateway setzt den Header nach der Wahl der Person (Umschalter im
+  Portal). Das SDK liest keine Cookies.
+- `<html lang>` und alle Texte folgen der Sprache. `layout()` schickt sie auch mit der Menü-Anfrage an `GET /nav`, damit das Menü
+  dieselbe Sprache hat.
+- Neuer Text: Schlüssel in **beiden** Sprachen in `texts.json` (beide SDK-Kopien), in der Vorlage `{{ tx.<schlüssel> }}`, im Code
+  `t("<schlüssel>")`. Eigene Texte der App gehören der App.
 
 ## Fehler: Standard
 
@@ -212,4 +225,4 @@ In einer App holt `make sdk-update SDK_DIST=<Portal-Repository>/sdk/dist/<sprach
 
 Eine Version für beide Sprachen, in `python/platform_sdk/VERSION`, `javascript/platform_sdk/VERSION` und
 `javascript/package.json`. Jede Änderung unter `platform_sdk/` braucht eine neue Version und `make sdk-release`.
-Aktuell: `1.2.1-dev`.
+Aktuell: `1.3.0-dev`.

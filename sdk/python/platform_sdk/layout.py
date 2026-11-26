@@ -16,6 +16,7 @@ from markupsafe import Markup
 
 from .config import Config
 from .context import User, current_assertion
+from .i18n import language, texts
 
 log = logging.getLogger("platform_sdk")
 env = Environment(loader=FileSystemLoader(Path(__file__).parent / "templates"), autoescape=True)
@@ -39,13 +40,17 @@ class Layout:
                 "icons": "/_portal/static/icons.svg",
             }
         if nav_html is None:
-            nav_html = env.get_template("nav.html").render(item=self._menu_item(), current=current, kit=kit)
+            nav_html = env.get_template("nav.html").render(
+                item=self._menu_item(), current=current, kit=kit, tx=texts()
+            )
         return env.get_template("layout.html").render(
             title=title,
             body=Markup(body),  # Inhalt kommt aus einer Vorlage mit autoescape
             nav_html=Markup(nav_html),  # vom Portal oder aus nav.html
             user=user,
             kit=kit,
+            lang=language(),
+            tx=texts(),
             app_css=f"{cfg.base_path}/static/app.css",
             dev=cfg.dev,
         )
@@ -65,7 +70,10 @@ class Layout:
             return None
         try:
             async with httpx.AsyncClient(timeout=2) as client:
-                response = await client.get(f"{self.config.api_url}/nav", headers={"Authorization": f"Bearer {token}"})
+                response = await client.get(
+                    f"{self.config.api_url}/nav",
+                    headers={"Authorization": f"Bearer {token}", "Accept-Language": language()},
+                )
                 response.raise_for_status()
         except httpx.HTTPError as exc:
             log.warning("Menü nicht abrufbar, Ersatz-Menü: %s", type(exc).__name__)

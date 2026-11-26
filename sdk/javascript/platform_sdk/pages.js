@@ -3,33 +3,20 @@
 /**
  * Fehlerantworten des SDK: HTML-Seite für Browser, sonst problem+json (06 §4).
  *
- * Dazu die Standardbehandlung nicht abgefangener Fehler (sdk/README.md, „Fehler: Standard“). Ihre Texte stehen nur
- * hier, auf der Fehlerseite des Portals (Ausnahme aus Regel 1).
+ * Dazu die Standardbehandlung nicht abgefangener Fehler (sdk/README.md, „Fehler: Standard“). Ihre Texte stehen in
+ * `texts.json` auf Deutsch und Englisch (HKA-101), wie auf der Fehlerseite des Portals (Ausnahme aus Regel 1).
  */
 
 const { env } = require("./templates");
+const { language, t, texts } = require("./i18n");
 const { requestContext } = require("./context");
 const { AdapterError } = require("./errors");
 const { BACKEND_TIMEOUT, category } = require("./adapters/transport");
 
-// Titel und Text je Art (domain = fachlich, technical = technisch, call = Aufruf oder Programmierfehler).
-// "request" (Fehler mit 4xx-Status, z. B. ungültiges JSON von Express) nutzt den allgemeinen Text von "domain".
-const FALLBACK_TEXTS = {
-  domain: [
-    "Das hat nicht geklappt",
-    "Die Aktion war nicht möglich. Bitte gehen Sie zurück, laden Sie die Seite neu und versuchen Sie es erneut.",
-  ],
-  technical: ["Gerade nicht erreichbar", "Der Dienst ist gerade nicht erreichbar. Bitte versuchen Sie es später erneut."],
-  call: [
-    "Fehler in der Anwendung",
-    "In dieser Anwendung ist ein Fehler aufgetreten. Wenn das wieder passiert, nennen Sie bitte die Vorgangsnummer.",
-  ],
-};
-
 function error(req, res, status, title, detail, { problemType = null, requestId = null } = {}) {
   requestId = requestId ?? requestContext.getStore()?.requestId ?? null;
   if ((req.headers.accept ?? "").includes("text/html")) {
-    const html = env.render("error.html", { title, detail, request_id: requestId });
+    const html = env.render("error.html", { title, detail, request_id: requestId, lang: language(req), tx: texts(req) });
     return res.status(status).type("html").send(html);
   }
   const body = { type: `urn:hka:problem:${problemType ?? status}`, title, status, detail };
@@ -48,7 +35,12 @@ async function errorInLayout(req, res, layout, status, title, detail) {
   if (!user || !(req.headers.accept ?? "").includes("text/html")) return error(req, res, status, title, detail);
   try {
     const requestId = requestContext.getStore()?.requestId ?? null;
-    const body = env.render("error_in_layout.html", { title, detail, request_id: requestId });
+    const body = env.render("error_in_layout.html", {
+      title,
+      detail,
+      request_id: requestId,
+      tx: texts(req),
+    });
     const html = await layout.render({ title, body, current: "", user });
     return res.status(status).type("html").send(html);
   } catch (err) {
@@ -101,8 +93,9 @@ function fallback(err, req, res) {
       ...entry,
     }),
   );
-  const [title, text] = FALLBACK_TEXTS[kind];
+  const title = t(`fallback_${kind}_title`, req);
+  const text = t(`fallback_${kind}_text`, req);
   return error(req, res, status, title, text, { problemType, requestId });
 }
 
-module.exports = { FALLBACK_TEXTS, error, errorInLayout, fallback };
+module.exports = { error, errorInLayout, fallback };

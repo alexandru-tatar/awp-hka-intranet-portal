@@ -7,6 +7,7 @@ Die Sprache gilt je Anfrage (``current_language``). Die Middleware setzt sie aus
 from __future__ import annotations
 
 from contextvars import ContextVar
+import math
 import string
 from pathlib import Path
 from typing import Final
@@ -47,6 +48,8 @@ def pick_language(cookie: str | None, accept_language: str | None) -> str:
                 try:
                     weight = float(value)
                 except ValueError:
+                    weight = 0.0
+                if not math.isfinite(weight):
                     weight = 0.0
         primary = tag.split("-")[0].lower()
         if weight > 0 and primary in LANGUAGES:
