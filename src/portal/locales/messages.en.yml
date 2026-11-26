@@ -1,0 +1,218 @@
+# UI texts (04 §6), English. Same keys and placeholders as messages.de.yml (a test checks this). Register: "you", short sentences, plain language.
+# Placeholders in {curly braces}; {kontakt} comes from the configuration.
+
+app.title: HKA Portal
+brand.name: Hochschule Karlsruhe
+brand.sub: Portal
+skip.link: Skip to content
+
+nav.label: Main navigation
+nav.menu_button: Menu
+nav.empty: No application is available to you at the moment. If you expect one, contact {kontakt}.
+nav.unavailable: not available
+
+header.logout: Log out
+header.signed_in_as: Signed in as
+header.admin: Administration
+
+logout.title: Log out?
+logout.body: Do you want to log out of the portal?
+
+lang.name.de: Deutsch
+lang.name.en: English
+
+footer.label: Footer
+footer.docs: Docs
+
+home.title: Home
+home.greeting: Welcome, {name}
+home.intro: Here you find all applications that are available to you. Choose an application.
+home.apps_heading: Your applications
+home.open: open
+
+login.title: Log in
+login.failed.title: Login not possible
+login.failed.body: The login did not work. Please try again. If it fails again, contact {kontakt}.
+login.expired.title: Login expired
+login.expired.body: The login took too long. Please start again.
+
+error.back_home: back to home
+error.status: Error {status}
+error.request_id: Error number
+error.400.title: Request not possible
+error.400.body: The portal could not process this request. Please try again.
+error.403.title: You do not have permission for this
+error.403.body: This application is not available for your role. If you think this is a mistake, contact {kontakt}.
+error.404.title: Page not found
+error.404.body: This address does not exist (any more). Use the menu to get to your application.
+error.503.title: Application temporarily unavailable
+error.503.body: This application is not answering at the moment. Please try again in a few minutes. If it takes longer, contact {kontakt}.
+error.401.title: Please log in
+error.401.body: You must be logged in to see this page. Log in and try again.
+error.405.title: This action is not possible here
+error.405.body: This page does not accept this kind of request. Please use the links and buttons in the portal.
+error.408.title: The request took too long
+error.408.body: The portal did not receive your request in time. Please try again.
+error.409.title: The change does not match the current state
+error.409.body: Something has changed since you opened the page. Reload the page and try again.
+error.410.title: No longer available
+error.410.body: This page no longer exists. Use the menu to get to your application.
+error.413.title: The input is too large
+error.413.body: The data you sent is larger than allowed. Please send less data or a smaller file.
+error.414.title: The address is too long
+error.414.body: The portal cannot process this address. Please open the page from the home page.
+error.415.title: This format is not supported
+error.415.body: The portal cannot read the data you sent. Please use a different format.
+error.422.title: Input cannot be processed
+error.422.body: Some details are invalid or missing. Please check your input and try again.
+error.429.title: Too many requests
+error.429.body: You sent a lot of requests in a short time. Please wait a moment and try again.
+error.501.title: This function does not exist yet
+error.501.body: The portal cannot answer this request. Please contact {kontakt}.
+error.502.title: Application not reachable
+error.502.body: The portal did not get a usable answer from the application. Please try again in a few minutes. If it takes longer, contact {kontakt}.
+error.504.title: The answer takes too long
+error.504.body: The application did not answer in time. Please try again in a few minutes. If it takes longer, contact {kontakt}.
+error.4xx.title: The request was not possible
+error.4xx.body: The portal could not process this request. Please try again. If it fails again, contact {kontakt}.
+error.login: Log in
+error.5xx.title: An error occurred
+error.5xx.body: "This is not your fault. Please try again later. If you report the problem, give this number: {request_id}."
+
+maintenance.title: Maintenance
+maintenance.body: The portal is not reachable right now. Please try again later.
+
+status.title: Operating status
+status.caption: All registered applications
+status.col.app: Application
+status.col.version: Version
+status.col.status: Status
+status.col.last_probe: Last check
+status.col.last_deploy: Last deployment
+status.healthy: running
+status.unhealthy: faulty
+status.failed: failed
+status.registering: being checked
+status.retired: retired
+status.none: No applications are registered yet.
+status.unknown: –
+
+admin.title: Administration
+admin.intro: Here you see all applications in the portal. You can change the roles of an application, remove applications and give people extra roles.
+admin.read_only: Administration is read-only here. Changes are not possible.
+admin.notice.app_removed: The application was removed. It is no longer in the menu.
+admin.notice.app_roles: The roles of the application were saved. The menu shows them right away.
+admin.notice.grant_set: The extra roles were saved. They apply from the person's next login.
+admin.notice.grant_deleted: The extra roles were deleted. This applies from the person's next login.
+admin.error.title: Your input could not be saved
+admin.error.app_roles_empty: Choose at least one role. Nobody can see an application without a role.
+admin.error.app_roles_unknown: One of the chosen roles does not exist. Please reload the page.
+admin.error.grant_sub: Enter the subject of the person (at most 200 characters).
+admin.error.grant_roles_unknown: One of the chosen roles does not exist. Please reload the page.
+admin.apps.heading: Applications
+admin.apps.caption: All applications with owner, status and roles
+admin.apps.note: If the pipeline registers a manifest again, the roles from the application's repository apply again.
+admin.col.app: Application
+admin.col.owner: Owner
+admin.col.version: Version
+admin.col.status: Status
+admin.col.roles: Roles
+admin.col.actions: Action
+admin.col.sub: Subject
+admin.owner.none: set up by hand
+admin.retired_since: since {date}
+admin.roles.legend: Roles
+admin.roles.save: Save
+admin.remove.button: Remove
+admin.remove.title: Remove “{name}”?
+admin.remove.body: The application “{slug}” disappears from the menu at once. The same repository can register the name again later.
+admin.remove.confirm: Remove
+admin.grants.heading: Extra roles per person
+admin.grants.intro: A person gets these roles in addition to the roles from the login. They apply from the next login.
+admin.grants.caption: Extra roles per person
+admin.grants.none: There are no extra roles yet.
+admin.grants.add: Add extra roles
+admin.grants.sub_hint: The subject is shown in the login system. Without a role, the entry is deleted.
+admin.grants.save: Save
+admin.grants.delete: Delete
+admin.grants.delete_title: Delete the roles of “{sub}”?
+admin.grants.delete_body: The person loses their extra roles from the next login.
+admin.grants.delete_confirm: Delete
+
+connections.title: My connections
+connections.intro: For some systems the portal needs your password once, so that applications can read there for you. The password is encrypted and stored only for this session.
+connections.none: No application needs a connection at the moment.
+
+dialog.cancel: Cancel
+
+# ── Development mode only ─────────────────────────────────────
+dev.banner: Development mode – login is simulated, applications are placeholders.
+dev.login.intro: There is no real login in development mode. Choose a test person.
+dev.login.no_roles: no role
+dev.app.notice: Placeholder. The application “{name}” will appear here later. The examples below show the patterns from the design kit.
+dev.app.table_caption: My grades
+dev.app.form_heading: Send message
+dev.app.dialog_title: Send message?
+dev.app.dialog_body: The message goes to the study office. You cannot take it back afterwards.
+dev.app.send: Send
+dev.app.sent: Sent (placeholder – nothing was sent).
+dev.app.subject: Subject
+dev.app.subject_hint: At most 120 characters.
+dev.app.subject_error: Please enter a subject.
+dev.app.message: Message
+dev.app.required: required
+dev.app.error_summary: Please check your input
+
+header.new_app: New app
+neue_app.title: Create a new app
+neue_app.eyebrow: Self-service
+neue_app.intro: Here you create the repository for your app. It is made from the template, has the branches main and develop and is ready to start at once. You need no commands and no special rights on GitHub.
+neue_app.form.slug: Short name
+neue_app.form.slug_hint: "It later appears in the address of the app. Allowed are 3 to 31 characters: lowercase letters, digits and hyphens only, and it starts with a letter. For example leave-request. The repository is then called app-leave-request, so do not type “app-” in front yourself."
+neue_app.form.language: Template
+neue_app.form.language_hint: Both templates come with a dev container and an automatic check. Choose the language your team knows.
+neue_app.form.python: Python
+neue_app.form.python_meta: FastAPI and uv
+neue_app.form.js: JavaScript
+neue_app.form.js_meta: Express and npm
+neue_app.form.github_login: Your GitHub name
+neue_app.form.github_login_hint: The invitation to the repository goes to this name. You find it in your profile on github.com.
+neue_app.form.submit: Create app
+neue_app.form.submit_hint: Creating the app usually takes 10 to 20 seconds.
+neue_app.panel.title: What you get
+neue_app.panel.repo: Your own repository on GitHub, copied from the template
+neue_app.panel.branches: The branches main and develop
+neue_app.panel.protect: "Protection for main: changes only through a pull request"
+neue_app.panel.invite: An invitation to your GitHub name
+neue_app.busy.eyebrow: One moment please
+neue_app.busy.title: Your app is being created
+neue_app.busy.body: The portal is now creating your repository on GitHub. This usually takes 10 to 20 seconds. Please do not close this page.
+neue_app.busy.steps: Progress
+neue_app.busy.note: The page changes by itself as soon as everything is done.
+neue_app.error.title: The app was not created
+neue_app.error.slug_form: "The short name has 3 to 31 characters: lowercase letters, digits and hyphens only, and it starts with a letter."
+neue_app.error.slug_reserved: You may not use this short name. Choose a name that says what your app is about.
+neue_app.error.language: Choose Python or JavaScript.
+neue_app.error.github_login: This is not a GitHub name. It consists of letters, digits and single hyphens and has at most 39 characters.
+neue_app.error.slug_taken: The short name is already taken or blocked. Choose another one. Nothing was created.
+neue_app.error.failed_before: "Something went wrong at the step “{step}”. Nothing was created. Try again or contact {kontakt}. Give the number {request_id}."
+neue_app.error.failed_after: "The repository “{repo}” was created, but something went wrong at the step “{step}”. Nothing was deleted. Contact {kontakt} and give the number {request_id}."
+neue_app.step.pruefen: Check
+neue_app.step.vorlage: Check template
+neue_app.step.repository: Check repository
+neue_app.step.reservieren: Reserve name
+neue_app.step.protokollieren: Log creation
+neue_app.step.anlegen: Create repository
+neue_app.step.warten: Wait for the template files
+neue_app.step.slug: Set short name in manifest.json
+neue_app.step.develop: Create branch develop
+neue_app.step.topic: Set topic
+neue_app.step.einladen: Invite person
+neue_app.step.ruleset: Set up protection for main
+neue_app.done.eyebrow: Done
+neue_app.done.title: Your app is created
+neue_app.done.next_title: What happens next
+neue_app.done.body: "The repository “{repo}” is ready. It has the branches main and develop. The branch main is protected: changes come only through a pull request with an approval."
+neue_app.done.invite: The invitation went to “{login}”. Accept it on GitHub, then you can clone the repository.
+neue_app.done.open: Open repository on GitHub
+neue_app.done.next: How to continue is described in the guide under “Open workspace”.

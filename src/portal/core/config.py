@@ -145,6 +145,7 @@ class Config:
     :ivar apps: Adressen der App-Container für den Prober, ``None`` ohne Abschnitt
     :ivar registry: Nachladen der Manifeste, Prober und Besitzerdatei
     :ivar app_creation: Neue Apps über eine GitHub App anlegen, ``None`` ohne Abschnitt (Funktion aus)
+    :ivar language_switch: Umschalter Deutsch/Englisch im Kopf auch im Gateway-Modus zeigen (braucht ``/sprache/<code>`` im Gateway)
     """
     env: str
     kontakt: str
@@ -164,6 +165,16 @@ class Config:
     registry: RegistryConfig = field(default_factory=RegistryConfig)
     gateway: GatewayConfig | None = None
     app_creation: AppCreationConfig | None = None
+    language_switch: bool = False
+
+    @property
+    def show_language_switch(self) -> bool:
+        """Ob der Umschalter Deutsch/Englisch im Kopf erscheint.
+
+        :return: ``True`` bei ``auth_mode: dev`` (das Portal setzt das Cookie selbst) oder mit ``language_switch: true``
+        :rtype: bool
+        """
+        return self.auth_mode == "dev" or self.language_switch
 
     @property
     def dev(self) -> bool:
@@ -179,7 +190,7 @@ _KEYS = {
     "env", "kontakt", "manifests_dir", "schema_path", "kit_dist", "role_vocabulary",
     "adapter_scopes", "state_file", "dev_users_file", "session_cookie",
     "cookie_secure", "auth_mode", "logging", "grants_file",
-    "apps", "registry", "gateway", "app_creation",
+    "apps", "registry", "gateway", "app_creation", "language_switch",
 }
 _REGISTRY_KEYS = {"refresh_seconds", "probe", "owners_file", "status_file", "admin_write"}
 _APP_CREATION_KEYS = {
@@ -238,6 +249,7 @@ def load_config(path: Path) -> Config:
         registry=_load_registry(path, base, raw.get("registry")),
         gateway=GatewayConfig(**raw["gateway"]) if raw.get("gateway") else None,
         app_creation=_load_app_creation(path, base, raw.get("app_creation"), raw.get("role_vocabulary") or ()),
+        language_switch=bool(raw.get("language_switch", False)),
     )
     if cfg.registry.probe:
         if cfg.apps is None:

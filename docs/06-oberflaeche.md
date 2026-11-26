@@ -39,12 +39,30 @@ Template bekommt `user` (die Session oder `None`), `request_id`, `nav_html` und 
 - `table(caption, columns, rows, num_cols, id)`: Tabelle mit Beschriftung; die erste Zelle jeder Zeile ist Zeilenkopf,
   `num_cols` richtet Spalten rechts aus.
 
-## Texte (`src/portal/locales/messages.de.yml`)
+## Texte (`src/portal/locales/messages.de.yml`, `messages.en.yml`)
 
-Alle sichtbaren Texte stehen in dieser Datei (Anrede „Sie", kurze Sätze, einfache Sprache), nicht in Templates oder Code.
+Alle sichtbaren Texte stehen in diesen Dateien, nicht in Templates oder Code. Deutsch ist die Standardsprache (Anrede „Sie", kurze
+Sätze, einfache Sprache), Englisch die zweite Sprache (Anrede „you", ebenfalls kurze Sätze). Beide Dateien haben dieselben Schlüssel
+und dieselben Platzhalter; `tests/test_i18n.py` schlägt fehl, wenn ein Schlüssel oder Platzhalter in einer Sprache fehlt.
 Aufruf im Template `{{ t('home.title') }}`, im Code `portal.t("home.title")`. Platzhalter in `{geschweiften Klammern}`;
 `{kontakt}` kommt aus der Konfiguration. Ein unbekannter Schlüssel löst einen Fehler (`KeyError`) aus, ein fehlender Platzhalter
-bleibt als `{name}` stehen. Neue Seite: Schlüssel anlegen, dann im Template verwenden.
+bleibt als `{name}` stehen. Neue Seite: Schlüssel in **beiden** Dateien anlegen, dann im Template verwenden.
+
+**Welche Sprache gilt (HKA-101):** `portal.core.i18n.pick_language` entscheidet je Anfrage, die Middleware setzt das Ergebnis
+(`request.state.language`, `current_language`). `t(...)` und `<html lang="{{ t.lang }}">` folgen ihr.
+1. Das Cookie `hka_lang` (`de` oder `en`) gewinnt.
+2. Sonst die erste unterstützte Sprache aus `Accept-Language` nach Gewicht (`en-GB` zählt als `en`).
+3. Sonst Deutsch.
+
+Jede Seite trägt `Content-Language` und `Vary: Accept-Language, Cookie`. `/nav` liefert das Menü in der Sprache der Anfrage
+(eigener ETag). Der Umschalter im Kopf (`DE`/`EN`, nur die andere Sprache) ruft `GET /sprache/<code>?next=<Pfad>`; das setzt das
+Cookie (ein Jahr, `HttpOnly`, `SameSite=Lax`) und leitet mit 303 zurück. Ein unbekannter Code ergibt 404, ein fremdes `next` die
+Startseite (`auth/redirects.py`, `sanitize_local_path`). Im Dev-Modus macht das Portal das selbst. Hinter dem Security-Gateway
+entfernt dieses Cookies auf dem Weg zum Portal; dort speichert das Gateway die Wahl und gibt sie als `Accept-Language` weiter.
+Der Umschalter erscheint dann mit `language_switch: true` in der Konfiguration.
+
+Neue Sprache: Datei `messages.<code>.yml`, Eintrag in `LANGUAGES` (`core/i18n.py`), Name der Sprache als `lang.name.<code>` in allen
+Dateien. Fehlt ein Text in der gewählten Sprache, zeigt das Portal den deutschen (der Test verhindert das).
 
 ## Fehlerseiten
 

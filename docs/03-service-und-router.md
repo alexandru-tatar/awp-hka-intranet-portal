@@ -75,19 +75,19 @@ Rolle wird vor Status geprüft, damit Fremde nichts über den Status erfahren.
 | alles andere | 500 |
 
 **Alle Fehler erscheinen als HTML-Seite des Portals, nie als JSON.** Eigene Texte gibt es für 400, 401, 403, 404, 405, 408,
-409, 410, 413, 414, 415, 422, 429, 501, 502, 503 und 504 (`error.<status>.title` und `.body` in `messages.de.yml`); jeder andere
+409, 410, 413, 414, 415, 422, 429, 501, 502, 503 und 504 (`error.<status>.title` und `.body` in `messages.de.yml` und `messages.en.yml`); jeder andere
 Status nutzt `error.4xx` bzw. `error.5xx`. Jede Seite zeigt Titel, Text, Link zur Startseite und die Fehlernummer (`request_id`),
 bei 401 zusätzlich einen Link zur Anmeldung. `/_portal/error/{code}` liefert dieselben Seiten für die `errors`-Middleware von
 Traefik. Ausnahmen, die absichtlich maschinenlesbar bleiben: `/nav` (401 als `application/problem+json`, 02/04 §8), `/readyz`
 (JSON) und Static-Dateien (nur Status, kein Body).
 
-Neuen Status mit eigenem Text ergänzen: Schlüssel in `messages.de.yml` und Status in `_ERRORS_WITH_TEXT` (`web/views.py`).
+Neuen Status mit eigenem Text ergänzen: Schlüssel in beiden Textdateien und Status in `_ERRORS_WITH_TEXT` (`web/views.py`).
 
 Neue fachliche Exception: Klasse in `service/exceptions.py` und Eintrag in `SERVICE_ERROR_STATUS`.
 
 ## Feature hinzufügen (Beispiel: neue Seite mit Daten)
 
 1. Methode im passenden Service, die ein DTO liefert (Test in `tests/test_service.py`).
-2. Handler in `router/<thema>_router.py`, Template unter `templates/pages/`, Texte in `messages.de.yml`.
+2. Handler in `router/<thema>_router.py`, Template unter `templates/pages/`, Texte in `messages.de.yml` und `messages.en.yml`.
 3. Router in `router/__init__.py` exportieren und in `app.py` einhängen.
 4. Test über `TestClient` (`client`-Fixture, `login(client, "alexandru")` aus `conftest.py`).

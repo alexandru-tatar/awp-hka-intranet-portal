@@ -30,6 +30,7 @@ from .router import (
     dev_login_router,
     dev_router,
     health_router,
+    language_router,
     nav_router,
     page_router,
 )
@@ -106,6 +107,7 @@ def create_app(
     app.include_router(health_router)
     if cfg.auth_mode != "gateway":
         app.include_router(dev_login_router)
+        app.include_router(language_router)
     if cfg.auth_mode == "gateway":
         from fastapi.responses import JSONResponse
         from starlette.concurrency import run_in_threadpool

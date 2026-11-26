@@ -18,6 +18,9 @@ header.admin: Verwaltung
 logout.title: Abmelden?
 logout.body: Möchten Sie sich vom Portal abmelden?
 
+lang.name.de: Deutsch
+lang.name.en: English
+
 footer.label: Fußzeile
 footer.docs: Docs
 
