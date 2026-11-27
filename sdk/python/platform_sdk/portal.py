@@ -20,9 +20,11 @@ from .layout import Layout
 from .middleware import PortalMiddleware
 
 KIT_DIR = Path(__file__).parent / "kit"
+# Wortlaut wie im Portal (src/portal/locales/messages.de.yml: error.403.*, kontakt aus dev/gateway.*.yml)
+NO_ACCESS_TITLE = "Dafür fehlt Ihnen die Berechtigung"
 NO_ACCESS_TEXT = (
-    "Diese Seite ist für Ihre Rolle nicht freigegeben. "
-    "Auf der Startseite des Portals finden Sie die Anwendungen, die Sie nutzen dürfen."
+    "Diese Anwendung ist für Ihre Rolle nicht freigegeben. "
+    "Wenn Sie glauben, dass das ein Fehler ist, melden Sie sich bei dem IT-Servicedesk (Kontakt folgt)."
 )
 
 
@@ -75,7 +77,7 @@ class Portal:
         async def dependency(request: Request) -> User:
             user = self.user(request)
             if not set(user.roles) & set(roles):
-                raise PortalHTTPError(403, "Kein Zugriff", NO_ACCESS_TEXT)
+                raise PortalHTTPError(403, NO_ACCESS_TITLE, NO_ACCESS_TEXT)
             return user
 
         return dependency

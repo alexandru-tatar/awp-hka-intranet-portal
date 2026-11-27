@@ -48,7 +48,7 @@ async function errorInLayout(req, res, layout, status, title, detail) {
   if (!user || !(req.headers.accept ?? "").includes("text/html")) return error(req, res, status, title, detail);
   try {
     const requestId = requestContext.getStore()?.requestId ?? null;
-    const body = env.render("error_in_layout.html", { title, detail, request_id: requestId });
+    const body = env.render("error_in_layout.html", { status, title, detail, request_id: requestId });
     const html = await layout.render({ title, body, current: "", user });
     return res.status(status).type("html").send(html);
   } catch (err) {

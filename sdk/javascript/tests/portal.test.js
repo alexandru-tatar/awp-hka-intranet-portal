@@ -109,12 +109,13 @@ test("requires: 403 im Browser als Seite im Portal-Rahmen mit Weg zur Startseite
   const html = await response.text();
   assert.equal(response.status, 403);
   assert.ok(response.headers.get("content-type").startsWith("text/html"));
-  assert.ok(html.includes("<title>Kein Zugriff – HKA Portal</title>"));
+  assert.ok(html.includes("<title>Dafür fehlt Ihnen die Berechtigung – HKA Portal</title>"));
   assert.ok(html.includes('class="site-header"') && html.includes('aria-label="Hauptnavigation"')); // Rahmen und Menü
   assert.ok(html.includes('href="/_portal/static/kit.css"')); // gestaltet mit dem Kit
-  assert.ok(html.includes("<h1>Kein Zugriff</h1>"));
-  assert.ok(html.includes("Diese Seite ist für Ihre Rolle nicht freigegeben."));
-  assert.ok(html.includes('<a href="/">Zur Startseite des Portals</a>'));
+  assert.ok(html.includes('<p class="error-page__status">Fehler 403</p>')); // Markup wie die Fehlerseite des Portals
+  assert.ok(html.includes("<h1>Dafür fehlt Ihnen die Berechtigung</h1>"));
+  assert.ok(html.includes("Diese Anwendung ist für Ihre Rolle nicht freigegeben."));
+  assert.ok(html.includes('<a class="cta" href="/">zur Startseite</a>'));
   assert.ok(!html.includes("dev-banner"));
 });
 
@@ -124,7 +125,7 @@ test("requires: 403 ohne text/html bleibt problem+json", async () => {
   assert.ok(response.headers.get("content-type").startsWith("application/problem+json"));
   const body = await response.json();
   assert.equal(body.type, "urn:hka:problem:403");
-  assert.equal(body.title, "Kein Zugriff");
+  assert.equal(body.title, "Dafür fehlt Ihnen die Berechtigung");
 });
 
 test("requires: mit der Rolle erscheint die Fehlerseite nicht (HKA-95)", async () => {
@@ -144,7 +145,7 @@ test("requires: 403 fällt auf die einfache Seite zurück, wenn der Rahmen nicht
     const response = await fetch(`${app.base}/nur-professor`, { headers: { ...student(), Accept: "text/html" } });
     const html = await response.text();
     assert.equal(response.status, 403);
-    assert.ok(html.includes("<h1>Kein Zugriff</h1>") && !html.includes("site-header"));
+    assert.ok(html.includes("<h1>Dafür fehlt Ihnen die Berechtigung</h1>") && !html.includes("site-header"));
   } finally {
     await app.close();
   }
@@ -215,7 +216,7 @@ test("Test-Anmeldung: Seite „Kein Zugriff“ im Rahmen zeigt den Entwicklungsm
   assert.equal(response.status, 403);
   assert.ok(html.includes("Entwicklungsmodus – Testperson: Erika Musterfrau"));
   assert.ok(html.includes('href="/__dev/kit/kit.css"'));
-  assert.ok(html.includes('<a href="/">Zur Startseite des Portals</a>'));
+  assert.ok(html.includes('<a class="cta" href="/">zur Startseite</a>'));
 });
 
 test("Test-Anmeldung mit weiterer Rolle", async () => {
