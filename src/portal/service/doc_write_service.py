@@ -190,6 +190,51 @@ class DocWriteService:
         except DocReadOnlyError:
             raise DocsReadOnlyError from None
 
+    def add_editor(self, admin: SessionDTO, sub: str) -> str:
+        """Person als Maintainer freigeben (Verwaltungsseite).
+
+        Der Name kommt aus der Liste der bekannten Personen; ohne Eintrag steht dort das Subject.
+
+        :param admin: Session der Person mit Rolle platform-admin
+        :param sub: Subject des IdP
+        :return: Anzeigename der freigegebenen Person
+        :rtype: str
+        :raises InvalidInputError: Bei leerem oder zu langem Subject
+        :raises DocsReadOnlyError: Ohne Speicherordner
+        """
+        sub = (sub or "").strip()
+        if not sub or len(sub) > 200:
+            raise InvalidInputError("maintainer_sub")
+        name = next((p.name for p in self.repo.people() if p.sub == sub), sub)
+        logger.debug("sub={}", sub)
+        try:
+            return self.repo.add_editor(sub, name, actor=admin.name).name
+        except DocReadOnlyError:
+            raise DocsReadOnlyError from None
+
+    def remove_editor(self, admin: SessionDTO, sub: str) -> None:
+        """Freigabe als Maintainer entfernen (Verwaltungsseite).
+
+        :param admin: Session der Person mit Rolle platform-admin
+        :param sub: Subject des IdP
+        :raises NotFoundError: Falls es keine Freigabe gibt
+        :raises DocsReadOnlyError: Ohne Speicherordner
+        """
+        logger.debug("sub={}", sub)
+        try:
+            self.repo.remove_editor(sub, actor=admin.name)
+        except DocNotFoundError:
+            raise NotFoundError(sub) from None
+        except DocReadOnlyError:
+            raise DocsReadOnlyError from None
+
+    def touch_person(self, session: SessionDTO) -> None:
+        """Besuch einer Person merken, damit die Verwaltungsseite sie zur Auswahl anbietet.
+
+        :param session: Angemeldete Session
+        """
+        self.repo.touch_person(session.sub, session.name, tuple(session.roles))
+
     def _clean_html(self, html: str) -> str:
         """HTML prüfen und bereinigen.
 

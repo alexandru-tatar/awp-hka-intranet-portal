@@ -29,6 +29,7 @@ def home(
     :rtype: Response
     """
     logger.debug("sub={}", session.sub)
+    portal.doc_write_service.touch_person(session)
     groups: Final = service.find_nav_groups(session.roles)
     return portal.views.page(
         request, "pages/home.html", title=portal.t("home.title"), session=session, groups=groups

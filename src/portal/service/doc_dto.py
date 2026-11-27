@@ -125,3 +125,54 @@ class DocChangeDTO:
         self.action = change.action
         self.note = change.note
         self.exists = exists
+
+
+@dataclass(eq=False, slots=True, kw_only=True)
+class MaintainerDTO:
+    """Eine Person, die die Dokumentation bearbeiten darf (für die Verwaltungsseite)."""
+
+    sub: str
+    name: str
+    via_role: bool
+    added: bool
+    added_by: str | None
+    added_at: str | None
+    last_seen: str | None
+
+    def __init__(self, *, sub: str, name: str, via_role: bool, added: bool, added_by: str | None = None,
+                 added_at: str | None = None, last_seen: str | None = None) -> None:
+        """Initialisierung aus den Angaben des Docs-Speichers.
+
+        :param sub: Subject des IdP
+        :param name: Anzeigename
+        :param via_role: ``True``, wenn die Person eine Bearbeitungsrolle aus der Anmeldung hat
+        :param added: ``True``, wenn die Verwaltungsseite sie freigegeben hat
+        :param added_by: Wer sie freigegeben hat
+        :param added_at: Wann sie freigegeben wurde (ISO 8601)
+        :param last_seen: Letzter Besuch im Portal (ISO 8601)
+        """
+        self.sub = sub
+        self.name = name
+        self.via_role = via_role
+        self.added = added
+        self.added_by = added_by
+        self.added_at = added_at
+        self.last_seen = last_seen
+
+
+@dataclass(eq=False, slots=True, kw_only=True)
+class PersonDTO:
+    """Eine Person, die das Portal schon genutzt hat (Auswahl auf der Verwaltungsseite)."""
+
+    sub: str
+    name: str
+    last_seen: str
+
+    def __init__(self, *, sub: str, name: str, last_seen: str) -> None:
+        """:param sub: Subject des IdP
+        :param name: Anzeigename
+        :param last_seen: Letzter Besuch (ISO 8601)
+        """
+        self.sub = sub
+        self.name = name
+        self.last_seen = last_seen

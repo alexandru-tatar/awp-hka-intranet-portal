@@ -50,9 +50,10 @@ def docs(portal: PortalDep, service: DocServiceDep, session: DocsReader) -> Resp
     :rtype: Response
     """
     logger.debug("sub={}", session.sub)
+    portal.doc_write_service.touch_person(session)
     html, nonce = portal.docs_page.render(
         pages=service.find_all(), changes=service.find_changes(), session=session,
-        can_edit=can_edit_docs(portal.cfg.docs, session), writable=service.writable,
+        can_edit=can_edit_docs(portal, session), writable=service.writable,
         max_upload_bytes=portal.cfg.docs.max_upload_bytes,
     )
     return HTMLResponse(html, headers={"Content-Security-Policy": docs_csp(nonce)})

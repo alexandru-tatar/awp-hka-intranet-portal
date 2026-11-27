@@ -8,7 +8,7 @@ from typing import Final
 from loguru import logger
 
 from ..docs import DocNotFoundError, DocStore
-from .doc_dto import DocChangeDTO, DocPageDTO, DocVersionDTO
+from .doc_dto import DocChangeDTO, DocPageDTO, DocVersionDTO, MaintainerDTO, PersonDTO
 from .exceptions import NotFoundError
 
 #: Höchstzahl der Einträge auf der Seite „Letzte Änderungen“.
@@ -104,3 +104,42 @@ class DocService:
             return self.repo.asset(name)
         except DocNotFoundError:
             raise NotFoundError(name) from None
+
+    def is_editor(self, sub: str) -> bool:
+        """Ob die Verwaltungsseite die Person als Maintainer freigegeben hat.
+
+        :param sub: Subject des IdP
+        :return: ``True`` bei einer Freigabe
+        :rtype: bool
+        """
+        return self.repo.is_editor(sub)
+
+    def find_maintainers(self, edit_roles: tuple[str, ...]) -> list[MaintainerDTO]:
+        """Alle, die bearbeiten dürfen: Freigaben der Verwaltungsseite und bekannte Personen mit Bearbeitungsrolle.
+
+        Personen mit Rolle aus der Anmeldung kennt das Portal erst, wenn sie es einmal genutzt haben.
+
+        :param edit_roles: Bearbeitungsrollen (``docs.edit_roles``)
+        :return: Nach Name sortiert
+        :rtype: list[MaintainerDTO]
+        """
+        people: Final = {p.sub: p for p in self.repo.people()}
+        result: dict[str, MaintainerDTO] = {}
+        for e in self.repo.editors():
+            seen = people.get(e.sub)
+            result[e.sub] = MaintainerDTO(
+                sub=e.sub, name=seen.name if seen else e.name, added=True, added_by=e.added_by, added_at=e.added_at,
+                via_role=bool(seen and set(seen.roles) & set(edit_roles)), last_seen=seen.last_seen if seen else None)
+        for p in people.values():
+            if p.sub not in result and set(p.roles) & set(edit_roles):
+                result[p.sub] = MaintainerDTO(sub=p.sub, name=p.name, via_role=True, added=False, last_seen=p.last_seen)
+        return sorted(result.values(), key=lambda m: m.name.lower())
+
+    def find_people(self) -> list[PersonDTO]:
+        """Personen, die das Portal schon genutzt haben, nach Name sortiert.
+
+        :return: Personen
+        :rtype: list[PersonDTO]
+        """
+        people = [PersonDTO(sub=p.sub, name=p.name, last_seen=p.last_seen) for p in self.repo.people()]
+        return sorted(people, key=lambda p: p.name.lower())
