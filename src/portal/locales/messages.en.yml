@@ -1,0 +1,211 @@
+# UI texts (04 §6), English. Same keys and placeholders as messages.de.yml (a test checks this). Register: "you", short sentences, plain language.
+# Placeholders in {curly braces}; {kontakt} comes from the configuration.
+
+app.title: HKA Portal
+brand.name: Hochschule Karlsruhe
+brand.sub: Portal
+skip.link: Skip to content
+
+nav.label: Main navigation
+nav.menu_button: Menu
+nav.empty: No app is available to you at the moment. If you expect one, contact {kontakt}.
+nav.unavailable: not available
+
+header.logout: Log out
+header.signed_in_as: Logged in as
+header.admin: Administration
+
+logout.title: Log out?
+logout.body: Do you want to log out of the portal?
+
+category.Studium: Studies
+category.Verwaltung: Administration
+category.Kommunikation: Communication
+category.Sonstiges: Other
+
+lang.name.de: Deutsch
+lang.name.en: English
+
+footer.label: Footer
+footer.docs: Docs
+docs.error.invalid: The request is incomplete. Please reload the page and try again.
+docs.error.csrf: Your session has expired. Please reload the page; your draft stays saved in the browser.
+docs.error.not_found: This page or version no longer exists.
+docs.error.conflict: "{name} has changed the page in the meantime. Open the new version and apply your changes; your draft stays saved in the browser."
+docs.error.title: Please enter a title with at most 120 characters (first heading of the page).
+docs.error.group: Please choose a section with at most 60 characters.
+docs.error.note: The change note may be at most 300 characters long.
+docs.error.level: This level does not exist.
+docs.error.too_long: The page is too large. Please split the content across several pages.
+docs.error.start: The start page of the docs cannot be deleted.
+docs.error.empty_file: The file is empty.
+docs.error.too_large: The file is too large. At most {limit_mb} MB are allowed.
+docs.error.media_type: This format is not allowed. Possible are PNG, JPEG, GIF, WebP and PDF.
+docs.error.read_only: The docs are read-only here because no storage folder is set up.
+
+home.title: Home
+home.greeting: Welcome, {name}
+home.intro: Here you find all apps that are available to you. Choose an app.
+home.apps_heading: Your apps
+home.open: open
+
+login.title: Log in
+login.failed.title: Login not possible
+login.failed.body: The login did not work. Please try again. If it fails again, contact {kontakt}.
+login.expired.title: Login expired
+login.expired.body: The login took too long. Please start again.
+
+error.back_home: back to home
+error.status: Error {status}
+error.request_id: Error number
+error.400.title: Request not possible
+error.400.body: The portal could not process this request. Please try again.
+error.403.title: You do not have permission for this
+error.403.body: This app is not available for your role. If you think this is a mistake, contact {kontakt}.
+error.404.title: Page not found
+error.404.body: This address does not exist (any more). Use the menu to get to your app.
+error.503.title: App temporarily unavailable
+error.503.body: This app is not answering at the moment. Please try again in a few minutes. If it takes longer, contact {kontakt}.
+error.401.title: Please log in
+error.401.body: You must be logged in to see this page. Log in and try again.
+error.405.title: This action is not possible here
+error.405.body: This page does not accept this kind of request. Please use the links and buttons in the portal.
+error.408.title: The request took too long
+error.408.body: The portal did not receive your request in time. Please try again.
+error.409.title: The change does not match the current state
+error.409.body: Something has changed since you opened the page. Reload the page and try again.
+error.410.title: No longer available
+error.410.body: This page no longer exists. Use the menu to get to your app.
+error.413.title: The input is too large
+error.413.body: The data you sent is larger than allowed. Please send less data or a smaller file.
+error.414.title: The address is too long
+error.414.body: The portal cannot process this address. Please open the page from the home page.
+error.415.title: This format is not supported
+error.415.body: The portal cannot read the data you sent. Please use a different format.
+error.422.title: Input cannot be processed
+error.422.body: Some details are invalid or missing. Please check your input and try again.
+error.429.title: Too many requests
+error.429.body: You sent a lot of requests in a short time. Please wait a moment and try again.
+error.501.title: This function does not exist yet
+error.501.body: The portal cannot answer this request. Please contact {kontakt}.
+error.502.title: App not reachable
+error.502.body: The portal did not get a usable answer from the app. Please try again in a few minutes. If it takes longer, contact {kontakt}.
+error.504.title: The answer takes too long
+error.504.body: The app did not answer in time. Please try again in a few minutes. If it takes longer, contact {kontakt}.
+error.4xx.title: The request was not possible
+error.4xx.body: The portal could not process this request. Please try again. If it fails again, contact {kontakt}.
+error.login: Log in
+error.5xx.title: An error occurred
+error.5xx.body: "This is not your fault. Please try again later. If you report the problem, give this number: {request_id}."
+
+maintenance.title: Maintenance
+maintenance.body: The portal is not reachable right now. Please try again later.
+
+status.title: Operating status
+status.caption: All registered apps
+status.col.app: App
+status.col.version: Version
+status.col.status: Status
+status.col.last_probe: Last check
+status.col.last_deploy: Last deployment
+status.healthy: running
+status.unhealthy: faulty
+status.failed: failed
+status.registering: being checked
+status.retired: retired
+status.none: No apps are registered yet.
+status.unknown: –
+
+admin.title: Administration
+admin.intro: Here you see all apps in the portal. You can change the roles of an app, remove apps and give people extra roles.
+admin.read_only: Administration is read-only here. Changes are not possible.
+admin.notice.app_removed: The app was removed. It is no longer in the menu.
+admin.notice.app_roles: The roles of the app were saved. The menu shows them right away.
+admin.notice.grant_set: The extra roles were saved. They apply from the person's next login.
+admin.notice.grant_deleted: The extra roles were deleted. This applies from the person's next login.
+admin.notice.maintainer_added: The person is now a maintainer. They can edit the docs right away without logging in again.
+admin.notice.maintainer_removed: The person is no longer a maintainer. From now on they can only read the docs.
+admin.error.title: Your input could not be saved
+admin.error.app_roles_empty: Choose at least one role. Nobody can see an app without a role.
+admin.error.app_roles_unknown: One of the chosen roles does not exist. Please reload the page.
+admin.error.grant_sub: Enter the subject of the person (at most 200 characters).
+admin.error.grant_roles_unknown: One of the chosen roles does not exist. Please reload the page.
+admin.error.maintainer_sub: Choose a person from the list or enter their subject (at most 200 characters).
+admin.error.maintainer_read_only: The docs have no storage folder here. Maintainers therefore cannot be managed.
+admin.apps.heading: Apps
+admin.apps.caption: All apps with owner, status and roles
+admin.apps.note: If the pipeline registers a manifest again, the roles from the app's repository apply again.
+admin.col.app: App
+admin.col.owner: Owner
+admin.col.version: Version
+admin.col.status: Status
+admin.col.roles: Roles
+admin.col.actions: Action
+admin.col.sub: Subject
+admin.col.person: Person
+admin.col.via: May edit through
+admin.col.last_seen: Last in the portal
+admin.owner.none: set up by hand
+admin.retired_since: since {date}
+admin.roles.legend: Roles
+admin.roles.save: Save
+admin.remove.button: Remove
+admin.remove.title: Remove “{name}”?
+admin.remove.body: The app “{slug}” disappears from the menu at once. The same repository can register the name again later.
+admin.remove.confirm: Remove
+admin.grants.heading: Extra roles per person
+admin.grants.intro: A person gets these roles in addition to the roles from the login. They apply from the next login.
+admin.grants.caption: Extra roles per person
+admin.grants.none: There are no extra roles yet.
+admin.grants.add: Add extra roles
+admin.grants.sub_hint: The subject is shown in the login system. Without a role, the entry is deleted.
+admin.grants.save: Save
+admin.grants.delete: Delete
+admin.grants.delete_title: Delete the roles of “{sub}”?
+admin.grants.delete_body: The person loses their extra roles from the next login.
+admin.grants.delete_confirm: Delete
+admin.maintainers.heading: Docs – maintainers
+admin.maintainers.intro: "Everyone who is logged in can read the docs. Only maintainers may edit them: people with the role from the login ({roles}) and people you approve here. An approval applies right away."
+admin.maintainers.caption: People who may edit the docs
+admin.maintainers.read_only: The docs have no storage folder here. Maintainers therefore cannot be managed.
+admin.maintainers.none: There are no maintainers yet. People with the role from the login appear here as soon as they have used the portal once.
+admin.maintainers.via_admin: Approved by {name} on {date}
+admin.maintainers.via_role: Role from the login
+admin.maintainers.never: not yet
+admin.maintainers.role_only: comes from the login
+admin.maintainers.remove: Remove
+admin.maintainers.remove_title: Remove “{name}” as maintainer?
+admin.maintainers.remove_body: The person can then only read the docs. Their earlier changes stay in the version history.
+admin.maintainers.remove_confirm: Remove
+admin.maintainers.add: Add maintainer
+admin.maintainers.person_hint: Everyone who has used the portal at least once is listed here.
+admin.maintainers.choose: Choose a person …
+admin.maintainers.seen: last {date}
+admin.maintainers.manual: Or enter a subject
+admin.maintainers.manual_hint: For people who are not in the list yet. The subject is shown in the login system.
+admin.maintainers.submit: Add as maintainer
+
+connections.title: My connections
+connections.intro: For some systems the portal needs your password once, so that apps can read there for you. The password is encrypted and stored only for this session.
+connections.none: No app needs a connection at the moment.
+
+dialog.cancel: Cancel
+
+# ── Development mode only ─────────────────────────────────────
+dev.banner: Development mode – login is simulated, apps are placeholders.
+dev.login.intro: There is no real login in development mode. Choose a test person.
+dev.login.no_roles: no role
+dev.app.notice: Placeholder. The app “{name}” will appear here later. The examples below show the patterns from the design kit.
+dev.app.table_caption: My grades
+dev.app.form_heading: Send message
+dev.app.dialog_title: Send message?
+dev.app.dialog_body: The message goes to the study office. You cannot take it back afterwards.
+dev.app.send: Send
+dev.app.sent: Sent (placeholder – nothing was sent).
+dev.app.subject: Subject
+dev.app.subject_hint: At most 120 characters.
+dev.app.subject_error: Please enter a subject.
+dev.app.message: Message
+dev.app.required: required
+dev.app.error_summary: Please check your input
+

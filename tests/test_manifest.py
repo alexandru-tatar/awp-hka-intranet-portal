@@ -11,8 +11,9 @@ from portal.registry import ManifestDirectorySource, ManifestValidator, Registry
 GOOD = {
     "slug": "noten",
     "name": "Meine Noten",
+    "name_en": "My grades",
     "category": "Studium",
-    "menu": {"label": "Meine Noten", "icon": "grades"},
+    "menu": {"label": "Meine Noten", "label_en": "My grades", "icon": "grades"},
     "roles": ["student"],
     "adapters": ["noten:read"],
     "version": "1.0.0",

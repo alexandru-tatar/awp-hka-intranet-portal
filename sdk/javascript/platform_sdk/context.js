@@ -20,7 +20,7 @@ class User {
   }
 }
 
-/** Kontext der laufenden Anfrage: { requestId, assertion, user }. */
+/** Kontext der laufenden Anfrage: { requestId, assertion, user, language }. */
 const requestContext = new AsyncLocalStorage();
 
 function currentAssertion() {

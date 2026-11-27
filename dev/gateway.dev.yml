@@ -1,6 +1,7 @@
 # Portal UI config for local development. Paths are relative to this file.
 env: dev
 kontakt: "dem IT-Servicedesk (Kontakt folgt)"   # open item 04 §13 — HKA-IT to supply
+kontakt_en: "the IT service desk (contact details to follow)"
 manifests_dir: manifests
 state_file: state.yml
 dev_users_file: users.yml

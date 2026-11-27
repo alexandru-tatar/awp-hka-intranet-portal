@@ -1,8 +1,9 @@
 {
   "slug": "abschlussarbeiten",
   "name": "Abschlussarbeiten",
+  "name_en": "Final theses",
   "category": "Verwaltung",
-  "menu": { "label": "Abschlussarbeiten", "icon": "book" },
+  "menu": { "label": "Abschlussarbeiten", "label_en": "Final theses", "icon": "book" },
   "roles": ["professor"],
   "version": "0.1.0"
 }

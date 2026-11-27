@@ -147,3 +147,19 @@ def test_app_faengt_selbst_ab(client, log_lines):
 def test_portal_fehler_bleiben_wie_bisher(client):
     response = client.get("/fehler/fachlich", headers={"Accept": "text/html"})  # ohne Assertion
     assert response.status_code == 401 and "Anmeldung" in response.text
+
+
+@pytest.mark.parametrize("art,status,title,text", [
+    ("fachlich", 423, "That did not work", "The action was not possible."),
+    ("technisch", 503, "Not reachable right now", "try again later"),
+    ("aufruf", 500, "Error in the app", "give the reference number"),
+    ("anderer", 500, "Error in the app", "give the reference number"),
+])
+def test_fallback_html_englisch(client, log_lines, art, status, title, text):
+    """HKA-101: Die Standardfehlerseite folgt Accept-Language."""
+    response = client.get(f"/fehler/{art}", headers={"X-Portal-Assertion": make_token(), "X-Request-Id": "req-123",
+                                                     "Accept": "text/html", "Accept-Language": "en"})
+    assert response.status_code == status
+    html = response.text
+    assert '<html lang="en">' in html and f"<h1>{title}</h1>" in html and text in html
+    assert "Reference number: req-123" in html and "Vorgangsnummer" not in html

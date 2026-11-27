@@ -123,6 +123,23 @@ for (const [art, status, title, text] of [
   });
 }
 
+for (const [art, status, title, text] of [
+  ["fachlich", 423, "That did not work", "The action was not possible."],
+  ["technisch", 503, "Not reachable right now", "try again later"],
+  ["aufruf", 500, "Error in the app", "give the reference number"],
+  ["anderer", 500, "Error in the app", "give the reference number"],
+]) {
+  test(`Fallback als HTML auf Englisch (HKA-101): ${art}`, async () => {
+    const response = await fetch(`${server.base}/fehler/${art}`, {
+      headers: { "X-Portal-Assertion": makeToken(), "X-Request-Id": "req-123", Accept: "text/html", "Accept-Language": "en" },
+    });
+    assert.equal(response.status, status);
+    const html = await response.text();
+    assert.ok(html.includes('<html lang="en">') && html.includes(`<h1>${title}</h1>`) && html.includes(text), html);
+    assert.ok(html.includes("Reference number: req-123") && !html.includes("Vorgangsnummer"));
+  });
+}
+
 test("Fallback als JSON behält den type", async () => {
   const response = await get("/fehler/fachlich", "application/json");
   assert.equal(response.status, 423);

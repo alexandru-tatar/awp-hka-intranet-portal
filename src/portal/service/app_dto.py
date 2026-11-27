@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from ..core.i18n import current_language
 from ..registry import AppView
 
 
@@ -24,15 +25,17 @@ class AppDTO:
     adapters: tuple[str, ...]
     available: bool
 
-    def __init__(self, app: AppView) -> None:
+    def __init__(self, app: AppView, lang: str | None = None) -> None:
         """Initialisierung von AppDTO durch ein AppView-Objekt der Registry.
 
         :param app: AppView-Objekt aus dem Registry-Snapshot
+        :param lang: Sprache für Name und Menütext, Standard: Sprache der Anfrage
         """
+        lang = lang or current_language.get()
         self.slug = app.slug
-        self.name = app.name
+        self.name = app.display_name(lang)
         self.category = app.category
-        self.menu_label = app.menu_label
+        self.menu_label = app.display_label(lang)
         self.menu_icon = app.menu_icon
         self.version = app.version
         self.status = app.status

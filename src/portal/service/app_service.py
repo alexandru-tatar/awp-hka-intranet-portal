@@ -7,6 +7,7 @@ from typing import Final
 
 from loguru import logger
 
+from ..core.i18n import current_language
 from ..registry import CATEGORIES, Registry
 from .app_dto import AppDTO, NavGroupDTO
 from .exceptions import ForbiddenError, LoginRequiredError, NotFoundError, UnavailableError
@@ -45,6 +46,7 @@ class AppService:
         :rtype: list[NavGroupDTO]
         """
         logger.debug("roles={}", roles)
+        lang: Final = current_language.get()
         apps: Final = [
             app
             for app in self.repo.snapshot().apps.values()
@@ -54,11 +56,11 @@ class AppService:
         for category in CATEGORIES:
             items = sorted(
                 (app for app in apps if app.category == category),
-                key=lambda app: _sort_key(app.menu_label),
+                key=lambda app: _sort_key(app.display_label(lang)),
             )
             if items:
                 groups.append(
-                    NavGroupDTO(category=category, items=tuple(AppDTO(app) for app in items))
+                    NavGroupDTO(category=category, items=tuple(AppDTO(app, lang) for app in items))
                 )
         logger.debug("groups={}", groups)
         return groups
@@ -69,10 +71,11 @@ class AppService:
         :return: Alle Apps des aktuellen Snapshots
         :rtype: list[AppDTO]
         """
+        lang: Final = current_language.get()
         apps: Final = sorted(
-            self.repo.snapshot().apps.values(), key=lambda app: app.name.casefold()
+            self.repo.snapshot().apps.values(), key=lambda app: app.display_name(lang).casefold()
         )
-        return [AppDTO(app) for app in apps]
+        return [AppDTO(app, lang) for app in apps]
 
     def find_authorized(self, slug: str, session: SessionDTO | None) -> AppDTO:
         """App zum Slug, falls die Session sie aufrufen darf.

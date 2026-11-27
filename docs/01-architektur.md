@@ -19,7 +19,7 @@ anderen Schichten. `context.py` baut aus der Konfiguration alle Objekte (`Portal
 ## Verzeichnisse
 
 ```text
-src/portal/        Anwendung (siehe Schichten); locales/messages.de.yml = alle UI-Texte; templates/
+src/portal/        Anwendung (siehe Schichten); locales/messages.de.yml und messages.en.yml = alle UI-Texte; templates/
 kit/               Design-Kit (CSS, JS, Icons, Schriften); kit/dist/ wird generiert (make kit)
 dev/               Konfigurationen, Manifeste, Testpersonen, Rollen für lokale Entwicklung
 schemas/           manifest.schema.json
@@ -33,7 +33,7 @@ docs/              diese Dokumentation (Markdown); docs/api/ = Sphinx-Konfigurat
 
 | Aufgabe | Ort |
 |---|---|
-| neue Seite | Handler in `router/<thema>_router.py` (+ Export in `router/__init__.py`, `include_router` in `app.py`), Template in `templates/pages/`, Texte in `locales/messages.de.yml` |
+| neue Seite | Handler in `router/<thema>_router.py` (+ Export in `router/__init__.py`, `include_router` in `app.py`), Template in `templates/pages/`, Texte in `locales/messages.de.yml` **und** `messages.en.yml` |
 | neue Geschäftsregel | `service/<entity>_service.py` (lesen) bzw. `<entity>_write_service.py` (schreiben) |
 | neue Rückgabestruktur eines Services | `service/<entity>_dto.py`, Export in `service/__init__.py` |
 | neue fachliche Exception | `service/exceptions.py` und Statuscode in `web/errors.py` (`SERVICE_ERROR_STATUS`) |
@@ -51,7 +51,7 @@ docs/              diese Dokumentation (Markdown); docs/api/ = Sphinx-Konfigurat
 
 ## Regeln
 
-- Alle UI-Texte stehen in `messages.de.yml`, nicht in Templates.
+- Alle UI-Texte stehen in `messages.de.yml` und `messages.en.yml` (gleiche Schlüssel, ein Test prüft das), nicht in Templates.
 - Kein Hex-Farbwert außerhalb `kit/css/tokens.css` (ein Test erzwingt das).
 - Jedes Paket hat `__init__.py`; Templates und Locales sind über `package-data` in `pyproject.toml` eingebunden.
 - Generierte Dateien nicht von Hand ändern: `kit/dist/`, `uv.lock`, `.venv/`.
@@ -70,6 +70,7 @@ docs/              diese Dokumentation (Markdown); docs/api/ = Sphinx-Konfigurat
 | `/_portal/error/{code}` | – | Fehlerseite (HTML) mit dem angefragten Status 400–599, für die `errors`-Middleware von Traefik |
 | `/nav` | Session (dev) bzw. Gateway-Assertion oder App-Token (`Authorization: Bearer`) | Menü-Fragment (ETag, `X-Portal-Kit`); ohne beides 401 als JSON für das SDK |
 | `/login` | – | nur `auth_mode: dev`: Testpersonen-Auswahl (im Gateway-Modus 404, Login macht das Gateway) |
+| `/sprache/{code}` | – | nur `auth_mode: dev`: Sprache `de`/`en` merken (Cookie `hka_lang`), 303 zurück zu `next`; unbekannter Code 404 (im Gateway-Modus macht das das Gateway) |
 | `/logout` | Session | GET Bestätigung, POST mit CSRF-Token |
 | `/readyz` | – | 200 |
 | `/apps/<slug>/…` | Session + Rolle | nur `auth_mode: dev`: Platzhalter-Seite. Im Gateway-Modus routet das Gateway zur App (Portal: 404) |

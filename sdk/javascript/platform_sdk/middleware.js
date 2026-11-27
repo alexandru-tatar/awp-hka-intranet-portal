@@ -6,10 +6,10 @@ const devshim = require("./devshim");
 const pages = require("./pages");
 const { User, requestContext } = require("./context");
 const { VerifyError } = require("./errors");
+const { pickLanguage, t } = require("./i18n");
 const { verify } = require("./verify");
 
 const ASSERTION_HEADER = "x-portal-assertion";
-const LOGIN_HINT = "Bitte öffnen Sie die Anwendung über das Portal und melden Sie sich dort an.";
 
 function logLine(req, res, started, user, requestId) {
   console.log(
@@ -30,7 +30,7 @@ function portalMiddleware(portal) {
   return async (req, res, next) => {
     const started = performance.now();
     const requestId = req.headers["x-request-id"] ?? null;
-    const store = { requestId, assertion: null, user: null };
+    const store = { requestId, assertion: null, user: null, language: pickLanguage(req.headers["accept-language"]) };
 
     await requestContext.run(store, async () => {
       if (req.path === "/healthz" && (req.method === "GET" || req.method === "HEAD")) return next();
@@ -45,14 +45,14 @@ function portalMiddleware(portal) {
       } else {
         const finish = (status, title) => {
           res.on("finish", () => logLine(req, res, started, null, requestId));
-          return pages.error(req, res, status, title, LOGIN_HINT);
+          return pages.error(req, res, status, title, t("login_hint"));
         };
-        if (token === undefined) return finish(401, "Anmeldung fehlt");
+        if (token === undefined) return finish(401, t("login_missing_title"));
         let claims;
         try {
           claims = await verify(token, { keys: portal.jwks, issuer: cfg.issuer, audience: cfg.slug });
         } catch (err) {
-          if (err instanceof VerifyError) return finish(401, "Anmeldung ungültig");
+          if (err instanceof VerifyError) return finish(401, t("login_invalid_title"));
           throw err;
         }
         user = new User({ sub: claims.sub, name: String(claims.name ?? ""), roles: claims.roles, email: claims.email ?? null });
@@ -60,7 +60,7 @@ function portalMiddleware(portal) {
       }
 
       store.user = user;
-      req.portal = { user, assertion: store.assertion, requestId };
+      req.portal = { user, assertion: store.assertion, requestId, language: store.language };
       res.on("finish", () => logLine(req, res, started, user, requestId));
       return next();
     });

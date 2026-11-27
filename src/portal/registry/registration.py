@@ -32,6 +32,7 @@ try:
 except ImportError:  # Windows: keine Sperre, die Registrierung läuft dort nur in Tests
     fcntl = None  # type: ignore[assignment]
 
+from .cli_texts import day, say
 from .models import CATEGORIES
 from .validation import ManifestInvalid, ManifestValidator
 
@@ -70,12 +71,12 @@ class Rejected(Exception):
         :return: Mehrzeiliger Text
         :rtype: str
         """
-        lines = [LINE, f"FEHLER {self.code}  –  {self.title}", f"Was ist passiert:   {self.what}",
-                 f"Warum wichtig:      {self.why}"]
+        lines = [LINE, f"{say('block.error')} {self.code}  –  {self.title}", f"{say('block.what'):<20}{self.what}",
+                 f"{say('block.why'):<20}{self.why}"]
         for number, step in enumerate(self.todo, 1):
-            lines.append(f"{'Was tun:' if number == 1 else '':<20}{number}. {step}")
+            lines.append(f"{say('block.todo') if number == 1 else '':<20}{number}. {step}")
         if self.details:
-            lines.append("Technische Details:")
+            lines.append(say("block.details"))
             lines += [f"  {line}" for line in self.details]
         lines.append(LINE)
         return "\n".join(lines)
@@ -125,16 +126,12 @@ def _manifest_invalid(what: str, details: list[str], *, roles: tuple[str, ...] =
     :return: Der Fehler
     :rtype: Rejected
     """
-    todo = ["Korrigieren Sie die genannten Stellen in manifest.json."]
+    todo = [say("pf104.fix")]
     if roles:
-        todo.append(f"Erlaubte Rollen: {', '.join(roles)}.")
-        todo.append(f"Erlaubte Kategorien: {', '.join(CATEGORIES)}.")
-    todo.append("Mehr dazu: Skill „portal\".")
-    return Rejected(
-        "PF-104", "manifest.json ungültig", what,
-        "Ohne gültiges Manifest nimmt das Portal die App nicht ins Menü auf. Der bisherige Menüstand bleibt.",
-        todo, details,
-    )
+        todo.append(say("pf104.roles", roles=", ".join(roles)))
+        todo.append(say("pf104.categories", categories=", ".join(CATEGORIES)))
+    todo.append(say("pf104.skill"))
+    return Rejected("PF-104", say("pf104.title"), what, say("pf104.why"), todo, details)
 
 
 def _name_taken(slug: str, what: str, details: list[str]) -> Rejected:
@@ -147,11 +144,8 @@ def _name_taken(slug: str, what: str, details: list[str]) -> Rejected:
     :rtype: Rejected
     """
     return Rejected(
-        "PF-202", "Registrierung abgelehnt", what,
-        "Ein Name darf nur zu einer App gehören, sonst könnte eine App eine fremde ersetzen.",
-        [f"Wählen Sie in manifest.json einen anderen slug als „{slug}\".",
-         "Gehört der Name wirklich zu Ihrer App (zum Beispiel nach dem Umbenennen des Repositorys), fragen Sie das "
-         "Plattform-Team."],
+        "PF-202", say("pf202.title"), what, say("pf202.why"),
+        [say("pf202.other_slug", slug=slug), say("pf202.ask")],
         details,
     )
 
@@ -239,7 +233,7 @@ class Registrar:
                     del retired[slug]
                     self._write_retired(retired)
             except OSError as exc:
-                raise RegistryError(f"Schreiben nicht möglich: {exc}") from exc
+                raise RegistryError(say("reg.write_failed", detail=exc)) from exc
         return manifest, known
 
     def entries(self) -> list[Entry]:
@@ -312,16 +306,17 @@ class Registrar:
                 raise NotRegistered(slug)
             manifest = self._read_json(path)
             if not isinstance(manifest, dict):
-                raise RegistryError(f"Datei {path} nicht lesbar")
+                raise RegistryError(say("reg.unreadable", path=path))
             manifest["roles"] = wanted
             try:
-                self._validator.validate(manifest)
+                # lenient: nur die Rollen ändern sich, ältere Manifeste ohne englische Felder bleiben änderbar (HKA-101)
+                self._validator.validate(manifest, lenient=True)
             except ManifestInvalid as exc:
-                raise RegistryError(f"Manifest {path.name} wäre danach ungültig: {exc}") from exc
+                raise RegistryError(say("reg.would_be_invalid", file=path.name, detail=exc)) from exc
             try:
                 atomic_write(path, json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
             except OSError as exc:
-                raise RegistryError(f"Schreiben nicht möglich: {exc}") from exc
+                raise RegistryError(say("reg.write_failed", detail=exc)) from exc
 
     def _retire(self, slug: str, owner: str | None) -> None:
         """Eine App stilllegen, mit Besitzerprüfung (``owner``) oder ohne (``None``, Plattform-Admin).
@@ -341,16 +336,15 @@ class Registrar:
                 raise NotRegistered(slug)
             if owner is not None and bound != owner:
                 raise Rejected(
-                    "PF-202", "Entfernen abgelehnt", f"Die App „{slug}\" gehört zu einem anderen Repository.",
-                    "Nur der Besitzer darf eine App entfernen, sonst könnte jemand eine fremde App abschalten.",
-                    ["Prüfen Sie den Wert von --owner.", "Gehört die App wirklich Ihnen, fragen Sie das Plattform-Team."],
-                    [f"slug={slug} angefragt von {owner}, gebunden an ein anderes Repository"],
+                    "PF-202", say("pf202r.title"), say("pf202r.what", slug=slug), say("pf202r.why"),
+                    [say("pf202r.check_owner"), say("pf202r.ask")],
+                    [say("pf202.foreign_detail", slug=slug, owner=owner)],
                 )
             try:
                 target.unlink()  # zuerst: Scheitert das Merken danach, bleibt der Name trotzdem an den Besitzer gebunden
                 self._write_retired({**retired, slug: self._now()})
             except OSError as exc:
-                raise RegistryError(f"Schreiben nicht möglich: {exc}") from exc
+                raise RegistryError(say("reg.write_failed", detail=exc)) from exc
 
     def _path_of(self, slug: str) -> Path | None:
         """Die Manifest-Datei zu einem Namen: ``<slug>.json`` oder die Datei, in der dieser ``slug`` steht.
@@ -373,16 +367,15 @@ class Registrar:
         :raises Rejected: PF-104
         """
         if len(raw) > MAX_MANIFEST_BYTES:
-            raise _manifest_invalid("Die Datei ist größer als 64 KiB.", [f"{len(raw)} Bytes"])
+            raise _manifest_invalid(say("pf104.too_big"), [say("pf104.bytes", count=len(raw))])
         try:
             manifest = json.loads(raw.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-            raise _manifest_invalid("Die Datei ist kein gültiges JSON.", [str(exc)]) from exc
+            raise _manifest_invalid(say("pf104.not_json"), [str(exc)]) from exc
         problems = self._validator.problems(manifest)
         if problems:
             fields = ", ".join(dict.fromkeys(problem.split(":", 1)[0] for problem in problems))
-            raise _manifest_invalid(f"Die Datei hält die Regeln der Plattform nicht ein. Betroffen: {fields}.",
-                                    problems, roles=self._roles)
+            raise _manifest_invalid(say("pf104.rules", fields=fields), problems, roles=self._roles)
         return manifest
 
     def _check_name(self, slug: str, owner: str, owners: dict[str, str], retired: dict[str, datetime]) -> None:
@@ -401,23 +394,23 @@ class Registrar:
         if bound is not None and bound != owner:
             retired_at = retired.get(slug)
             if retired_at is None:
-                raise _name_taken(slug, f"Der Name „{slug}\" gehört zu einem anderen Repository.",
-                                  [f"slug={slug} angefragt von {owner}, gebunden an ein anderes Repository"])
+                raise _name_taken(slug, say("pf202.foreign", slug=slug),
+                                  [say("pf202.foreign_detail", slug=slug, owner=owner)])
             free_at = retired_at + timedelta(days=SLUG_COOLDOWN_DAYS)
             if self._now() < free_at:
                 raise _name_taken(
-                    slug, f"Der Name „{slug}\" gehörte zu einer stillgelegten App und ist noch gesperrt.",
-                    [f"slug={slug} stillgelegt am {retired_at:%d.%m.%Y}, frei für andere Repositorys ab "
-                     f"{free_at:%d.%m.%Y} ({SLUG_COOLDOWN_DAYS} Tage)"],
+                    slug, say("pf202.locked", slug=slug),
+                    [say("pf202.locked_detail", slug=slug, retired=day(retired_at), free=day(free_at),
+                         days=SLUG_COOLDOWN_DAYS)],
                 )
         target = self._dir / f"{slug}.json"
         for path in sorted(self._dir.glob("*.json")):
             if path != target and self._slug_of(path) == slug:
-                raise _name_taken(slug, f"Der Name „{slug}\" steht schon in einer anderen Manifest-Datei.",
-                                  [f"Datei {path.name}"])
+                raise _name_taken(slug, say("pf202.second_file", slug=slug),
+                                  [say("pf202.second_file_detail", file=path.name)])
         if bound is None and target.exists():
-            raise _name_taken(slug, f"Der Name „{slug}\" ist von Hand eingerichtet und hat keinen Besitzer.",
-                              [f"Datei {target.name} ohne Eintrag in der Besitzerdatei"])
+            raise _name_taken(slug, say("pf202.by_hand", slug=slug),
+                              [say("pf202.by_hand_detail", file=target.name)])
 
     @staticmethod
     def _read_json(path: Path) -> object:
@@ -456,9 +449,9 @@ class Registrar:
             data = json.loads(self._retired_file.read_text(encoding="utf-8"))
             result = {slug: datetime.fromisoformat(value) for slug, value in data.items()}
         except (OSError, ValueError, AttributeError, TypeError) as exc:
-            raise RegistryError(f"Datei {self._retired_file} nicht lesbar: {exc}") from exc
+            raise RegistryError(say("reg.retired_unreadable", path=self._retired_file, detail=exc)) from exc
         if any(value.tzinfo is None for value in result.values()):
-            raise RegistryError(f"Datei {self._retired_file}: Zeitpunkt ohne Zeitzone")
+            raise RegistryError(say("reg.retired_zone", path=self._retired_file))
         return result
 
     def _write_retired(self, retired: dict[str, datetime]) -> None:
@@ -483,9 +476,9 @@ class Registrar:
         try:
             data = json.loads(self._owners_file.read_text(encoding="utf-8"))
         except (OSError, ValueError) as exc:
-            raise RegistryError(f"Besitzerdatei {self._owners_file} nicht lesbar: {exc}") from exc
+            raise RegistryError(say("reg.owners_unreadable", path=self._owners_file, detail=exc)) from exc
         if not isinstance(data, dict) or not all(isinstance(k, str) and isinstance(v, str) for k, v in data.items()):
-            raise RegistryError(f"Besitzerdatei {self._owners_file} hat nicht die Form {{name: repository}}")
+            raise RegistryError(say("reg.owners_shape", path=self._owners_file))
         return data
 
     @contextlib.contextmanager
@@ -501,7 +494,7 @@ class Registrar:
         try:
             handle = open(self._owners_file.with_name(self._owners_file.name + ".lock"), "a")
         except OSError as exc:
-            raise RegistryError(f"Sperrdatei nicht anlegbar: {exc}") from exc
+            raise RegistryError(say("reg.lock_failed", detail=exc)) from exc
         with handle:
             deadline = time.monotonic() + self._lock_timeout
             while True:
@@ -511,10 +504,7 @@ class Registrar:
                 except BlockingIOError:
                     if time.monotonic() >= deadline:
                         raise Rejected(
-                            "PF-204", "Bereitstellung gesperrt",
-                            "Eine andere Registrierung läuft gerade.",
-                            "Zwei Registrierungen gleichzeitig könnten sich gegenseitig überschreiben.",
-                            ["Warten Sie einige Sekunden, dann starten Sie die Registrierung erneut."],
+                            "PF-204", say("pf204.title"), say("pf204.what"), say("pf204.why"), [say("pf204.todo")],
                         ) from None
                     time.sleep(0.1)
             yield

@@ -15,8 +15,9 @@ const KEYS = JwksCache.fixed({ "test-key": publicKey });
 const MANIFEST = {
   slug: "noten",
   name: "Noten-Übersicht",
+  name_en: "Grades overview",
   category: "Studium",
-  menu: { label: "Meine Noten", icon: "grades" },
+  menu: { label: "Meine Noten", label_en: "My grades", icon: "grades" },
   roles: ["student"],
   adapters: ["noten:read"],
   version: "1.0.0",

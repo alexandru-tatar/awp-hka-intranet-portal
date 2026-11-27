@@ -15,17 +15,12 @@ from .adapters.bwsync import connect as bwsync_connect
 from .config import Config
 from .context import User
 from .errors import AdapterError, PortalHTTPError
+from .i18n import pick_language, t
 from .jwks import JwksCache
 from .layout import Layout
 from .middleware import PortalMiddleware
 
 KIT_DIR = Path(__file__).parent / "kit"
-# Wortlaut wie im Portal (src/portal/locales/messages.de.yml: error.403.*, kontakt aus dev/gateway.*.yml)
-NO_ACCESS_TITLE = "Dafür fehlt Ihnen die Berechtigung"
-NO_ACCESS_TEXT = (
-    "Diese Anwendung ist für Ihre Rolle nicht freigegeben. "
-    "Wenn Sie glauben, dass das ein Fehler ist, melden Sie sich bei dem IT-Servicedesk (Kontakt folgt)."
-)
 
 
 class Portal:
@@ -70,17 +65,25 @@ class Portal:
     def user(self, request: Request) -> User:
         user = getattr(request.state, "portal_user", None)
         if user is None:
-            raise PortalHTTPError(401, "Anmeldung fehlt", "Bitte melden Sie sich im Portal an.")
+            raise PortalHTTPError(401, t("login_missing_title"), t("login_required_detail"))
         return user
 
     def requires(self, *roles: str) -> Callable[[Request], Awaitable[User]]:
         async def dependency(request: Request) -> User:
             user = self.user(request)
             if not set(user.roles) & set(roles):
-                raise PortalHTTPError(403, NO_ACCESS_TITLE, NO_ACCESS_TEXT)
+                raise PortalHTTPError(403, t("no_access_title"), t("no_access_detail"))
             return user
 
         return dependency
+
+    def language(self, request: Request) -> str:
+        """Sprache der Person für diese Anfrage: ``"de"`` oder ``"en"`` (Standard Deutsch).
+
+        Sie kommt aus ``Accept-Language``; das Security-Gateway setzt den Header nach der Wahl im Portal. Eigene Texte der App
+        folgen ihr (Regel R-UI-7: alle Texte auf Deutsch und Englisch).
+        """
+        return pick_language(request.headers.get("accept-language"))
 
     def url(self, path: str) -> str:
         if not path.startswith("/"):

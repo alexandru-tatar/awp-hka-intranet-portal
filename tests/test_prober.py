@@ -21,7 +21,8 @@ NOW = datetime(2026, 11, 4, 9, 0, 0, tzinfo=timezone.utc)
 
 
 def manifest(slug="pruefung", **changes):
-    return {"slug": slug, "name": "Prüfungen", "category": "Studium", "menu": {"label": "Prüfungen", "icon": "grades"},
+    return {"slug": slug, "name": "Prüfungen", "name_en": "Examinations", "category": "Studium",
+            "menu": {"label": "Prüfungen", "label_en": "Examinations", "icon": "grades"},
             "roles": ["student"], "version": "1.0.0", **changes}
 
 

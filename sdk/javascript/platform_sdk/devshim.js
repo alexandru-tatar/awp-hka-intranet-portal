@@ -5,6 +5,7 @@
 const crypto = require("node:crypto");
 const express = require("express");
 const { User } = require("./context");
+const { language, texts } = require("./i18n");
 const { env } = require("./templates");
 
 const COOKIE = "portal_dev";
@@ -44,8 +45,11 @@ function router(portal) {
   const r = express.Router();
   const manifestRoles = portal.manifest.roles;
 
-  r.get("/login", (_req, res) => {
-    res.type("html").send(env.render("dev_login.html", { persons: TEST_PERSONS, roles: manifestRoles, app: portal.manifest.name }));
+  r.get("/login", (req, res) => {
+    res.type("html").send(env.render("dev_login.html", {
+      persons: TEST_PERSONS, roles: manifestRoles, app: (language(req) === "en" ? portal.manifest.name_en : null) || portal.manifest.name, lang: language(req),
+      tx: texts(req),
+    }));
   });
 
   r.post("/login", express.urlencoded({ extended: false }), (req, res) => {

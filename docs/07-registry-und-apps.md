@@ -12,8 +12,9 @@ Datei `dev/manifests/<slug>.json` anlegen; im Dev-Modus wird der Ordner bei jede
 {
   "slug": "noten",
   "name": "Meine Noten",
+  "name_en": "My grades",
   "category": "Studium",
-  "menu": { "label": "Meine Noten", "icon": "grades" },
+  "menu": { "label": "Meine Noten", "label_en": "My grades", "icon": "grades" },
   "roles": ["student"],
   "adapters": ["noten:read"],
   "claims": [],
@@ -24,9 +25,11 @@ Datei `dev/manifests/<slug>.json` anlegen; im Dev-Modus wird der Ordner bei jede
 | Feld | Pflicht | Regel |
 |---|---|---|
 | `slug` | ja | `^[a-z][a-z0-9-]{2,30}$`, nicht in der Liste reservierter Slugs (`RESERVED_SLUGS`, z. B. `admin`, `api`, `login`, `apps`) |
-| `name` | ja | 1–60 Zeichen, keine Steuerzeichen |
+| `name` | ja | 1–60 Zeichen, keine Steuerzeichen; Name auf Deutsch |
+| `name_en` | ja (HKA-101) | wie `name`, auf Englisch |
 | `category` | ja | `Studium`, `Verwaltung`, `Kommunikation` oder `Sonstiges` |
-| `menu.label` | ja | 1–40 Zeichen |
+| `menu.label` | ja | 1–40 Zeichen; Beschriftung auf Deutsch |
+| `menu.label_en` | ja (HKA-101) | wie `menu.label`, auf Englisch |
 | `menu.icon` | ja | `grades`, `mail`, `calendar`, `document`, `people`, `book`, `room`, `settings` oder `info` |
 | `roles` | ja | mindestens eine Rolle aus `role_vocabulary` der Konfiguration |
 | `adapters` | nein | Scopes der Form `name:aktion`, aus `adapter_scopes` der Konfiguration |
@@ -34,6 +37,12 @@ Datei `dev/manifests/<slug>.json` anlegen; im Dev-Modus wird der Ordner bei jede
 | `version` | ja | `MAJOR.MINOR.PATCH` |
 
 Unbekannte Felder sind ein Fehler. Die Datei `schemas/manifest.schema.json` ist die Quelle; neue Felder zuerst dort eintragen.
+
+**Zwei Sprachen (HKA-101).** Das Menü, die Startseite und die Verwaltung zeigen `name_en` und `menu.label_en`, wenn die Person Englisch gewählt hat,
+sonst `name` und `menu.label`. Die Kategorie bleibt der deutsche Schlüssel; die Überschrift kommt aus den Textdateien (`category.<name>`).
+Die englischen Felder sind **Pflicht bei `check` und `register`** (PF-104). Beim **Laden** bereits registrierter Manifeste (`ManifestDirectorySource`,
+`ManifestValidator.problems(..., lenient=True)`) dürfen sie noch fehlen: Sonst verschwänden nach dem Update des Portals alle schon registrierten
+Apps aus dem Menü. Das Portal schreibt dann `manifest_missing_english` ins Log und zeigt den deutschen Text auch auf Englisch.
 
 ## Prüfung (`registry/validation.py`)
 
@@ -87,6 +96,11 @@ das Manifest auf der Standardeingabe (höchstens 64 KiB).
 `check` macht die Schritte 1 und 2 und schreibt nichts. Bei jeder Ablehnung bleibt jede Datei unverändert, also auch das Menü. Die
 Fehlerblöcke stehen im Format des Katalogs der Pipeline (`.agents/skills/pipeline-fehler/fehlercodes.md`) auf der Fehlerausgabe.
 Exit-Codes: 0 in Ordnung, 1 abgelehnt, 2 falscher Aufruf, 3 Fehler im Betrieb (Konfiguration, Besitzerdatei, Schreibrechte).
+
+**Sprache der Ausgabe (HKA-101).** Meldungen, Tabelle von `list` und Fehlerblöcke gibt es auf Deutsch und Englisch (`registry/cli_texts.py`).
+Es gilt `PORTAL_LANG=de|en`, sonst die erste gesetzte Variable aus `LC_ALL`, `LC_MESSAGES`, `LANG` (beginnt sie mit `en`: Englisch), sonst Deutsch.
+`portal-deploy` liest `PORTAL_LANG` aus der Umgebung oder aus `/etc/portal/deploy.env` (sudo gibt die Umgebung nicht immer weiter) und gibt den Wert
+mit `-e PORTAL_LANG=…` an den Container. Beispiel: `sudo PORTAL_LANG=en portal-deploy list`.
 
 **Nachladen:** Eine Hintergrundaufgabe des Portals ruft alle `registry.refresh_seconds` (Standard 5) `Registry.refresh()` auf, in jeder
 Umgebung. Wird dieselbe Datei neu geschrieben (anderer Inhalt oder neue Änderungszeit), gilt das als neue Registrierung, und die App

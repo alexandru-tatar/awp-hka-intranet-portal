@@ -22,7 +22,7 @@ from .web.docs_page import DocsPage
 from .web.views import Views
 
 PACKAGE_DIR = Path(__file__).resolve().parent
-MESSAGES_FILE = PACKAGE_DIR / "locales" / "messages.de.yml"
+LOCALES_DIR = PACKAGE_DIR / "locales"
 TEMPLATES_DIR = PACKAGE_DIR / "templates"
 
 
@@ -81,7 +81,7 @@ def build_portal(
     :rtype: Portal
     """
     kit = Kit.load(cfg.kit_dist)
-    t = Messages(MESSAGES_FILE, defaults={"kontakt": cfg.kontakt})
+    t = Messages(LOCALES_DIR, defaults={"kontakt": {"de": cfg.kontakt, "en": cfg.kontakt_en or cfg.kontakt}})
     registry = _build_registry(cfg)
     registry.reload()
     sessions: SessionStore | None = MemorySessionStore() if cfg.auth_mode == "dev" else None

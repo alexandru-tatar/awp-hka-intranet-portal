@@ -8,16 +8,13 @@ const { Adapters } = require("./adapters");
 const bwsyncConnect = require("./adapters/bwsync/connect");
 const { Config } = require("./config");
 const devshim = require("./devshim");
+const { language, t } = require("./i18n");
 const { JwksCache } = require("./jwks");
 const { Layout } = require("./layout");
 const { portalMiddleware } = require("./middleware");
 const pages = require("./pages");
 
 const KIT_DIR = path.join(__dirname, "kit");
-// Wortlaut wie im Portal (src/portal/locales/messages.de.yml: error.403.*, kontakt aus dev/gateway.*.yml)
-const NO_ACCESS_TITLE = "Dafür fehlt Ihnen die Berechtigung";
-const NO_ACCESS_TEXT =
-  "Diese Anwendung ist für Ihre Rolle nicht freigegeben. Wenn Sie glauben, dass das ein Fehler ist, melden Sie sich bei dem IT-Servicedesk (Kontakt folgt).";
 
 class Portal {
   constructor(config) {
@@ -75,13 +72,21 @@ class Portal {
     return (req, res, next) => {
       const user = req.portal?.user;
       if (!user) {
-        return pages.error(req, res, 401, "Anmeldung fehlt", "Bitte melden Sie sich im Portal an.");
+        return pages.error(req, res, 401, t("login_missing_title", req), t("login_required_detail", req));
       }
       if (!user.roles.some((r) => roles.includes(r))) {
-        return pages.errorInLayout(req, res, this._layout, 403, NO_ACCESS_TITLE, NO_ACCESS_TEXT);
+        return pages.errorInLayout(req, res, this._layout, 403, t("no_access_title", req), t("no_access_detail", req));
       }
       return next();
     };
+  }
+
+  /**
+   * Sprache der Person für diese Anfrage: "de" oder "en" (Standard Deutsch). Sie kommt aus `Accept-Language`; das
+   * Security-Gateway setzt den Header nach der Wahl im Portal. Eigene Texte der App folgen ihr (Regel R-UI-7).
+   */
+  language(req) {
+    return language(req);
   }
 
   url(pathName) {

@@ -4,13 +4,23 @@
     <span class="brand__name">{{ t('brand.name') }}</span>
     <span class="brand__sub">{{ t('brand.sub') }}</span>
   </a>
-  {% if user %}
+  {%- if cfg.show_language_switch or user %}
   <div class="site-header__user">
+    {%- if cfg.show_language_switch %}
+    {%- set other = 'en' if t.lang == 'de' else 'de' %}
+    {#- Nach einem POST zur Startseite: Die Weiterleitung kommt als GET an, die Route nimmt vielleicht nur POST an. #}
+    {%- set back = (request.url.path ~ ('?' ~ request.url.query if request.url.query else '')) if request.method == 'GET' else '/' %}
+    <a href="/sprache/{{ other }}?next={{ back|urlencode }}" lang="{{ other }}" hreflang="{{ other }}" aria-label="{{ t('lang.name.' ~ other) }}" title="{{ t('lang.name.' ~ other) }}">{{ other|upper }}</a>
+    {%- endif %}
+    {%- if user %}
     <span class="muted"><span class="visually-hidden">{{ t('header.signed_in_as') }} </span>{{ user.name }}</span>
     {% if 'platform-admin' in user.roles %}<a href="/_portal/admin">{{ t('header.admin') }}</a>{% endif %}
     <button type="button" class="btn btn--link" data-dialog-open="logout-dialog">{{ t('header.logout') }}</button>
     <noscript><a href="/logout">{{ t('header.logout') }}</a></noscript>
+    {%- endif %}
   </div>
+  {%- endif %}
+  {%- if user %}
   <form id="logout-form" method="post" action="/logout" hidden>
     <input type="hidden" name="csrf" value="{{ user.csrf }}">
   </form>

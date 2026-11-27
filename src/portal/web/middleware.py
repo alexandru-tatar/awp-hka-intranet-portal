@@ -1,4 +1,4 @@
-"""Verwaltung je Anfrage: Request-ID, Standard-Header und im Dev-Modus das Neuladen der Registry."""
+"""Verwaltung je Anfrage: Request-ID, Sprache, Standard-Header und im Dev-Modus das Neuladen der Registry."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ import time
 from fastapi import FastAPI, Request, Response
 from loguru import logger
 
+from ..core.i18n import LANGUAGE_COOKIE, current_language, pick_language
 from ..core.kit import STATIC_PREFIX, is_static_path
 from .deps import get_portal
 
@@ -33,10 +34,15 @@ def apply_default_headers(request: Request, response: Response) -> None:
     Static-Dateien erhalten langes ``immutable``-Caching, ihre festen Alias-Namen ``no-cache`` (sie zeigen auf das
     jeweils aktuelle Kit), alles andere ``no-store``.
 
+    Dazu kommen ``Content-Language`` und ``Vary`` für die Sprache der Seite (HKA-101).
+
     :param request: Anfrage
     :param response: Antwort, wird verändert
     """
     response.headers["X-Request-Id"] = request.state.request_id
+    if not is_static_path(request.url.path):
+        response.headers.setdefault("Content-Language", request.state.language)
+        response.headers.append("Vary", "Accept-Language, Cookie")
     if is_static_path(request.url.path):
         alias = request.url.path[len(STATIC_PREFIX) + 1:] in get_portal(request).kit.aliases
         response.headers["Cache-Control"] = "no-cache" if alias else STATIC_CACHE
@@ -71,7 +77,7 @@ def log_access(request: Request, status: int, started: float) -> None:
 def register_middleware(app: FastAPI) -> None:
     """Middleware eintragen.
 
-    Sie vergibt die Request-ID, lädt im Dev-Modus die Registry bei Änderungen neu (außer bei Static-Dateien),
+    Sie vergibt die Request-ID, bestimmt die Sprache der Anfrage (``pick_language``), lädt im Dev-Modus die Registry bei Änderungen neu (außer bei Static-Dateien),
     schreibt die Zugriffszeile (statt ``uvicorn.access``, damit sie die Request-ID trägt) und setzt die Standard-Header.
 
     :param app: Anwendung
@@ -79,6 +85,10 @@ def register_middleware(app: FastAPI) -> None:
     @app.middleware("http")
     async def portal_request(request: Request, call_next):
         request.state.request_id = request_id_for(request)
+        request.state.language = pick_language(
+            request.cookies.get(LANGUAGE_COOKIE), request.headers.get("accept-language")
+        )
+        current_language.set(request.state.language)
         portal = get_portal(request)
         started = time.perf_counter()
         with logger.contextualize(request_id=request.state.request_id):

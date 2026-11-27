@@ -1,8 +1,8 @@
 {#- Inhalt der Fehlerseite im Seitenrahmen des Portals (pages.errorInLayout, Python: pages.error_in_layout). Markup und Wortlaut wie src/portal/templates/pages/error.html. -#}
 <div class="error-page">
-  <p class="error-page__status">Fehler {{ status }}</p>
+  <p class="error-page__status">{{ tx.error_status }} {{ status }}</p>
   <h1>{{ title }}</h1>
   <p>{{ detail }}</p>
-  <p><a class="cta" href="/">zur Startseite</a></p>
-  {% if request_id %}<p class="error-page__code">Fehlernummer: <code>{{ request_id }}</code></p>{% endif %}
+  <p><a class="cta" href="/">{{ tx.back_to_portal_home }}</a></p>
+  {% if request_id %}<p class="error-page__code">{{ tx.error_number }}: <code>{{ request_id }}</code></p>{% endif %}
 </div>

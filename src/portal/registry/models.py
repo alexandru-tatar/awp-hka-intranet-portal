@@ -40,6 +40,8 @@ class AppView:
     :ivar status: Eine aus ``STATUSES``
     :ivar last_probe_at: Zeitpunkt der letzten Prüfung
     :ivar last_deployed_at: Zeitpunkt des letzten Deployments
+    :ivar name_en: Anzeigename auf Englisch, ``None`` bei älteren Manifesten (dann gilt ``name``)
+    :ivar menu_label_en: Beschriftung im Menü auf Englisch, ``None`` bei älteren Manifesten (dann gilt ``menu_label``)
     """
     slug: str
     name: str
@@ -53,6 +55,8 @@ class AppView:
     status: str
     last_probe_at: str | None = None
     last_deployed_at: str | None = None
+    name_en: str | None = None
+    menu_label_en: str | None = None
 
     @classmethod
     def from_manifest(cls, manifest: dict, *, status: str, last_probe_at: str | None = None,
@@ -79,7 +83,27 @@ class AppView:
             status=status,
             last_probe_at=last_probe_at,
             last_deployed_at=last_deployed_at,
+            name_en=manifest.get("name_en"),
+            menu_label_en=manifest["menu"].get("label_en"),
         )
+
+    def display_name(self, lang: str) -> str:
+        """Anzeigename in der Sprache.
+
+        :param lang: ``de`` oder ``en``
+        :return: ``name_en`` bei ``en``, wenn vorhanden, sonst ``name``
+        :rtype: str
+        """
+        return (self.name_en if lang == "en" else None) or self.name
+
+    def display_label(self, lang: str) -> str:
+        """Beschriftung im Menü in der Sprache.
+
+        :param lang: ``de`` oder ``en``
+        :return: ``menu_label_en`` bei ``en``, wenn vorhanden, sonst ``menu_label``
+        :rtype: str
+        """
+        return (self.menu_label_en if lang == "en" else None) or self.menu_label
 
     def same_registration(self, other: "AppView") -> bool:
         """Ob beide Ansichten dieselbe Registrierung zeigen: gleiches Manifest und gleicher Zeitpunkt der Bereitstellung.

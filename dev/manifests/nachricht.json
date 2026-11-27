@@ -1,8 +1,9 @@
 {
   "slug": "nachricht",
   "name": "Nachricht an das Studienbüro",
+  "name_en": "Message to the study office",
   "category": "Kommunikation",
-  "menu": { "label": "Nachricht senden", "icon": "mail" },
+  "menu": { "label": "Nachricht senden", "label_en": "Send message", "icon": "mail" },
   "roles": ["student", "employee", "professor"],
   "adapters": ["mail:send"],
   "claims": ["email"],

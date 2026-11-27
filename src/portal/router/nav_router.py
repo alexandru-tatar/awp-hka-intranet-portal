@@ -45,7 +45,7 @@ def nav(
         return Response(UNAUTHORIZED, status_code=401, media_type="application/problem+json")
 
     body: Final = str(portal.views.nav_html_for_roles(roles, current))
-    etag: Final = _etag_for(portal.kit.id, body)
+    etag: Final = _etag_for(portal.kit.id, request.state.language, body)
     headers: Final = {
         ETAG: etag,
         CACHE_CONTROL: NAV_MAX_AGE,
@@ -56,12 +56,13 @@ def nav(
     return HTMLResponse(body, headers=headers)
 
 
-def _etag_for(kit_id: str, body: str) -> str:
-    """ETag des Menüs; ändert sich mit dem Menü und mit jedem Kit-Release.
+def _etag_for(kit_id: str, language: str, body: str) -> str:
+    """ETag des Menüs; ändert sich mit dem Menü, der Sprache und jedem Kit-Release.
 
     :param kit_id: Kennung des Kits
+    :param language: Sprache der Anfrage
     :param body: HTML des Menüs
     :return: ETag in Anführungszeichen
     :rtype: str
     """
-    return '"' + hashlib.sha256(f"{kit_id}\n{body}".encode()).hexdigest()[:20] + '"'
+    return '"' + hashlib.sha256(f"{kit_id}\n{language}\n{body}".encode()).hexdigest()[:20] + '"'

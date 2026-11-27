@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de">
+<html lang="{{ lang }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,20 +9,20 @@
   <script src="{{ kit.js }}" defer></script>
 </head>
 <body>
-  <a class="skip" href="#main">Zum Inhalt springen</a>
-  {% if dev %}<div class="dev-banner">Entwicklungsmodus – Testperson: {{ user.name }}</div>{% endif %}
+  <a class="skip" href="#main">{{ tx.skip }}</a>
+  {% if dev %}<div class="dev-banner">{{ tx.dev_banner }} {{ user.name }}</div>{% endif %}
   <header class="site-header">
     <a class="brand" href="/">
-      <span class="brand__name">Hochschule Karlsruhe</span>
-      <span class="brand__sub">Portal</span>
+      <span class="brand__name">{{ tx.brand_name }}</span>
+      <span class="brand__sub">{{ tx.brand_sub }}</span>
     </a>
     <div class="site-header__user">
-      <span class="muted"><span class="visually-hidden">Angemeldet als </span>{{ user.name }}</span>
+      <span class="muted"><span class="visually-hidden">{{ tx.signed_in_as }} </span>{{ user.name }}</span>
       {% if dev %}
-      <a href="/__dev/login">Abmelden</a>
+      <a href="/__dev/login">{{ tx.logout }}</a>
       {% else %}
-      <button type="button" class="btn btn--link" data-dialog-open="logout-dialog">Abmelden</button>
-      <noscript><a href="/logout">Abmelden</a></noscript>
+      <button type="button" class="btn btn--link" data-dialog-open="logout-dialog">{{ tx.logout }}</button>
+      <noscript><a href="/logout">{{ tx.logout }}</a></noscript>
       {% endif %}
     </div>
     {% if not dev %}
@@ -31,11 +31,11 @@
     <form id="logout-form" method="post" action="/logout" hidden></form>
     <dialog id="logout-dialog" aria-labelledby="logout-dialog-title" data-submit-form="logout-form">
       <form method="dialog">
-        <h2 id="logout-dialog-title">Abmelden?</h2>
-        <p>Möchten Sie sich vom Portal abmelden?</p>
+        <h2 id="logout-dialog-title">{{ tx.logout_title }}</h2>
+        <p>{{ tx.logout_body }}</p>
         <div class="dialog__actions">
-          <button value="cancel" class="btn btn--secondary">Abbrechen</button>
-          <button value="confirm" class="btn btn--primary" autofocus>Abmelden</button>
+          <button value="cancel" class="btn btn--secondary">{{ tx.cancel }}</button>
+          <button value="confirm" class="btn btn--primary" autofocus>{{ tx.logout }}</button>
         </div>
       </form>
     </dialog>
@@ -48,7 +48,7 @@
     </main>
   </div>
   <footer class="site-footer">
-    <p class="site-footer__brand"><strong>Hochschule Karlsruhe</strong> Portal</p>
+    <p class="site-footer__brand"><strong>{{ tx.brand_name }}</strong> {{ tx.brand_sub }}</p>
   </footer>
 </body>
 </html>

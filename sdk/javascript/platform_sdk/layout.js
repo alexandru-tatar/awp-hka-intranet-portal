@@ -10,6 +10,7 @@
 
 const { currentAssertion } = require("./context");
 const { env } = require("./templates");
+const { language, texts } = require("./i18n");
 
 class Layout {
   constructor(config) {
@@ -31,13 +32,15 @@ class Layout {
         icons: "/_portal/static/icons.svg",
       };
     }
-    if (navHtml === null) navHtml = env.render("nav.html", { item: this._menuItem(), current, kit });
+    if (navHtml === null) navHtml = env.render("nav.html", { item: this._menuItem(), current, kit, tx: texts() });
     return env.render("layout.html", {
       title,
       body, // Inhalt kommt aus einer Vorlage mit autoescape
       nav_html: navHtml, // vom Portal oder aus nav.html
       user,
       kit,
+      lang: language(),
+      tx: texts(),
       app_css: `${cfg.basePath}/static/app.css`,
       dev: cfg.dev,
     });
@@ -45,7 +48,13 @@ class Layout {
 
   _menuItem() {
     const m = this.config.manifest;
-    return { category: m.category, label: m.menu.label, icon: m.menu.icon, path: this.config.basePath || "/" };
+    const label = (language() === "en" ? m.menu.label_en : null) || m.menu.label;
+    return {
+      category: texts()[`category_${m.category}`] ?? m.category,
+      label,
+      icon: m.menu.icon,
+      path: this.config.basePath || "/",
+    };
   }
 
   async _fetchNav() {
@@ -53,7 +62,7 @@ class Layout {
     if (token === null) return null;
     try {
       const response = await fetch(`${this.config.apiUrl}/nav`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}`, "Accept-Language": language() },
         signal: AbortSignal.timeout(2000),
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);

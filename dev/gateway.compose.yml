@@ -4,6 +4,7 @@
 env: dev
 auth_mode: gateway
 kontakt: "dem IT-Servicedesk (Kontakt folgt)"
+kontakt_en: "the IT service desk (contact details to follow)"
 # Manifeste: Ordner .local/portal/manifests im Portal-Repo (Volume). Der Prober setzt den Status, keine state.yml.
 manifests_dir: /var/lib/portal/manifests
 schema_path: ../schemas/manifest.schema.json
