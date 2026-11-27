@@ -183,10 +183,10 @@ def test_header_logout_opens_a_confirmation_dialog_with_csrf(client):
     assert form and re.search(r'name="csrf" value="[^"]+"', form.group(1))
 
 
-def test_footer_shows_docs_link_only_to_docs_roles(client):
+def test_footer_shows_docs_link_to_everyone_logged_in(client):
     html = login(client, "alexandru").get("/").text
     footer = html.split('<footer class="site-footer">', 1)[1].split("</footer>", 1)[0]
-    assert "/_portal/docs" not in footer and "<ul>" not in footer
+    assert re.findall(r'<a class="cta" href="([^"]+)">([^<]+)</a>', footer) == [("/_portal/docs", "Docs")]
     assert "Impressum" not in html
 
 

@@ -77,25 +77,31 @@ def get_doc_write_service(portal: PortalDep) -> DocWriteService:
 
 
 def can_read_docs(cfg_docs, session: SessionDTO | None) -> bool:
-    """Ob eine Session die Dokumentation lesen darf (Lese- oder Bearbeitungsrolle).
+    """Ob eine Session die Dokumentation lesen darf.
 
     :param cfg_docs: Abschnitt ``docs`` der Konfiguration (:class:`~portal.core.config.DocsConfig`)
     :param session: Session oder ``None``
-    :return: ``True``, falls eine der Rollen vorhanden ist
+    :return: ``True`` bei ``read_roles: all`` für jede Session, sonst mit einer Lese- oder Bearbeitungsrolle
     :rtype: bool
     """
-    return bool(session and session.roles & (set(cfg_docs.read_roles) | set(cfg_docs.edit_roles)))
+    if session is None:
+        return False
+    if "*" in cfg_docs.read_roles:
+        return True
+    return bool(session.roles & (set(cfg_docs.read_roles) | set(cfg_docs.edit_roles)))
 
 
-def can_edit_docs(cfg_docs, session: SessionDTO | None) -> bool:
-    """Ob eine Session die Dokumentation bearbeiten darf.
+def can_edit_docs(portal: Portal, session: SessionDTO | None) -> bool:
+    """Ob eine Session die Dokumentation bearbeiten darf: Bearbeitungsrolle oder Freigabe auf der Verwaltungsseite.
 
-    :param cfg_docs: Abschnitt ``docs`` der Konfiguration (:class:`~portal.core.config.DocsConfig`)
+    :param portal: Portal-Kontext
     :param session: Session oder ``None``
-    :return: ``True``, falls eine Bearbeitungsrolle vorhanden ist
+    :return: ``True``, falls die Person bearbeiten darf
     :rtype: bool
     """
-    return bool(session and session.roles & set(cfg_docs.edit_roles))
+    if session is None:
+        return False
+    return bool(session.roles & set(portal.cfg.docs.edit_roles)) or portal.doc_service.is_editor(session.sub)
 
 
 def require_docs_reader(portal: PortalDep, session: Annotated[SessionDTO, Depends(require_session)]) -> SessionDTO:
@@ -121,7 +127,7 @@ def require_docs_editor(portal: PortalDep, session: Annotated[SessionDTO, Depend
     :rtype: SessionDTO
     :raises HTTPException: 403 ohne passende Rolle
     """
-    if not can_edit_docs(portal.cfg.docs, session):
+    if not can_edit_docs(portal, session):
         raise HTTPException(403)
     return session
 

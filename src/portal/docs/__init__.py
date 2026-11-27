@@ -8,8 +8,10 @@ from .sanitize import sanitize_html
 from .store import (
     DocChange,
     DocConflictError,
+    DocEditor,
     DocNotFoundError,
     DocPage,
+    DocPerson,
     DocReadOnlyError,
     DocStore,
     DocStoreError,
@@ -17,6 +19,6 @@ from .store import (
 )
 
 __all__ = [
-    "DocChange", "DocConflictError", "DocNotFoundError", "DocPage", "DocReadOnlyError", "DocStore",
+    "DocChange", "DocConflictError", "DocEditor", "DocPerson", "DocNotFoundError", "DocPage", "DocReadOnlyError", "DocStore",
     "DocStoreError", "DocVersion", "sanitize_html",
 ]

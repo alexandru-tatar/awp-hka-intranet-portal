@@ -7,6 +7,8 @@ Aufbau des Ordners (``docs.dir`` in der Konfiguration)::
     changes.jsonl                eine Zeile je Änderung (neueste unten)
     order.json                   Reihenfolge der Seiten in der Navigation
     seed.json                    Prüfsumme des Ausgangsstands je Seite, der zuletzt übernommen wurde
+    editors.json                 Personen, die die Verwaltungsseite als Maintainer freigegeben hat
+    people.json                  Personen, die das Portal schon genutzt haben (Auswahl auf der Verwaltungsseite)
     assets/<hash>.<endung>       hochgeladene Bilder und PDFs
 
 Ist der Ordner leer, übernimmt der Speicher beim Start den Ausgangsstand aus ``seed.html`` als Version 1. Ändert sich
@@ -133,6 +135,36 @@ class DocVersion:
 
 
 @dataclass(frozen=True)
+class DocEditor:
+    """Eine Person, die die Verwaltungsseite als Maintainer freigegeben hat.
+
+    :ivar sub: Subject des IdP
+    :ivar name: Anzeigename
+    :ivar added_by: Name der Person, die freigegeben hat
+    :ivar added_at: Zeitpunkt (ISO 8601, UTC)
+    """
+    sub: str
+    name: str
+    added_by: str
+    added_at: str
+
+
+@dataclass(frozen=True)
+class DocPerson:
+    """Eine Person, die das Portal schon genutzt hat.
+
+    :ivar sub: Subject des IdP
+    :ivar name: Anzeigename
+    :ivar roles: Rollen beim letzten Besuch
+    :ivar last_seen: Zeitpunkt des letzten Besuchs (ISO 8601, UTC, auf die Stunde genau aktualisiert)
+    """
+    sub: str
+    name: str
+    roles: tuple[str, ...]
+    last_seen: str
+
+
+@dataclass(frozen=True)
 class DocChange:
     """Ein Eintrag im Änderungsprotokoll.
 
@@ -165,6 +197,7 @@ class DocStore:
         self._lock = threading.RLock()
         self._pages: dict[str, DocPage] = {}
         self._order: list[str] = []
+        self._seen: dict[str, tuple[float, str, tuple[str, ...]]] = {}
         if directory is None:
             for page in parse_seed(SEED_FILE.read_text(encoding="utf-8")):
                 self._pages[page.slug] = page
@@ -279,7 +312,99 @@ class DocStore:
             raise DocNotFoundError(name)
         return path
 
+    def editors(self) -> list[DocEditor]:
+        """Personen, die die Verwaltungsseite als Maintainer freigegeben hat, nach Name sortiert.
+
+        :return: Freigaben, leer ohne Ordner
+        :rtype: list[DocEditor]
+        """
+        raw = self._read_json("editors.json", [])
+        return sorted((DocEditor(**e) for e in raw), key=lambda e: e.name.lower())
+
+    def people(self) -> list[DocPerson]:
+        """Personen, die das Portal schon genutzt haben, zuletzt gesehene zuerst.
+
+        :return: Personen, leer ohne Ordner
+        :rtype: list[DocPerson]
+        """
+        raw = self._read_json("people.json", {})
+        people = [DocPerson(sub=sub, name=v["name"], roles=tuple(v.get("roles", ())), last_seen=v["last_seen"])
+                  for sub, v in raw.items()]
+        return sorted(people, key=lambda p: p.last_seen, reverse=True)
+
     # ── schreiben ──────────────────────────────────────────────────────
+
+    def add_editor(self, sub: str, name: str, *, actor: str) -> DocEditor:
+        """Person als Maintainer freigeben; ist sie schon freigegeben, bleibt der Eintrag.
+
+        :param sub: Subject des IdP
+        :param name: Anzeigename
+        :param actor: Name der freigebenden Person
+        :return: Die Freigabe
+        :rtype: DocEditor
+        :raises DocReadOnlyError: Ohne Ordner
+        """
+        with self._lock:
+            directory = self._require_dir()
+            raw = self._read_json("editors.json", [])
+            for e in raw:
+                if e["sub"] == sub:
+                    return DocEditor(**e)
+            editor = DocEditor(sub=sub, name=name, added_by=actor, added_at=_now())
+            raw.append(editor.__dict__)
+            atomic_write(directory / "editors.json", json.dumps(raw, ensure_ascii=False, indent=1))
+            logger.info("docs editor added sub={} actor={}", sub, actor)
+            return editor
+
+    def remove_editor(self, sub: str, *, actor: str) -> None:
+        """Freigabe als Maintainer entfernen.
+
+        :param sub: Subject des IdP
+        :param actor: Name der Person, die entfernt
+        :raises DocNotFoundError: Falls es keine Freigabe gibt
+        :raises DocReadOnlyError: Ohne Ordner
+        """
+        with self._lock:
+            directory = self._require_dir()
+            raw = self._read_json("editors.json", [])
+            kept = [e for e in raw if e["sub"] != sub]
+            if len(kept) == len(raw):
+                raise DocNotFoundError(sub)
+            atomic_write(directory / "editors.json", json.dumps(kept, ensure_ascii=False, indent=1))
+            logger.info("docs editor removed sub={} actor={}", sub, actor)
+
+    def is_editor(self, sub: str) -> bool:
+        """Ob die Verwaltungsseite die Person als Maintainer freigegeben hat.
+
+        :param sub: Subject des IdP
+        :return: ``True`` bei einer Freigabe
+        :rtype: bool
+        """
+        return any(e.get("sub") == sub for e in self._read_json("editors.json", []))
+
+    def touch_person(self, sub: str, name: str, roles: tuple[str, ...]) -> None:
+        """Besuch einer Person merken (für die Auswahl auf der Verwaltungsseite).
+
+        Geschrieben wird höchstens einmal pro Stunde und Person oder wenn sich Name oder Rollen ändern.
+
+        :param sub: Subject des IdP
+        :param name: Anzeigename
+        :param roles: Rollen
+        """
+        if self._dir is None or not sub:
+            return
+        import time
+
+        roles = tuple(sorted(roles))
+        last = self._seen.get(sub)
+        if last and time.monotonic() - last[0] < 3600 and last[1:] == (name, roles):
+            return
+        with self._lock:
+            raw = self._read_json("people.json", {})
+            raw[sub] = {"name": name, "roles": list(roles), "last_seen": _now()}
+            atomic_write(self._dir / "people.json", json.dumps(raw, ensure_ascii=False, indent=1))
+            self._seen[sub] = (time.monotonic(), name, roles)
+
 
     def create(self, *, title: str, group: str, html: str, attrs: dict[str, str], actor: str, note: str,
                after: str | None = None) -> DocPage:
@@ -405,6 +530,21 @@ class DocStore:
         return name
 
     # ── intern ─────────────────────────────────────────────────────────
+
+    def _read_json(self, name: str, default):
+        """JSON-Datei aus dem Ordner lesen.
+
+        :param name: Dateiname
+        :param default: Wert ohne Ordner, ohne Datei oder bei kaputter Datei
+        :return: Inhalt
+        """
+        if self._dir is None or not (self._dir / name).exists():
+            return default
+        try:
+            return json.loads((self._dir / name).read_text(encoding="utf-8"))
+        except ValueError:
+            logger.warning("docs file unreadable name={}", name)
+            return default
 
     def _require_dir(self) -> Path:
         """Ordner des Speichers.

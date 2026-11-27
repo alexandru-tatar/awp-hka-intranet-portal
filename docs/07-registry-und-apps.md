@@ -244,6 +244,7 @@ Rollen, listet stillgelegte Apps und die Grants je Person. Mit `registry.admin_w
 | App entfernen | Button „Entfernen …“, Rückfrage im Dialog | wie `portal-deploy remove`, aber ohne `--owner` (`Registrar.remove_as_admin`): Manifest weg, Name bleibt an den Besitzer gebunden, Menü sofort aktualisiert |
 | Rollen einer App | Haken je Rolle, „Speichern“ | `roles` im Manifest wird ersetzt und erneut geprüft (`Registrar.set_roles`), mindestens eine Rolle aus `role_vocabulary`, Menü sofort aktualisiert |
 | Grants je Person | Tabelle und Formular „Zusätzliche Rollen hinzufügen“ | schreibt `grants_file`; ohne Rolle entfällt der Eintrag. Gilt ab der nächsten Anmeldung der Person, weil die Rollen beim Login in die Session kommen |
+| Maintainer der Dokumentation | Abschnitt „Dokumentation – Maintainer“: Person auswählen oder Subject eingeben, „Entfernen …“ mit Rückfrage | schreibt `editors.json` im Docs-Speicher (`docs.dir`); gilt **sofort**, ohne neue Anmeldung und unabhängig von `admin_write`. Die Tabelle zeigt auch bekannte Personen mit der Rolle `maintainer` aus der Anmeldung ([06](06-oberflaeche.md#dokumentation-_portaldocs)) |
 
 Alle Änderungen sind POST mit CSRF-Token der Session, laufen über `AdminService` (nicht in den Handlern) und stehen im Log
 (`admin_action action=… admin=<sub>`). Registriert die Pipeline ein Manifest später erneut, gelten wieder die Rollen aus dem Repository
@@ -258,7 +259,9 @@ das ist der Preis der Seite. Wer das nicht will, setzt `admin_write` auf `false`
 
 **Lokal:** `gateway.dev.yml` hat `admin_write: true` und legt `owners.json` und `retired.json` neben die Konfiguration (in `.gitignore`).
 Entfernen löscht die Datei in `dev/manifests/`; `git restore dev/manifests` und das Löschen von `dev/owners.json` und `dev/retired.json` stellen den Stand wieder her.
-Die Grants wirken nur bei `auth_mode: oidc`; in dev kommen die Rollen aus `users.yml`.
+Die Grants wirken nur, wo das Anmeldesystem sie liest: in dev kommen die Rollen aus `users.yml`, und das Security-Gateway liest
+`grants.yml` nur mit gesetztem `GW_GRANTS_FILE` (auf der VM derzeit nicht gesetzt). Die Maintainer der Dokumentation wirken dagegen
+überall, weil das Portal sie selbst prüft.
 
 
 ## Interne lesende API für den separaten Gateway

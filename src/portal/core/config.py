@@ -81,8 +81,10 @@ class RegistryConfig:
     admin_write: bool = False
 
 
-#: Rollen, die die Dokumentation ohne Abschnitt ``docs`` lesen und bearbeiten dürfen.
-DOCS_DEFAULT_ROLES = ("maintainer", "platform-admin")
+#: Wert von ``docs.read_roles`` für „alle angemeldeten Personen“ (in der YAML-Datei ``read_roles: all``).
+DOCS_ALL = "*"
+#: Rollen, die die Dokumentation ohne Abschnitt ``docs`` bearbeiten dürfen.
+DOCS_EDIT_ROLES = ("maintainer",)
 
 
 @dataclass(frozen=True)
@@ -91,13 +93,14 @@ class DocsConfig:
 
     :ivar dir: Speicherordner für Seiten, Versionen und hochgeladene Dateien; ohne Wert nur lesend aus dem
         Ausgangsstand (``portal/docs/seed.html``)
-    :ivar read_roles: Rollen, die die Dokumentation lesen dürfen
-    :ivar edit_roles: Rollen, die Seiten anlegen, bearbeiten, wiederherstellen und löschen dürfen
+    :ivar read_roles: Rollen, die die Dokumentation lesen dürfen; ``("*",)`` (YAML ``all``) für alle Angemeldeten
+    :ivar edit_roles: Rollen, die Seiten anlegen, bearbeiten, wiederherstellen und löschen dürfen; dazu kommen
+        Personen, die die Verwaltungsseite als Maintainer freigibt
     :ivar max_upload_bytes: Größte erlaubte Datei beim Hochladen
     """
     dir: Path | None = None
-    read_roles: tuple[str, ...] = DOCS_DEFAULT_ROLES
-    edit_roles: tuple[str, ...] = DOCS_DEFAULT_ROLES
+    read_roles: tuple[str, ...] = (DOCS_ALL,)
+    edit_roles: tuple[str, ...] = DOCS_EDIT_ROLES
     max_upload_bytes: int = 10 * 1024 * 1024
 
 
@@ -375,8 +378,11 @@ def _load_docs(path: Path, base: Path, raw: dict | None, vocabulary: tuple[str, 
     if unknown:
         raise ConfigError(f"{path}: unknown docs key(s) {', '.join(sorted(unknown))}")
     roles = {}
-    for key in ("read_roles", "edit_roles"):
-        value = raw.get(key, list(DOCS_DEFAULT_ROLES))
+    for key, default in (("read_roles", "all"), ("edit_roles", list(DOCS_EDIT_ROLES))):
+        value = raw.get(key, default)
+        if key == "read_roles" and value == "all":
+            roles[key] = (DOCS_ALL,)
+            continue
         if not isinstance(value, list) or not value or not all(isinstance(r, str) for r in value):
             raise ConfigError(f"{path}: docs {key} must be a non-empty list of roles")
         outside = set(value) - set(vocabulary)

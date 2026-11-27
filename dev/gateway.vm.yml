@@ -58,10 +58,11 @@ logging:
     httpcore: WARNING
     watchfiles: WARNING
 
-# Dokumentation /_portal/docs (docs/06-oberflaeche.md): lesen und bearbeiten mit Rolle maintainer oder platform-admin.
+# Dokumentation /_portal/docs (docs/06-oberflaeche.md): lesen alle Angemeldeten, bearbeiten Rolle maintainer und
+# Personen, die die Verwaltungsseite als Maintainer freigibt.
 # Speicher im beschreibbaren Registry-Volume, damit kein weiteres Volume nötig ist.
 docs:
   dir: /var/lib/portal/registry/docs
-  read_roles: [maintainer, platform-admin]
-  edit_roles: [maintainer, platform-admin]
+  read_roles: all
+  edit_roles: [maintainer]
   max_upload_mb: 10

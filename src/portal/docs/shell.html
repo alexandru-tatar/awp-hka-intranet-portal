@@ -1049,7 +1049,7 @@ var GLOSSAR=[
   sx.onclick=function(e){if(e.target===sx)closeS();if(e.target.closest('.sx-res a'))closeS()};
   sq.oninput=search;
   sq.onkeydown=function(e){var as=sr.querySelectorAll('a');if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();sel=(sel+(e.key==='ArrowDown'?1:-1)+as.length)%Math.max(1,as.length);as.forEach(function(a,i){a.classList.toggle('sel',i===sel)});if(as[sel])as[sel].scrollIntoView({block:'nearest'})}else if(e.key==='Enter'&&as[sel]){location.hash=as[sel].getAttribute('href').slice(1);closeS()}};
-  D.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openS()}else if(e.key==='Escape'){closeS();nav(false)}else if(e.key==='/'&&!/INPUT|TEXTAREA/.test(D.activeElement.tagName)){e.preventDefault();openS()}});
+  D.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){if(D.activeElement.isContentEditable)return;e.preventDefault();openS()}else if(e.key==='Escape'){closeS();nav(false)}else if(e.key==='/'&&!e.ctrlKey&&!e.metaKey&&!/INPUT|TEXTAREA|SELECT/.test(D.activeElement.tagName)&&!D.activeElement.isContentEditable){e.preventDefault();openS()}});
 
   var stand=D.getElementById('docsStand');
   if(stand&&BOOT.last){stand.innerHTML='Zuletzt geändert '+esc(rel(BOOT.last.ts))+' von '+esc(BOOT.last.actor)+' · <a href="#aenderungen">Alle Änderungen</a>'}

@@ -151,6 +151,33 @@ admin.grants.delete: Löschen
 admin.grants.delete_title: Rollen von „{sub}“ löschen?
 admin.grants.delete_body: Die Person verliert ihre zusätzlichen Rollen ab der nächsten Anmeldung.
 admin.grants.delete_confirm: Löschen
+admin.notice.maintainer_added: Die Person ist jetzt Maintainer. Sie kann die Dokumentation sofort bearbeiten, ohne sich neu anzumelden.
+admin.notice.maintainer_removed: Die Person ist kein Maintainer mehr. Sie kann die Dokumentation ab sofort nur noch lesen.
+admin.error.maintainer_sub: Wählen Sie eine Person aus der Liste oder geben Sie ihr Subject ein (höchstens 200 Zeichen).
+admin.error.maintainer_read_only: Die Dokumentation hat hier keinen Speicherordner. Maintainer lassen sich deshalb nicht verwalten.
+admin.col.person: Person
+admin.col.via: Darf bearbeiten durch
+admin.col.last_seen: Zuletzt im Portal
+admin.maintainers.heading: Dokumentation – Maintainer
+admin.maintainers.intro: "Alle Angemeldeten können die Dokumentation lesen. Bearbeiten dürfen nur Maintainer: Personen mit der Rolle aus der Anmeldung ({roles}) und Personen, die Sie hier freigeben. Eine Freigabe gilt sofort."
+admin.maintainers.caption: Personen, die die Dokumentation bearbeiten dürfen
+admin.maintainers.read_only: Die Dokumentation hat hier keinen Speicherordner. Maintainer lassen sich deshalb nicht verwalten.
+admin.maintainers.none: Es gibt noch keine Maintainer. Personen mit der Rolle aus der Anmeldung erscheinen hier, sobald sie das Portal einmal genutzt haben.
+admin.maintainers.via_admin: Freigabe von {name} am {date}
+admin.maintainers.via_role: Rolle aus der Anmeldung
+admin.maintainers.never: noch nicht
+admin.maintainers.role_only: kommt aus der Anmeldung
+admin.maintainers.remove: Entfernen
+admin.maintainers.remove_title: „{name}“ als Maintainer entfernen?
+admin.maintainers.remove_body: Die Person kann die Dokumentation danach nur noch lesen. Ihre bisherigen Änderungen bleiben im Versionsverlauf.
+admin.maintainers.remove_confirm: Entfernen
+admin.maintainers.add: Maintainer hinzufügen
+admin.maintainers.person_hint: Hier stehen alle, die das Portal schon einmal genutzt haben.
+admin.maintainers.choose: Person auswählen …
+admin.maintainers.seen: zuletzt {date}
+admin.maintainers.manual: Oder Subject eingeben
+admin.maintainers.manual_hint: Für Personen, die noch nicht in der Liste stehen. Das Subject steht im Anmeldesystem.
+admin.maintainers.submit: Als Maintainer hinzufügen
 
 connections.title: Meine Verbindungen
 connections.intro: Für einige Systeme braucht das Portal einmal Ihr Passwort, damit Anwendungen dort für Sie lesen können. Das Passwort wird verschlüsselt und nur für diese Sitzung gespeichert.

@@ -25,15 +25,19 @@ def editor(client):
     return client, {"X-CSRF-Token": csrf(client)}
 
 
-def test_docs_need_maintainer_or_admin(client):
+def test_everyone_logged_in_reads_docs_but_only_maintainer_edits(client):
     assert client.get("/_portal/docs").status_code == 302
-    assert login(client, "alexandru").get("/_portal/docs").status_code == 403
+    r = login(client, "alexandru").get("/_portal/docs")
+    assert r.status_code == 200 and '"canEdit": false' in r.text
     footer = client.get("/").text.split('<footer class="site-footer">', 1)[1]
-    assert "/_portal/docs" not in footer
+    assert "/_portal/docs" in footer
+    assert client.get(f"{API}/pages/faq").status_code == 200
+    h = {"X-CSRF-Token": csrf(client)}
+    assert client.put(f"{API}/pages/faq", json={"base_version": 1, "html": "<h1>x</h1>"}, headers=h).status_code == 403
 
 
-@pytest.mark.parametrize("user", ["entwickler", "admin"])
-def test_maintainer_and_admin_read_docs_with_nonce_csp(client, user):
+@pytest.mark.parametrize(("user", "can_edit"), [("entwickler", "true"), ("admin", "false"), ("max", "false")])
+def test_docs_page_with_nonce_csp(client, user, can_edit):
     login(client, user)
     footer = client.get("/").text.split('<footer class="site-footer">', 1)[1].split("</footer>", 1)[0]
     assert re.findall(r'<a class="cta" href="([^"]+)">([^<]+)</a>', footer) == [("/_portal/docs", "Docs")]
@@ -44,7 +48,7 @@ def test_maintainer_and_admin_read_docs_with_nonce_csp(client, user):
     assert "script-src 'nonce-" in csp and "script-src 'self' 'unsafe-inline'" not in csp
     scripts = re.findall(r"<script(?![^>]*application/json)([^>]*)>", r.text)
     assert scripts and all(f'nonce="{nonce}"' in s for s in scripts)
-    assert '"canEdit": true' in r.text
+    assert f'"canEdit": {can_edit}' in r.text
 
 
 def test_seed_has_all_pages_and_changes_page(editor):
@@ -111,7 +115,6 @@ def test_writes_need_csrf_and_editor_role(client):
     client.post("/logout", data={"csrf": csrf(client)})
     login(client, "alexandru")
     assert client.put(f"{API}/pages/faq", json={"base_version": 1, "html": "<h1>x</h1>"}).status_code == 403
-    assert client.get(f"{API}/pages/faq").status_code == 403
 
 
 def test_image_upload_checks_type_and_is_served(editor):
@@ -208,3 +211,68 @@ def test_new_seed_updates_only_pages_nobody_edited(tmp_path, monkeypatch, withou
 
     store = DocStore(tmp_path / "docs")  # nochmal starten: nichts Neues
     assert store.page("a").version == 2 and len(store.changes()) == len(DocStore(tmp_path / "docs").changes())
+
+
+def test_admin_adds_and_removes_maintainer_effective_immediately(client):
+    login(client, "alexandru")
+    client.get("/")  # Besuch: Person erscheint in der Auswahl der Verwaltungsseite
+    client.post("/logout", data={"csrf": csrf(client)})
+    login(client, "entwickler")
+    client.get("/")
+    client.post("/logout", data={"csrf": csrf(client)})
+
+    login(client, "admin")
+    page = client.get("/_portal/admin").text
+    section = page.split('id="maintainers-heading"', 1)[1]
+    assert "Eva Entwicklerin" in section and "Rolle aus der Anmeldung" in section
+    assert '<option value="dev:alexandru">Alexandru Tatar' in section
+    admin_csrf = re.search(r'name="csrf" value="([^"]+)"', page).group(1)
+    assert client.post("/_portal/admin/maintainers", data={"csrf": admin_csrf, "sub": ""}).status_code == 422
+    r = client.post("/_portal/admin/maintainers", data={"csrf": admin_csrf, "sub": "dev:alexandru"})
+    assert r.status_code == 303 and "maintainer_added" in r.headers["location"]
+    assert re.search(r"Freigabe von Admin am \d\d\.\d\d\.\d{4}", client.get("/_portal/admin").text)
+    client.post("/logout", data={"csrf": admin_csrf})
+
+    login(client, "alexandru")  # ohne Rolle maintainer, aber freigegeben
+    assert '"canEdit": true' in client.get("/_portal/docs").text
+    h = {"X-CSRF-Token": csrf(client)}
+    page_json = client.get(f"{API}/pages/faq").json()
+    assert client.put(f"{API}/pages/faq", json={"base_version": page_json["version"], "html": page_json["html"]},
+                      headers=h).status_code == 200
+    client.post("/logout", data={"csrf": h["X-CSRF-Token"]})
+
+    login(client, "admin")
+    admin_csrf = csrf(client)
+    r = client.post("/_portal/admin/maintainers/delete", data={"csrf": admin_csrf, "sub": "dev:alexandru"})
+    assert r.status_code == 303
+    assert client.post("/_portal/admin/maintainers/delete", data={"csrf": admin_csrf, "sub": "dev:alexandru"}).status_code == 404
+    client.post("/logout", data={"csrf": admin_csrf})
+    login(client, "alexandru")
+    assert '"canEdit": false' in client.get("/_portal/docs").text
+
+
+def test_maintainer_routes_need_admin(client):
+    login(client, "entwickler")
+    assert client.post("/_portal/admin/maintainers", data={"csrf": csrf(client), "sub": "x"}).status_code == 403
+
+
+@pytest.mark.parametrize(("value", "expected"), [
+    ("all", ("*",)), ("[maintainer]", ("maintainer",)),
+])
+def test_config_read_roles(env, value, expected):
+    from portal.core.config import load_config
+
+    path = env / "gateway.dev.yml"
+    text = path.read_text(encoding="utf-8").replace("  read_roles: all\n", f"  read_roles: {value}\n")
+    path.write_text(text, encoding="utf-8")
+    assert load_config(path).docs.read_roles == expected
+
+
+def test_config_rejects_unknown_docs_role(env):
+    from portal.core.config import ConfigError, load_config
+
+    path = env / "gateway.dev.yml"
+    path.write_text(path.read_text(encoding="utf-8").replace("edit_roles: [maintainer]", "edit_roles: [chef]"),
+                    encoding="utf-8")
+    with pytest.raises(ConfigError, match="not in role_vocabulary"):
+        load_config(path)
