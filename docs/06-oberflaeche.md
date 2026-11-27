@@ -128,13 +128,21 @@ Ohne `docs.dir` ist die Dokumentation nur lesbar (Ausgangsstand, kein Editor). Z
   und nach Tagen gruppiert, mit Notiz und Filter. Sie ist auch über das Uhr-Symbol im Kopf und die Fußzeile der Docs erreichbar.
   Die Fußzeile nennt die letzte Änderung.
 - Im Versionsverlauf lässt sich jede ältere Version ansehen und als neue Version wiederherstellen.
-- Editor (WYSIWYG, `contenteditable`): Absatzformate, Fett, Kursiv, Code, Links (auch auf andere Docs-Seiten), Listen,
-  Hinweisboxen, Befehls-Blöcke mit Kopier-Knopf, Tabellen mit Zeilen und Spalten bearbeiten, Trennlinie, HTML-Ansicht.
-  Bilder kommen per Knopf, Einfügen aus der Zwischenablage oder Ziehen und Ablegen dazu, mit Fortschritt, Alternativtext,
-  Bildunterschrift und Größe (klein, mittel, volle Breite, zentriert). PDFs werden als Download-Link eingefügt.
-- Veröffentlichen mit optionaler Änderungsnotiz (Strg/⌘+S). Ein Entwurf liegt laufend im `localStorage` des Browsers und wird beim
-  nächsten Öffnen angeboten. Hat inzwischen jemand anderes veröffentlicht, antwortet die Schnittstelle mit 409, und der Editor fragt
-  nach.
+- Editor (WYSIWYG, `contenteditable`), Start mit „Bearbeiten“ oder der Taste `E`. Fokus-Modus: Navigation und
+  Inhaltsverzeichnis verschwinden, oben steht eine Leiste mit Titel, Status („Keine Änderungen“, „Nicht veröffentlicht“,
+  „Entwurf gespeichert“), Wortzahl, „⋯“ (Seiteneinstellungen, HTML bearbeiten, Tastenkürzel, Seite löschen), „Abbrechen“
+  und „Veröffentlichen“. Darunter die Formatleiste mit Absatzformat, Fett, Kursiv, Code, Link, Listen und „Einfügen“.
+- Schreiben wie in Confluence oder Notion: `/` öffnet das Befehlsmenü (Überschriften, Listen, Bild, Tabelle,
+  Hinweisboxen, Befehl, Codeblock, Zitat, Link, PDF, Trennlinie), filterbar und per Tastatur bedienbar. Über markiertem
+  Text erscheint eine kleine Formatleiste. Markdown-Kürzel: `## ` Überschrift 2, `### ` Überschrift 3, `- ` Aufzählung,
+  `1. ` nummerierte Liste, `> ` Zitat, `` ``` `` Codeblock, `---` + Enter Trennlinie. Leere Zeilen zeigen einen Hinweis.
+- Links zeigen beim Anklicken eine Karte mit Adresse, „Bearbeiten“ und „Entfernen“; Tabellen eine Leiste für Zeilen
+  und Spalten; Bilder eine Leiste für Größe, Zentrieren, Beschreibung (Alternativtext, Bildunterschrift) und Entfernen.
+  Bilder kommen per Menü, Einfügen aus der Zwischenablage oder Ziehen und Ablegen dazu, mit Fortschritt. PDFs werden als
+  Download-Link eingefügt. Eine kopierte Adresse über markiertem Text wird zum Link.
+- „Veröffentlichen“ (oder Strg/⌘+S) öffnet einen Dialog für die Änderungsnotiz. Ein Entwurf liegt laufend im
+  `localStorage` des Browsers und wird beim nächsten Öffnen angeboten. Hat inzwischen jemand anderes veröffentlicht,
+  antwortet die Schnittstelle mit 409, und der Editor fragt nach.
 - Neue Seiten legt „Neue Seite“ im Kopf an (Titel, Bereich, Stufe). Löschen nimmt eine Seite aus der Navigation, ihre Versionen
   bleiben erhalten. Die Startseite lässt sich nicht löschen.
 
