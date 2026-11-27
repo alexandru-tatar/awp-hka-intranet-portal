@@ -1,24 +1,15 @@
 """PageRouter: Startseite, Status, Verbindungen und Fehlerseiten (04 §2)."""
 
-from pathlib import Path
 from typing import Final
 
 from fastapi import APIRouter, Request
-from fastapi.responses import FileResponse, HTMLResponse, Response
+from fastapi.responses import HTMLResponse, Response
 from loguru import logger
 
 from portal.web.deps import AdminSession, AppServiceDep, CurrentSession, PortalDep
 from portal.web.errors import render_error
 
 router: Final = APIRouter(tags=["Seiten"])
-
-DOCS_FILE: Final = Path(__file__).resolve().parent.parent / "docs" / "awp-docs.html"
-# Die Doku ist eine eigenständige Seite mit Inline-Skript und -CSS; das Gateway übernimmt diese CSP.
-DOCS_CSP: Final = (
-    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
-    "img-src 'self' data:; font-src 'self' data:; object-src 'none'; base-uri 'self'; "
-    "form-action 'self'; frame-ancestors 'none'"
-)
 
 
 @router.get("/", response_class=HTMLResponse)
@@ -94,15 +85,3 @@ def error(request: Request, status_code: int) -> Response:
     """
     logger.debug("status_code={}", status_code)
     return render_error(request, status_code if 400 <= status_code <= 599 else 404)
-
-
-@router.get("/_portal/docs", response_class=HTMLResponse)
-def docs(session: CurrentSession) -> Response:
-    """AWP-Dokumentation (eigenständige HTML-Seite, Link im Footer).
-
-    :param session: Angemeldete Session
-    :return: Response mit der Dokumentation
-    :rtype: Response
-    """
-    logger.debug("sub={}", session.sub)
-    return FileResponse(DOCS_FILE, media_type="text/html; charset=utf-8", headers={"Content-Security-Policy": DOCS_CSP})

@@ -7,7 +7,7 @@ dev_users_file: users.yml
 schema_path: ../schemas/manifest.schema.json
 kit_dist: ../kit/dist
 session_cookie: portal_sid
-role_vocabulary: [student, employee, professor, platform-admin, pilot-tester]   # = roles.yml + grants.yml (02 §8)
+role_vocabulary: [student, employee, professor, platform-admin, maintainer, pilot-tester]   # = roles.yml + grants.yml (02 §8)
 adapter_scopes: [noten:read, mail:send]                                         # later: x-required-scope from adapter OpenAPI (05)
 # Logging (core/log.py): Konsole immer, Logdatei optional. Level je Logger überschreiben die Mindestlevel.
 logging:
@@ -28,3 +28,12 @@ logging:
 registry:
   owners_file: owners.json
   admin_write: true
+
+# Dokumentation /_portal/docs (docs/06-oberflaeche.md): lesen und bearbeiten mit Rolle maintainer oder platform-admin.
+# Seiten, Versionen und hochgeladene Bilder liegen in docs/ neben dieser Datei (in .gitignore); ein leerer Ordner bekommt
+# beim Start den Ausgangsstand aus src/portal/docs/seed.html. Zurücksetzen: Ordner dev/docs löschen.
+docs:
+  dir: docs
+  read_roles: [maintainer, platform-admin]
+  edit_roles: [maintainer, platform-admin]
+  max_upload_mb: 10

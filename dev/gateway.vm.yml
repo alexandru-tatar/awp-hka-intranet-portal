@@ -9,7 +9,7 @@ kontakt: "dem IT-Servicedesk (Kontakt folgt)"
 manifests_dir: /var/lib/portal/manifests
 schema_path: ../schemas/manifest.schema.json
 kit_dist: ../kit/dist
-role_vocabulary: [student, employee, professor, platform-admin, pilot-tester]
+role_vocabulary: [student, employee, professor, platform-admin, maintainer, pilot-tester]
 adapter_scopes: [noten:read, mail:send, bwsync:read, bwsync:write, bwsync:delete]
 session_cookie: portal_sid
 cookie_secure: true
@@ -57,3 +57,11 @@ logging:
     httpx: WARNING
     httpcore: WARNING
     watchfiles: WARNING
+
+# Dokumentation /_portal/docs (docs/06-oberflaeche.md): lesen und bearbeiten mit Rolle maintainer oder platform-admin.
+# Speicher im beschreibbaren Registry-Volume, damit kein weiteres Volume nötig ist.
+docs:
+  dir: /var/lib/portal/registry/docs
+  read_roles: [maintainer, platform-admin]
+  edit_roles: [maintainer, platform-admin]
+  max_upload_mb: 10

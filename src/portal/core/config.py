@@ -81,6 +81,26 @@ class RegistryConfig:
     admin_write: bool = False
 
 
+#: Rollen, die die Dokumentation ohne Abschnitt ``docs`` lesen und bearbeiten dürfen.
+DOCS_DEFAULT_ROLES = ("maintainer", "platform-admin")
+
+
+@dataclass(frozen=True)
+class DocsConfig:
+    """Dokumentation unter ``/_portal/docs`` (Abschnitt ``docs``).
+
+    :ivar dir: Speicherordner für Seiten, Versionen und hochgeladene Dateien; ohne Wert nur lesend aus dem
+        Ausgangsstand (``portal/docs/seed.html``)
+    :ivar read_roles: Rollen, die die Dokumentation lesen dürfen
+    :ivar edit_roles: Rollen, die Seiten anlegen, bearbeiten, wiederherstellen und löschen dürfen
+    :ivar max_upload_bytes: Größte erlaubte Datei beim Hochladen
+    """
+    dir: Path | None = None
+    read_roles: tuple[str, ...] = DOCS_DEFAULT_ROLES
+    edit_roles: tuple[str, ...] = DOCS_DEFAULT_ROLES
+    max_upload_bytes: int = 10 * 1024 * 1024
+
+
 @dataclass(frozen=True)
 class GatewayConfig:
     issuer: str
@@ -109,6 +129,7 @@ class Config:
     :ivar grants_file: Zusätzliche Rollen je Subject
     :ivar apps: Adressen der App-Container für den Prober, ``None`` ohne Abschnitt
     :ivar registry: Nachladen der Manifeste, Prober und Besitzerdatei
+    :ivar docs: Dokumentation: Speicherordner und Rollen
     """
     env: str
     kontakt: str
@@ -127,6 +148,7 @@ class Config:
     apps: AppsConfig | None = None
     registry: RegistryConfig = field(default_factory=RegistryConfig)
     gateway: GatewayConfig | None = None
+    docs: DocsConfig = field(default_factory=DocsConfig)
 
     @property
     def dev(self) -> bool:
@@ -142,8 +164,9 @@ _KEYS = {
     "env", "kontakt", "manifests_dir", "schema_path", "kit_dist", "role_vocabulary",
     "adapter_scopes", "state_file", "dev_users_file", "session_cookie",
     "cookie_secure", "auth_mode", "logging", "grants_file",
-    "apps", "registry", "gateway",
+    "apps", "registry", "gateway", "docs",
 }
+_DOCS_KEYS = {"dir", "read_roles", "edit_roles", "max_upload_mb"}
 _REGISTRY_KEYS = {"refresh_seconds", "probe", "owners_file", "status_file", "admin_write"}
 _APPS_KEYS = {"upstream", "connect_timeout_seconds", "read_timeout_seconds", "max_body_bytes"}
 
@@ -196,6 +219,7 @@ def load_config(path: Path) -> Config:
         apps=_load_apps(path, raw.get("apps")),
         registry=_load_registry(path, base, raw.get("registry")),
         gateway=GatewayConfig(**raw["gateway"]) if raw.get("gateway") else None,
+        docs=_load_docs(path, base, raw.get("docs"), tuple(raw["role_vocabulary"])),
     )
     if cfg.registry.probe:
         if cfg.apps is None:
@@ -329,4 +353,42 @@ def _load_registry(path: Path, base: Path, raw: dict | None) -> RegistryConfig:
         owners_file=(base / raw["owners_file"]).resolve() if raw.get("owners_file") else None,
         status_file=(base / raw["status_file"]).resolve() if raw.get("status_file") else None,
         admin_write=bool(raw.get("admin_write", False)),
+    )
+
+
+def _load_docs(path: Path, base: Path, raw: dict | None, vocabulary: tuple[str, ...]) -> DocsConfig:
+    """Den Abschnitt ``docs`` lesen und prüfen.
+
+    :param path: Pfad der Konfigurationsdatei, für Fehlermeldungen
+    :param base: Ordner der Konfigurationsdatei, Basis für einen relativen ``dir``
+    :param raw: Rohwerte des Abschnitts, ``None`` ohne Abschnitt
+    :param vocabulary: Erlaubte Rollen (``role_vocabulary``)
+    :return: Die Einstellungen, ohne Abschnitt die Voreinstellung (nur lesend)
+    :rtype: DocsConfig
+    :raises ConfigError: Bei unbekannten Schlüsseln, Rollen außerhalb von ``role_vocabulary`` oder ungültiger Größe
+    """
+    if raw is None:
+        return DocsConfig()
+    if not isinstance(raw, dict):
+        raise ConfigError(f"{path}: docs must be a mapping")
+    unknown = set(raw) - _DOCS_KEYS
+    if unknown:
+        raise ConfigError(f"{path}: unknown docs key(s) {', '.join(sorted(unknown))}")
+    roles = {}
+    for key in ("read_roles", "edit_roles"):
+        value = raw.get(key, list(DOCS_DEFAULT_ROLES))
+        if not isinstance(value, list) or not value or not all(isinstance(r, str) for r in value):
+            raise ConfigError(f"{path}: docs {key} must be a non-empty list of roles")
+        outside = set(value) - set(vocabulary)
+        if outside:
+            raise ConfigError(f"{path}: docs {key} not in role_vocabulary: {', '.join(sorted(outside))}")
+        roles[key] = tuple(value)
+    size = float(raw.get("max_upload_mb", 10))
+    if not 0 < size <= 100:
+        raise ConfigError(f"{path}: docs max_upload_mb must be between 0 and 100")
+    return DocsConfig(
+        dir=(base / raw["dir"]).resolve() if raw.get("dir") else None,
+        read_roles=roles["read_roles"],
+        edit_roles=tuple(dict.fromkeys(roles["edit_roles"])),
+        max_upload_bytes=int(size * 1024 * 1024),
     )

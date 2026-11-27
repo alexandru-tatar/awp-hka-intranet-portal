@@ -1,0 +1,1444 @@
+<!-- Ausgangsstand der Dokumentation: wird beim ersten Start in den Docs-Speicher übernommen (portal.docs.store). -->
+<article class="page" data-page="start" data-title="Willkommen" data-group="Erste Schritte" data-landing="1">
+  <section class="lp-hero">
+    <div>
+      <p class="eyebrow">Anwendungsplattform (AWP) · Dokumentation v0.9</p>
+      <h1>Eigene Mini&#8209;Apps für die Hochschule – <span>ohne selbst zu programmieren.</span></h1>
+      <p class="lp-lede">Sie beschreiben, was die App tun soll. Die KI schreibt den Code. Die Plattform kümmert sich um Anmeldung, Design, Prüfung und Bereitstellung im Hochschulportal.</p>
+      <button class="lp-search" type="button" data-open-search><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><span>Suchen, z. B. „Dev Container“</span><kbd class="dx-kbd">Strg K</kbd></button>
+      <p class="lp-quick"><span>Häufig gesucht</span><a class="cta" href="#schnellstart">Schnellstart</a><a class="cta" href="#dev-container">Dev Container</a><a class="cta" href="#golden-master">Golden Master</a><a class="cta" href="#t10">Freigabe</a></p>
+    </div>
+    <div class="lp-hero-art"><svg class="diag" viewBox="0 0 520 420" role="img" aria-label="Aus der Vorlage entsteht per Prompt eine Kachel im Portal">
+        <defs>
+          <marker id="hA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="d-head-acc"/></marker>
+        </defs>
+        <!-- template stack -->
+        <rect x="20" y="40" width="190" height="230" class="d-soft"/>
+        <rect x="34" y="54" width="190" height="230" class="d-soft"/>
+        <rect x="48" y="68" width="190" height="230" class="d-acc-line"/>
+        <text x="66" y="100" class="d-lab">Golden Master</text>
+        <text x="66" y="126" class="d-t-c">Vorlage</text>
+        <rect x="66" y="144" width="154" height="24" class="d-soft"/><text x="76" y="161" class="d-mono">manifest.json</text>
+        <rect x="66" y="174" width="154" height="24" class="d-soft"/><text x="76" y="191" class="d-mono">.agents/skills/</text>
+        <rect x="66" y="204" width="154" height="24" class="d-soft"/><text x="76" y="221" class="d-mono">.devcontainer/</text>
+        <rect x="66" y="234" width="154" height="24" class="d-soft"/><text x="76" y="251" class="d-mono">platform_sdk/</text>
+        <!-- arrow -->
+        <path d="M244 180 C300 180 300 120 340 120" class="d-arrow-acc d-flow"/>
+        <path d="M244 190 C300 190 300 250 340 250" class="d-arrow-acc d-flow"/>
+        <!-- portal -->
+        <rect x="300" y="30" width="200" height="370" class="d-box"/>
+        <rect x="300" y="30" width="200" height="40" class="d-acc"/>
+        <rect x="300" y="54" width="200" height="16" class="d-acc"/>
+        <text x="318" y="56" class="d-w">Portal</text>
+        <rect x="318" y="88" width="78" height="64" class="d-acc-line"/><rect x="330" y="100" width="18" height="18" class="d-acc"/><text x="330" y="140" class="d-s">Räume</text>
+        <rect x="404" y="88" width="78" height="64" class="d-soft"/><rect x="416" y="100" width="18" height="18" class="d-box"/><text x="416" y="140" class="d-s">Dateien</text>
+        <rect x="318" y="162" width="78" height="64" class="d-soft"/><rect x="330" y="174" width="18" height="18" class="d-box"/><text x="330" y="214" class="d-s">Reisen</text>
+        <rect x="404" y="162" width="78" height="64" class="d-acc-line"/><rect x="416" y="174" width="18" height="18" class="d-acc"/><text x="416" y="214" class="d-s">Neu</text>
+        <rect x="318" y="236" width="164" height="146" class="d-soft"/>
+        <text x="332" y="262" class="d-lab">Heute frei</text>
+        <rect x="332" y="274" width="136" height="22" class="d-box"/><rect x="416" y="278" width="44" height="14" class="d-acc"/>
+        <rect x="332" y="302" width="136" height="22" class="d-box"/><rect x="416" y="306" width="44" height="14" class="d-ok"/>
+        <rect x="332" y="330" width="136" height="22" class="d-box"/><rect x="416" y="334" width="44" height="14" class="d-acc"/>
+        <!-- KI bubble -->
+        <rect x="40" y="320" width="220" height="70" class="d-focus"/>
+        <text x="58" y="348" class="d-t">„Baue eine App, mit der …“</text>
+        <text x="58" y="370" class="d-s">Prompt an Claude Code</text>
+      </svg></div>
+  </section>
+  <div class="lp-body">
+    <section class="lp-sec">
+      <div class="lp-sec-head"><h2>Einstieg</h2><p>Wählen Sie, wie Sie anfangen möchten.</p></div>
+      <div class="lp-cards">
+        <a class="lp-card big" href="#schnellstart"><svg class="i" aria-hidden="true"><use href="#i-start"/></svg><b>Schnellstart in 15 Minuten</b><p>Vom leeren Rechner zur ersten laufenden App – die kürzeste Route mit allen Befehlen.</p><span class="cta">Jetzt starten</span></a>
+        <a class="lp-card" href="#t-ziel"><svg class="i" aria-hidden="true"><use href="#i-course"/></svg><b>Anleitung: Eigene App</b><p>Von der Idee bis zur Freigabe – Schritt für Schritt, mit Checklisten.</p><span class="cta">Zur Anleitung</span></a>
+        <a class="lp-card" href="#ueberblick"><svg class="i" aria-hidden="true"><use href="#i-overview"/></svg><b>So funktioniert’s</b><p>Das große Bild in drei Minuten.</p><span class="cta">Lesen</span></a>
+        <a class="lp-card" href="#umgebungen"><svg class="i" aria-hidden="true"><use href="#i-concept"/></svg><b>Konzepte</b><p>Golden Master, Dev Container, Gateway, Adapter – verständlich erklärt.</p><span class="cta">Zu den Konzepten</span></a>
+        <a class="lp-card" href="#befehle"><svg class="i" aria-hidden="true"><use href="#i-terminal"/></svg><b>Befehle</b><p>Alle <code>make</code>-Befehle mit der Angabe, wo sie laufen.</p><span class="cta">Zur Referenz</span></a>
+        <a class="lp-card" href="#probleme"><svg class="i" aria-hidden="true"><use href="#i-wrench"/></svg><b>Fehlerbehebung</b><p>Die häufigsten Probleme und ihre Lösung.</p><span class="cta">Zur Hilfe</span></a>
+        <a class="lp-card" href="#glossar"><svg class="i" aria-hidden="true"><use href="#i-index"/></svg><b>Begriffe A–Z</b><p>Alle Fachbegriffe in einfacher Sprache.</p><span class="cta">Zum Glossar</span></a>
+      </div>
+    </section>
+
+    <section class="lp-sec">
+      <div class="lp-sec-head"><h2>Ihr Weg zur ersten App</h2><p>Jede Etappe ist eine kurze Seite.</p></div>
+      <ol class="lp-path">
+        <li><a href="#voraussetzungen"><b>Einrichten</b><small>VS Code, Git, Docker</small></a></li>
+        <li><a href="#t1"><b>Idee klären</b><small>Wer, was, welche Daten</small></a></li>
+        <li><a href="#t5"><b>Mit der KI bauen</b><small>Beschreiben und verbessern</small></a></li>
+        <li><a href="#t7"><b>Prüfen</b><small>Testen, Check, Review</small></a></li>
+        <li><a href="#t10"><b>Freigabe</b><small>Entscheidung über das Portal</small></a></li>
+      </ol>
+    </section>
+
+    <section class="lp-sec">
+      <div class="lp-sec-head"><h2>Neuigkeiten</h2><a class="cta" href="#roadmap">Zur Roadmap</a></div>
+      <div class="lp-news">
+        <div><time>23.11.2026</time><span class="tag n">Neu</span><span>Neue Anleitung „Eigene App“ mit Checklisten und Freigabe-Antrag, Befehle für Windows, macOS und Linux, Wahl zwischen Python und JavaScript, ausführliche Seite zu KI &amp; Skills und Fehlercodes.</span></div>
+        <div><time>20.11.2026</time><span class="tag n">Neu</span><span>Dokumentation 0.9 veröffentlicht – mit Anleitung, Suche und Begriffsverzeichnis.</span></div>
+        <div><time>Nächster Sprint</time><span class="tag p">Geplant</span><span>Projekt aus der Vorlage per Knopfdruck, weniger Passwortabfragen beim Deploy, Zeitzone Europe/Berlin.</span></div>
+        <div><time>Nächster Sprint</time><span class="tag p">Geplant</span><span>Test-Adapter mit pseudonymisierten Daten für realistische Tests.</span></div>
+      </div>
+    </section>
+  </div>
+</article>
+
+<article class="page" data-page="schnellstart" data-title="Schnellstart in 15 Minuten" data-group="Erste Schritte" data-level="Einsteiger">
+  <h1>Schnellstart in 15 Minuten</h1>
+  <p class="lede">Die kürzeste Route zur ersten laufenden App. Für Details zu jedem Schritt gibt es die <a href="#t-ziel">Anleitung</a>.</p>
+  <div class="tldr"><h5>Kurz gesagt</h5><ul>
+    <li>Einmal installieren: VS Code, Git, Docker, Erweiterung „Dev Containers“, Claude Code.</li>
+    <li>Repo aus der Vorlage klonen → „Reopen in Container“ → KI beschreiben lassen → <code>make dev</code>.</li>
+  </ul></div>
+  <h2>Voraussetzungen</h2>
+  <p>Eine klare Idee – siehe <a href="#t1">Idee klären</a>.</p>
+  <p>Sie haben VS Code, Git und Docker installiert und Docker läuft. Falls nicht: <a href="#voraussetzungen">Einrichtung</a>.</p>
+  <h2>Vorlage wählen</h2>
+  <div class="lg-pick" role="group" aria-label="Programmiersprache wählen"><div class="lg-opt" data-lang-opt="py"><button type="button" data-pick-lang="py"><span class="lg-ic"><svg class="i" aria-hidden="true"><use href="#i-lang-py"/></svg></span><b>Python <span class="lg-badge">Standard</span></b><small>FastAPI, Jinja2, pytest<span class="lg-state"></span></small></button><a class="cta" href="https://github.com/alexandru-tatar/awp-hka-gold-python" target="_blank" rel="noopener">awp-hka-gold-python auf GitHub</a></div><div class="lg-opt" data-lang-opt="js"><button type="button" data-pick-lang="js"><span class="lg-ic"><svg class="i" aria-hidden="true"><use href="#i-lang-js"/></svg></span><b>JavaScript</b><small>Node.js, Express, Jest<span class="lg-state"></span></small></button><a class="cta" href="https://github.com/alexandru-tatar/awp-hka-gold-js" target="_blank" rel="noopener">awp-hka-gold-js auf GitHub</a></div></div>
+  <p>Zum schnellen Ausprobieren klonen Sie die gewählte Vorlage direkt. Für eine echte App legen Sie vorher ein eigenes Repository aus der Vorlage an (<b>Use this template</b>) und klonen dieses – siehe <a href="#t2">Projekt anlegen</a>.</p>
+  <h2>Projekt holen</h2>
+  <div class="tabs os" data-sync="os"><div class="tabs-bar" role="tablist" aria-label="Betriebssystem"><button type="button" role="tab" data-t="win" class="on"><svg class="i i-os" aria-hidden="true"><use href="#i-os-win"/></svg>Windows</button><button type="button" role="tab" data-t="mac"><svg class="i i-os" aria-hidden="true"><use href="#i-os-mac"/></svg>macOS</button><button type="button" role="tab" data-t="linux"><svg class="i i-os" aria-hidden="true"><use href="#i-os-linux"/></svg>Linux (Ubuntu)</button></div><div class="tab-p on" data-t="win" role="tabpanel"><p><b>PowerShell</b> öffnen: Startmenü, „PowerShell“ eintippen, Enter.</p><div class="lang-b py"><div class="code"><button class="copy" data-copy="cd $HOME\Projects&#10;git clone https://github.com/alexandru-tatar/awp-hka-gold-python.git ihr-kurzname&#10;cd ihr-kurzname&#10;code .">Kopieren</button><span class="p">PS&gt; </span>cd $HOME\Projects<br><span class="p">PS&gt; </span>git clone https://github.com/alexandru-tatar/awp-hka-gold-python.git ihr-kurzname<br><span class="p">PS&gt; </span>cd ihr-kurzname<br><span class="p">PS&gt; </span>code . <span class="c"># öffnet VS Code</span></div></div><div class="lang-b js"><div class="code"><button class="copy" data-copy="cd $HOME\Projects&#10;git clone https://github.com/alexandru-tatar/awp-hka-gold-js.git ihr-kurzname&#10;cd ihr-kurzname&#10;code .">Kopieren</button><span class="p">PS&gt; </span>cd $HOME\Projects<br><span class="p">PS&gt; </span>git clone https://github.com/alexandru-tatar/awp-hka-gold-js.git ihr-kurzname<br><span class="p">PS&gt; </span>cd ihr-kurzname<br><span class="p">PS&gt; </span>code . <span class="c"># öffnet VS Code</span></div></div></div><div class="tab-p" data-t="mac" role="tabpanel"><p><b>Terminal</b> öffnen: <kbd>⌘</kbd>+<kbd>Leertaste</kbd>, „Terminal“ eintippen, Enter.</p><div class="lang-b py"><div class="code"><button class="copy" data-copy="cd ~/Projects&#10;git clone https://github.com/alexandru-tatar/awp-hka-gold-python.git ihr-kurzname&#10;cd ihr-kurzname&#10;code .">Kopieren</button><span class="p">$ </span>cd ~/Projects<br><span class="p">$ </span>git clone https://github.com/alexandru-tatar/awp-hka-gold-python.git ihr-kurzname<br><span class="p">$ </span>cd ihr-kurzname<br><span class="p">$ </span>code . <span class="c"># öffnet VS Code</span></div></div><div class="lang-b js"><div class="code"><button class="copy" data-copy="cd ~/Projects&#10;git clone https://github.com/alexandru-tatar/awp-hka-gold-js.git ihr-kurzname&#10;cd ihr-kurzname&#10;code .">Kopieren</button><span class="p">$ </span>cd ~/Projects<br><span class="p">$ </span>git clone https://github.com/alexandru-tatar/awp-hka-gold-js.git ihr-kurzname<br><span class="p">$ </span>cd ihr-kurzname<br><span class="p">$ </span>code . <span class="c"># öffnet VS Code</span></div></div></div><div class="tab-p" data-t="linux" role="tabpanel"><p><b>Terminal</b> öffnen: <kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>T</kbd>.</p><div class="lang-b py"><div class="code"><button class="copy" data-copy="cd ~/Projects&#10;git clone https://github.com/alexandru-tatar/awp-hka-gold-python.git ihr-kurzname&#10;cd ihr-kurzname&#10;code .">Kopieren</button><span class="p">$ </span>cd ~/Projects<br><span class="p">$ </span>git clone https://github.com/alexandru-tatar/awp-hka-gold-python.git ihr-kurzname<br><span class="p">$ </span>cd ihr-kurzname<br><span class="p">$ </span>code . <span class="c"># öffnet VS Code</span></div></div><div class="lang-b js"><div class="code"><button class="copy" data-copy="cd ~/Projects&#10;git clone https://github.com/alexandru-tatar/awp-hka-gold-js.git ihr-kurzname&#10;cd ihr-kurzname&#10;code .">Kopieren</button><span class="p">$ </span>cd ~/Projects<br><span class="p">$ </span>git clone https://github.com/alexandru-tatar/awp-hka-gold-js.git ihr-kurzname<br><span class="p">$ </span>cd ihr-kurzname<br><span class="p">$ </span>code . <span class="c"># öffnet VS Code</span></div></div></div></div>
+  <h2>Im Dev Container öffnen</h2>
+  <p><span class="os-v win"><svg class="i" aria-hidden="true"><use href="#i-os-win"/></svg><kbd>Strg</kbd>+<kbd>Umschalt</kbd>+<kbd>P</kbd></span><span class="os-v linux"><svg class="i" aria-hidden="true"><use href="#i-os-linux"/></svg><kbd>Strg</kbd>+<kbd>Umschalt</kbd>+<kbd>P</kbd></span><span class="os-v mac"><svg class="i" aria-hidden="true"><use href="#i-os-mac"/></svg><kbd>⌘</kbd>+<kbd>Umschalt</kbd>+<kbd>P</kbd></span> → <b>Dev Containers: Reopen in Container</b>. Warten, bis unten links „Dev Container“ steht.</p>
+  <h2>Steckbrief setzen</h2>
+  <p>In <code>manifest.json</code> den <code>slug</code> von <code>meine-app</code> auf <code>ihr-kurzname</code> ändern, Namen und Rollen eintragen.</p>
+  <h2>App beschreiben</h2>
+  <p>Claude Code öffnen (im Container neu anmelden) und beschreiben, was die App tun soll.</p>
+  <h2>Starten und ansehen</h2>
+  <div class="code"><button class="copy" data-copy="make dev">Kopieren</button><span class="p">$ </span>make dev <span class="c"># → http://localhost:8080</span></div>
+  <h2>Prüfen</h2>
+  <div class="code"><button class="copy" data-copy="make check">Kopieren</button><span class="p">$ </span>make check</div>
+  <div class="callout c-tip"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></div><div><h5>Geschafft</h5><p>Ihre App läuft lokal. Weiter geht es mit <a href="#t8">Sichern</a>, <a href="#t9">Review</a> und <a href="#t10">Freigabe beantragen</a>. Ins Portal bringt die App nur die Freigabe-Verantwortliche.</p></div></div>
+</article>
+
+<article class="page" data-page="ueberblick" data-title="So funktioniert die Plattform" data-group="Erste Schritte" data-level="Einsteiger">
+  <h1>So funktioniert die Plattform</h1>
+  <p class="lede">In der Hochschule gibt es viele kleine Aufgaben, die man mit einer kleinen Web-App lösen kann. Mit der Anwendungsplattform (AWP) bauen Fachabteilungen solche Mini-Apps selbst – mit Hilfe einer KI.</p>
+  <div class="tldr"><h5>Kurz gesagt</h5><ul>
+    <li>Eine <b>Mini-App</b> löst genau einen Anwendungsfall und erscheint als Kachel im Portal.</li>
+    <li>Jede App startet aus derselben <b>Vorlage</b>. Darum sehen alle gleich aus und sind gleich sicher.</li>
+    <li>Die KI schreibt Code, <b>Sie</b> prüfen und geben frei.</li>
+  </ul></div>
+  <h2>Beispiele</h2>
+  <ul class="l">
+    <li>Räume für Vormittag oder Nachmittag mit einem Klick reservieren.</li>
+    <li>Dienstreiseantrag in einer einfachen Oberfläche – die Belege liegen revisionssicher in ELO.</li>
+    <li>Dateien in bwSync&amp;Share ansehen, hochladen, umbenennen, verschieben.</li>
+  </ul>
+  <h2>Der Weg in sieben Etappen</h2>
+  <figure class="fig"><div class="fig-body">
+    <nav class="flow" aria-label="Ablauf">
+      <a href="#t2"><span class="dot" aria-hidden="true"></span><span><b>Vorlage holen</b><small>Eigenes Repo aus dem Golden Master</small><span class="where">GitHub</span></span></a>
+      <a href="#t3"><span class="dot" aria-hidden="true"></span><span><b>Arbeitsplatz öffnen</b><small>VS Code + Dev Container</small><span class="where">Ihr Rechner</span></span></a>
+      <a href="#t5"><span class="dot" aria-hidden="true"></span><span><b>App beschreiben</b><small>Prompt an Claude Code</small><span class="where">Container</span></span></a>
+      <a href="#t6"><span class="dot" aria-hidden="true"></span><span><b>Ausprobieren</b><small><code>make dev</code> · localhost</small><span class="where">Ihr Rechner</span></span></a>
+      <a href="#t7"><span class="dot" aria-hidden="true"></span><span><b>Prüfen</b><small><code>make check</code></small><span class="where">Container</span></span></a>
+      <a href="#t9"><span class="dot" aria-hidden="true"></span><span><b>Sichern &amp; Review</b><small>Commit · Pull Request · Review</small><span class="where">GitHub</span></span></a>
+      <a href="#t10"><span class="dot" aria-hidden="true"></span><span><b>Freigabe</b><small>Die Freigabe-Verantwortliche stellt bereit und entscheidet</small><span class="where">Freigabe</span></span></a>
+    </nav>
+  </div><figcaption>Der Gesamtablauf. Klicken Sie auf eine Etappe, um direkt zur Anleitung zu springen.</figcaption></figure>
+  <h2>Wer macht was?</h2>
+  <p>Am besten klappt es <b>im Tandem</b>: Eine Person kennt den fachlichen Ablauf sehr gut (z. B. wo in ELO welche Akte liegt). Eine zweite Person hat etwas technisches Verständnis (Git, Docker). Mehr unter <a href="#support">Rollen &amp; Support</a>.</p>
+  <div class="callout c-info"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-info"/></svg></div><div><h5>Nicht gedacht für</h5><p>Große Anwendungen mit vielen Teilen. Dafür gibt es den klassischen Weg über die IT.</p></div></div>
+</article>
+
+<!-- ======================================================== -->
+<!-- KONZEPTE                                                  -->
+<!-- ======================================================== -->
+<article class="page" data-page="umgebungen" data-title="Die drei Umgebungen" data-group="Konzepte">
+  <h1>Die drei Umgebungen</h1>
+  <p class="lede">Eine Umgebung ist ein Ort, an dem eine App läuft. Es gibt drei – jede mit eigenem Zweck und eigenen Daten.</p>
+  <div class="tldr"><h5>Kurz gesagt</h5><ul><li><b>Lokal</b> = ausprobieren. <b>Test-VM</b> = im echten Portal testen. <b>Betrieb</b> = für alle.</li><li>Lokal und auf der Test-VM nur Testdaten.</li></ul></div>
+  <h2>Überblick</h2>
+  <div class="envs">
+    <div class="card top"><span class="k">Lokal · Entwicklung</span><h4>Ihr Rechner</h4><p>Bauen und sofort ausprobieren – im Dev Container, mit Test-Anmeldung.</p><dl><dt>Daten</dt><dd><span class="pill no">nur Testdaten</span></dd><dt>Adresse</dt><dd><code>localhost:8080</code></dd></dl></div>
+    <div class="env-arrow" aria-hidden="true"><svg class="i" aria-hidden="true"><use href="#i-chevron"/></svg></div>
+    <div class="card top"><span class="k">Test · Test-VM</span><h4>Hochschulnetz</h4><p>Im echten Portal mit Testkonten prüfen. Bereitgestellt durch die Freigabe-Verantwortliche. Kein Internet.</p><dl><dt>Daten</dt><dd><span class="pill no">Test / pseudonym.</span></dd><dt>Zugang</dt><dd>Netz / VPN</dd></dl></div>
+    <div class="env-arrow" aria-hidden="true"><svg class="i" aria-hidden="true"><use href="#i-chevron"/></svg></div>
+    <div class="card top"><span class="k">Betrieb · Live</span><h4>Rechenzentrum</h4><p>Für alle Berechtigten. Nur nach Entscheidung der Freigabe-Verantwortlichen.</p><dl><dt>Daten</dt><dd><span class="pill ok">echte Daten</span></dd><dt>Status</dt><dd>wird festgelegt</dd></dl></div>
+  </div>
+  <h2>Was ist eine VM?</h2>
+  <p>Eine <b>VM</b> (virtuelle Maschine) ist ein Rechner, der nur als Software auf einem echten Server läuft. Bei uns ist die <b>Test-VM</b> die Testumgebung auf einem Knoten im Hochschulnetz. Dort laufen Gateway, Portal und Ihre App genau wie später im Betrieb – aber nur mit Testdaten und ohne Internetzugang.</p>
+  <div class="callout c-info"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-info"/></svg></div><div><h5>Hinweis</h5><p>Diese Dokumentation behandelt Lokal und Test. Der Weg in den Betrieb wird gerade festgelegt.</p></div></div>
+</article>
+
+<article class="page" data-page="architektur" data-title="Architektur" data-group="Konzepte">
+  <h1>Architektur</h1>
+  <p class="lede">Wenn jemand eine Mini-App öffnet, arbeiten im Hintergrund mehrere Bausteine zusammen. So hängen sie zusammen.</p>
+  <div class="tldr"><h5>Kurz gesagt</h5><ul><li>Das <b>Gateway</b> lässt nur angemeldete Personen durch.</li><li>Die App spricht nie direkt mit Fachsystemen – nur mit dem <b>Adapter</b>.</li></ul></div>
+  <h2>Das Bild</h2>
+  <figure class="fig"><div class="fig-body">
+    <svg class="diag" viewBox="0 0 900 400" role="img" aria-labelledby="archT">
+      <title id="archT">Architektur: Browser, Gateway mit Keycloak und Redis, Portal, Mini-Apps, Adapter und Fachsysteme</title>
+      <defs>
+        <marker id="h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="d-head"/></marker>
+        <marker id="ha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="d-head-acc"/></marker>
+      </defs>
+      <rect x="160" y="22" width="565" height="356" class="d-zone-fill"/>
+      <text x="180" y="48" class="d-lab">Test-VM · Hochschulnetz · ohne Internet</text>
+      <!-- Browser -->
+      <rect x="14" y="158" width="118" height="76" class="d-box"/>
+      <text x="32" y="190" class="d-t">Browser</text><text x="32" y="210" class="d-s">Nutzer:in</text>
+      <!-- Keycloak / Gateway / Redis -->
+      <rect x="190" y="70" width="140" height="58" class="d-box"/><text x="206" y="96" class="d-t">Keycloak</text><text x="206" y="115" class="d-s">Anmeldung</text>
+      <rect x="190" y="160" width="140" height="74" class="d-acc"/><text x="206" y="192" class="d-w">Gateway</text><text x="206" y="212" class="d-ws">Security · „Pförtner“</text>
+      <rect x="190" y="268" width="140" height="58" class="d-box"/><text x="206" y="294" class="d-t">Redis</text><text x="206" y="313" class="d-s">Sitzungen</text>
+      <!-- Portal / Apps -->
+      <rect x="380" y="70" width="150" height="66" class="d-box"/><text x="396" y="98" class="d-t">Portal</text><text x="396" y="118" class="d-s">Kacheln &amp; Rollen</text>
+      <rect x="392" y="186" width="150" height="72" class="d-soft"/>
+      <rect x="386" y="180" width="150" height="72" class="d-soft"/>
+      <rect x="380" y="174" width="150" height="72" class="d-acc-line"/><text x="396" y="204" class="d-t">Mini-Apps</text><text x="396" y="224" class="d-s">je 1 Container</text>
+      <!-- Adapter -->
+      <rect x="575" y="174" width="130" height="72" class="d-focus"/><text x="591" y="204" class="d-t">Adapter</text><text x="591" y="224" class="d-s">„Übersetzer“</text>
+      <!-- Fachsysteme -->
+      <text x="760" y="56" class="d-lab">Fachsysteme</text>
+      <rect x="760" y="70" width="126" height="56" class="d-box"/><text x="776" y="103" class="d-t">ELO</text>
+      <rect x="760" y="182" width="126" height="56" class="d-box"/><text x="776" y="208" class="d-t">bwSync&amp;</text><text x="776" y="226" class="d-t">Share</text>
+      <rect x="760" y="294" width="126" height="56" class="d-box"/><text x="776" y="320" class="d-t">Raum-</text><text x="776" y="338" class="d-t">verwaltung</text>
+      <!-- arrows -->
+      <path d="M132 196 H186" class="d-arrow-acc" marker-end="url(#ha)"/>
+      <path d="M260 158 V132" class="d-arrow" marker-end="url(#h)" marker-start="url(#h)"/>
+      <path d="M260 236 V264" class="d-arrow" marker-end="url(#h)" marker-start="url(#h)"/>
+      <path d="M330 180 C356 180 352 104 376 104" class="d-arrow-acc" marker-end="url(#ha)"/>
+      <path d="M330 210 H376" class="d-arrow-acc" marker-end="url(#ha)"/>
+      <path d="M455 170 V140" class="d-arrow-dash" marker-end="url(#h)"/>
+      <path d="M530 210 H571" class="d-arrow-acc" marker-end="url(#ha)"/>
+      <path d="M705 200 C735 200 730 98 756 98" class="d-arrow" marker-end="url(#h)"/>
+      <path d="M705 210 H756" class="d-arrow" marker-end="url(#h)"/>
+      <path d="M705 220 C735 220 730 322 756 322" class="d-arrow" marker-end="url(#h)"/>
+      <text x="575" y="268" class="d-s">Zugangsdaten</text>
+      <text x="575" y="284" class="d-s">verschlüsselt (SQLite)</text>
+    </svg>
+  </div><figcaption>Architektur der Test-VM. Den Weg einer einzelnen Anfrage durch diese Bausteine erklärt <a href="#hg-anfrage">Was bei einer Anfrage passiert</a>.</figcaption></figure>
+  <h2>Die Bausteine</h2>
+  <div class="tbl-wrap"><table><thead><tr><th>Baustein</th><th>Aufgabe in einfachen Worten</th></tr></thead><tbody>
+    <tr><td>Security-Gateway</td><td>Der „Pförtner“. Jede Anfrage geht zuerst hierhin. Nur angemeldete Personen kommen durch.</td></tr>
+    <tr><td>Keycloak</td><td>Das Anmeldesystem. Sagt dem Gateway, wer Sie sind und welche Rollen Sie haben.</td></tr>
+    <tr><td>Redis</td><td>Schneller Zwischenspeicher für Ihre Sitzung.</td></tr>
+    <tr><td>Portal</td><td>Startseite mit Kacheln – nur Apps passend zu Ihrer Rolle.</td></tr>
+    <tr><td>Mini-App</td><td>Ihre App in einem eigenen Container. Meldet sich per Manifest an.</td></tr>
+    <tr><td>Adapter</td><td>Der „Übersetzer“ zu den Fachsystemen. Nur er kennt deren Technik und Zugänge.</td></tr>
+    <tr><td>Fachsysteme</td><td>Bestehende Systeme: ELO, bwSync&amp;Share, Raumverwaltung …</td></tr>
+  </tbody></table></div>
+  <h2>Warum ein Adapter?</h2>
+  <p>Die KI muss nicht wissen, wie Fachsysteme intern funktionieren. Und die Zugangsdaten liegen an <b>einer</b> geschützten Stelle – nicht in jeder App.</p>
+  <p>Den Weg einer Anfrage Schritt für Schritt erklärt <a href="#hg-anfrage">Was bei einer Anfrage passiert</a>.</p>
+</article>
+
+<article class="page" data-page="golden-master" data-title="Golden Master (Vorlage)" data-group="Konzepte">
+  <h1>Golden Master</h1>
+  <p class="lede">Ein Golden Master ist die fertige <b>Vorlage</b> (Template) für jede neue App – wie eine Briefvorlage in Word: Briefkopf, Schrift und Aufbau sind schon da, Sie schreiben nur den Inhalt.</p>
+  <div class="tldr"><h5>Kurz gesagt</h5><ul><li>Jede App beginnt als Kopie einer Vorlage.</li><li>Es gibt zwei gleichwertige Vorlagen: <b>Python</b> (Standard) und <b>JavaScript</b>.</li><li>Sie ändern Manifest und App-Code – den Rest pflegt das Plattform-Team.</li></ul></div>
+  <h2>Von der Vorlage zur App</h2>
+  <figure class="fig"><div class="fig-body">
+    <svg class="diag" viewBox="0 0 900 330" role="img" aria-labelledby="gmT">
+      <title id="gmT">Aus dem Golden Master entstehen mehrere Apps mit gleichem Grundgerüst</title>
+      <defs><marker id="h2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="d-head-acc"/></marker></defs>
+      <rect x="14" y="20" width="330" height="290" class="d-acc-line"/>
+      <rect x="14" y="20" width="330" height="52" class="d-acc"/><rect x="14" y="56" width="330" height="16" class="d-acc"/>
+      <text x="34" y="52" class="d-w">Golden Master · Vorlage</text>
+      <g>
+        <rect x="34" y="88" width="290" height="34" class="d-soft"/><text x="48" y="110" class="d-mono">manifest.json</text><use href="#i-edit" x="200" y="99" width="14" height="14" class="d-ico edit"/><text x="220" y="110" class="d-s">Steckbrief</text>
+        <rect x="34" y="128" width="290" height="34" class="d-soft"/><text x="48" y="150" class="d-mono">src/app/ · tests/</text><use href="#i-edit" x="200" y="139" width="14" height="14" class="d-ico edit"/><text x="220" y="150" class="d-s">Ihr Code</text>
+        <rect x="34" y="168" width="290" height="34" class="d-soft"/><text x="48" y="190" class="d-mono">.agents/skills/</text><use href="#i-lock" x="200" y="179" width="14" height="14" class="d-ico lock"/><text x="220" y="190" class="d-s">KI-Regeln</text>
+        <rect x="34" y="208" width="290" height="34" class="d-soft"/><text x="48" y="230" class="d-mono">platform_sdk/</text><use href="#i-lock" x="200" y="219" width="14" height="14" class="d-ico lock"/><text x="220" y="230" class="d-s">Bibliothek</text>
+        <rect x="34" y="248" width="290" height="34" class="d-soft"/><text x="48" y="270" class="d-mono">.devcontainer/</text><use href="#i-lock" x="230" y="259" width="14" height="14" class="d-ico lock"/><text x="250" y="270" class="d-s">Werkzeug</text>
+      </g>
+      <path d="M350 165 C430 165 430 70 520 70" class="d-arrow-acc d-flow" marker-end="url(#h2)"/>
+      <path d="M350 165 H520" class="d-arrow-acc d-flow" marker-end="url(#h2)"/>
+      <path d="M350 165 C430 165 430 260 520 260" class="d-arrow-acc d-flow" marker-end="url(#h2)"/>
+      <text x="380" y="154" class="d-lab">Kopie anlegen</text>
+      <g>
+        <rect x="528" y="34" width="358" height="72" class="d-box"/><rect x="528" y="34" width="8" height="72" class="d-acc"/>
+        <text x="552" y="64" class="d-t">raumbuchung</text><text x="552" y="86" class="d-s">Räume sehen und mit einem Klick buchen</text>
+        <rect x="528" y="129" width="358" height="72" class="d-box"/><rect x="528" y="129" width="8" height="72" class="d-acc"/>
+        <text x="552" y="159" class="d-t">dienstreise</text><text x="552" y="181" class="d-s">Antrag ausfüllen, Belege landen in ELO</text>
+        <rect x="528" y="224" width="358" height="72" class="d-box"/><rect x="528" y="224" width="8" height="72" class="d-acc"/>
+        <text x="552" y="254" class="d-t">dateiablage</text><text x="552" y="276" class="d-s">Dateien in bwSync&amp;Share verwalten</text>
+      </g>
+    </svg>
+  </div><figcaption>Vom Golden Master zur eigenen App. <svg class="i" aria-hidden="true"><use href="#i-edit"/></svg> dürfen Sie ändern · <svg class="i" aria-hidden="true"><use href="#i-lock"/></svg> wird zentral gepflegt, nicht ändern.</figcaption></figure>
+  <h2>Python oder JavaScript?</h2>
+  <p>Beide Vorlagen bauen dieselbe Art von App. Sie unterscheiden sich nur in der Programmiersprache und den Werkzeugen dahinter. Im Zweifel nehmen Sie <b>Python</b> – das ist der Standard. JavaScript passt, wenn Ihr Team damit schon arbeitet.</p>
+  <div class="lg-pick" role="group" aria-label="Programmiersprache wählen"><div class="lg-opt" data-lang-opt="py"><button type="button" data-pick-lang="py"><span class="lg-ic"><svg class="i" aria-hidden="true"><use href="#i-lang-py"/></svg></span><b>Python <span class="lg-badge">Standard</span></b><small>FastAPI, Jinja2, pytest<span class="lg-state"></span></small></button><a class="cta" href="https://github.com/alexandru-tatar/awp-hka-gold-python" target="_blank" rel="noopener">awp-hka-gold-python auf GitHub</a></div><div class="lg-opt" data-lang-opt="js"><button type="button" data-pick-lang="js"><span class="lg-ic"><svg class="i" aria-hidden="true"><use href="#i-lang-js"/></svg></span><b>JavaScript</b><small>Node.js, Express, Jest<span class="lg-state"></span></small></button><a class="cta" href="https://github.com/alexandru-tatar/awp-hka-gold-js" target="_blank" rel="noopener">awp-hka-gold-js auf GitHub</a></div></div><div class="tbl-wrap"><table><thead><tr><th></th><th><svg class="i" aria-hidden="true"><use href="#i-lang-py"/></svg>Python</th><th><svg class="i" aria-hidden="true"><use href="#i-lang-js"/></svg>JavaScript</th></tr></thead><tbody><tr><td>Sprache</td><td>Python 3.14</td><td>JavaScript mit Node.js 24</td></tr><tr><td>Web-Grundgerüst</td><td>FastAPI</td><td>Express</td></tr><tr><td>Seitenvorlagen</td><td>Jinja2 in <code>src/app/templates/</code></td><td>Nunjucks in <code>src/views/</code></td></tr><tr><td>Seiten und Routen</td><td><code>src/app/views.py</code></td><td><code>src/routes.js</code></td></tr><tr><td>Tests</td><td>pytest in <code>tests/</code></td><td>Jest in <code>tests/</code></td></tr><tr><td>Code-Regeln</td><td>Ruff</td><td>ESLint</td></tr><tr><td>Paketversionen</td><td>uv, <code>uv.lock</code></td><td>npm, <code>package-lock.json</code></td></tr><tr><td>Vorlage</td><td><a href="https://github.com/alexandru-tatar/awp-hka-gold-python" target="_blank" rel="noopener">awp-hka-gold-python</a></td><td><a href="https://github.com/alexandru-tatar/awp-hka-gold-js" target="_blank" rel="noopener">awp-hka-gold-js</a></td></tr></tbody></table></div><div class="callout c-tip"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></div><div><h5>Was gleich bleibt</h5><p>Regeln, Skills der KI, <code>manifest.json</code>, alle <code>make</code>-Befehle und der ganze Ablauf bis zur Freigabe sind in beiden Vorlagen gleich. Sie müssen keine der beiden Sprachen können – die KI schreibt den Code.</p></div></div>
+  <h2>Was steckt drin?</h2>
+  <div class="tbl-wrap"><table><thead><tr><th>Bestandteil</th><th>Was ist das?</th><th>Ändern?</th></tr></thead><tbody>
+    <tr><td><code>manifest.json</code></td><td>Steckbrief: Name, Kurzname, Menü, Rollen</td><td><span class="pill ok">ja</span></td></tr>
+    <tr><td><code><span class="lang-v py">src/app/</span><span class="lang-v js">src/</span></code></td><td>Seiten und Vorlagen Ihrer App – hier schreibt die KI</td><td><span class="pill ok">ja</span></td></tr>
+    <tr><td><code>tests/</code></td><td>Automatische Tests Ihrer App</td><td><span class="pill ok">ja</span></td></tr>
+    <tr><td><code>platform_sdk/</code></td><td>Portal-Bibliothek: Anmeldung, Design, Adapter-Zugriff</td><td><span class="pill no">nein</span></td></tr>
+    <tr><td><code>.agents/skills/</code></td><td>Regeln für die KI</td><td><span class="pill no">nein</span></td></tr>
+    <tr><td><code>.devcontainer/</code></td><td>Werkzeuge und Versionen des Dev Containers</td><td><span class="pill no">nein</span></td></tr>
+    <tr><td><code>Makefile</code> · <code><span class="lang-v py">main.py</span><span class="lang-v js">server.js</span></code></td><td>Kurzbefehle und Grundgerüst</td><td><span class="pill no">nein</span></td></tr>
+  </tbody></table></div>
+  <div class="callout c-wip"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-wip"/></svg></div><div><h5>Noch in Arbeit</h5><p>Neue Versionen der Vorlage gelangen <b>nicht automatisch</b> in bestehende Apps. Für die Bibliothek gibt es <code>make sdk-update</code>; der Rest wird festgelegt.</p></div></div>
+</article>
+
+<article class="page" data-page="dev-container" data-title="Dev Container" data-group="Konzepte">
+  <h1>Dev Container</h1>
+  <p class="lede">Ein Dev Container ist ein kleiner, abgeschlossener Computer <b>in</b> Ihrem Computer, in dem alle Werkzeuge schon installiert sind. Docker startet ihn, VS Code verbindet sich damit.</p>
+  <div class="tldr"><h5>Kurz gesagt</h5><ul><li>Keine Programmiersprache und keine Werkzeuge selbst installieren – alles ist im Container.</li><li>Ihr Projektordner bleibt auf Ihrem Rechner – der Container „leiht“ ihn sich (Mount).</li><li>Kaputt? <b>Rebuild Container</b> – Projektdateien bleiben erhalten.</li></ul></div>
+  <h2>So hängt alles zusammen</h2>
+  <figure class="fig"><div class="fig-body">
+    <svg class="diag" viewBox="0 0 900 360" role="img" aria-labelledby="dcT">
+      <title id="dcT">Dev Container: Projektordner auf dem Rechner wird in den Container eingebunden, VS Code verbindet sich</title>
+      <defs><marker id="h3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="d-head-acc"/></marker>
+      <marker id="h3g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="d-head"/></marker></defs>
+      <rect x="8" y="10" width="884" height="340" class="d-zone-fill"/>
+      <text x="28" y="40" class="d-lab">Ihr Rechner (Host) · Windows / macOS / Linux</text>
+      <!-- folder -->
+      <path d="M36 80 h70 l14 14 h116 a10 10 0 0 1 10 10 v196 a10 10 0 0 1 -10 10 h-200 a10 10 0 0 1 -10 -10 v-210 a10 10 0 0 1 10 -10z" class="d-box"/>
+      <text x="48" y="122" class="d-t">Projektordner</text>
+      <text x="48" y="150" class="d-mono">manifest.json</text>
+      <text x="48" y="174" class="d-mono">src/app/</text>
+      <text x="48" y="198" class="d-mono">tests/</text>
+      <text x="48" y="222" class="d-mono">.agents/skills/</text>
+      <text x="48" y="246" class="d-mono">.devcontainer/</text>
+      <text x="48" y="286" class="d-s">bleibt immer erhalten</text>
+      <!-- docker -->
+      <rect x="300" y="58" width="410" height="272" class="d-box"/>
+      <text x="320" y="86" class="d-lab">Docker</text>
+      <rect x="324" y="100" width="362" height="210" class="d-acc-line"/>
+      <text x="344" y="130" class="d-t-c">Dev Container</text>
+      <text x="344" y="150" class="d-s">fertig eingerichtet, für alle gleich</text>
+      <g>
+        <rect x="344" y="168" width="100" height="34" class="d-soft"/><text x="356" y="190" class="d-mono">Python 3.14</text>
+        <rect x="454" y="168" width="60" height="34" class="d-soft"/><text x="468" y="190" class="d-mono">uv</text>
+        <rect x="524" y="168" width="70" height="34" class="d-soft"/><text x="538" y="190" class="d-mono">make</text>
+        <rect x="604" y="168" width="64" height="34" class="d-soft"/><text x="616" y="190" class="d-mono">Ruff</text>
+        <rect x="344" y="212" width="160" height="34" class="d-focus"/><text x="358" y="234" class="d-mono">Claude Code</text>
+        <rect x="514" y="212" width="154" height="34" class="d-soft"/><text x="526" y="234" class="d-mono">/workspaces/…</text>
+        <text x="344" y="280" class="d-s">Versionen aus devcontainer.json + uv.lock</text>
+      </g>
+      <!-- vscode -->
+      <rect x="744" y="110" width="128" height="150" class="d-box"/>
+      <rect x="744" y="110" width="128" height="30" class="d-focus"/><rect x="744" y="126" width="128" height="14" class="d-focus" style="stroke:none"/>
+      <text x="760" y="131" class="d-t">VS Code</text>
+      <text x="760" y="172" class="d-s">Editor,</text><text x="760" y="190" class="d-s">Terminal,</text><text x="760" y="208" class="d-s">Erweiterungen</text>
+      <rect x="752" y="232" width="112" height="18" class="d-acc"/><text x="758" y="245" style="fill:#fff;font-size:10.5px;font-weight:600">Dev Container</text>
+      <!-- arrows -->
+      <path d="M250 205 H320" class="d-arrow-acc" marker-end="url(#h3)" marker-start="url(#h3)"/>
+      <text x="258" y="192" class="d-lab" style="fill:var(--accent-text)">Mount</text>
+      <path d="M740 185 H690" class="d-arrow" marker-end="url(#h3g)" marker-start="url(#h3g)"/>
+    </svg>
+  </div><figcaption>Der Projektordner liegt auf Ihrem Rechner und wird in den Container eingebunden (Mount). Was Sie oder die KI im Container ändern, steht sofort auch in Ihrem Ordner. Abgebildet ist die Python-Vorlage; in der JavaScript-Vorlage stehen dort Node.js 24, npm und ESLint.</figcaption></figure>
+  <h2>Vorteile</h2>
+  <div class="grid2">
+    <div class="card"><h4>Gleich für alle</h4><p>Exakt dieselben Werkzeuge und Versionen. „Bei mir geht es aber“ gibt es nicht mehr.</p></div>
+    <div class="card"><h4>Nichts installieren</h4><p>Nur VS Code, Git und Docker auf dem eigenen Rechner.</p></div>
+    <div class="card"><h4>Schnell neu aufsetzen</h4><p>Container neu bauen – Projektdateien bleiben.</p></div>
+    <div class="card"><h4>Passt zum Betrieb</h4><p>Auch im Betrieb laufen Apps in Containern.</p></div>
+  </div>
+  <h2>Host oder Container?</h2>
+  <p>Wichtig für die Befehle: Manche laufen <b>im Container</b> (<code>make dev</code>, <code>make check</code>), andere <b>auf Ihrem Rechner</b>, dem <b>Host</b> (<code>make docker</code>), weil nur dort Docker verfügbar ist. <code>make deploy</code> führt nur die <a href="#t10">Freigabe-Verantwortliche</a> aus. Siehe <a href="#befehle">Befehle</a>.</p>
+  <details class="bg"><summary>Was im Hintergrund passiert</summary><div class="bg-body"><div class="tabs os" data-sync="lang"><div class="tabs-bar" role="tablist" aria-label="Programmiersprache"><button type="button" role="tab" data-t="py" class="on"><svg class="i i-os" aria-hidden="true"><use href="#i-lang-py"/></svg>Python</button><button type="button" role="tab" data-t="js"><svg class="i i-os" aria-hidden="true"><use href="#i-lang-js"/></svg>JavaScript</button></div><div class="tab-p on" data-t="py" role="tabpanel"><p>Docker lädt ein Basis-Image von Microsoft mit Python 3.14, installiert <code>uv</code> und richtet mit <code>uv sync --locked</code> alle Pakete in den Versionen aus <code>uv.lock</code> ein. Erweiterungen: Python, Ruff.</p></div><div class="tab-p" data-t="js" role="tabpanel"><p>Docker lädt ein Basis-Image von Microsoft mit Node.js 24 und richtet mit <code>npm ci</code> alle Pakete in den Versionen aus <code>package-lock.json</code> ein. Erweiterung: ESLint.</p></div></div><p>Die Konfiguration steht in <code>.devcontainer/devcontainer.json</code>.</p></div></details>
+</article>
+
+<article class="page" data-page="ki" data-title="KI &amp; Skills" data-group="Konzepte" data-level="Einsteiger">
+  <h1>Die KI: Claude Code und Skills</h1>
+  <p class="lede">Claude Code ist ein KI-Assistent in VS Code. Sie beschreiben in normaler Sprache, was Ihre App tun soll – Claude Code schreibt den Code. Damit das Ergebnis zur Hochschule passt, arbeitet die KI nach festen Merkblättern: den <b>Skills</b>.</p>
+  <div class="tldr"><h5>Kurz gesagt</h5><ul>
+    <li>Sieben Skills sagen der KI, wie eine App an der HKA aussehen und funktionieren muss.</li>
+    <li>Die KI sucht sich die passenden Skills selbst aus. Sie müssen keinen davon kennen.</li>
+    <li>Die KI schreibt Code – <b>Sie</b> prüfen, sichern und geben frei.</li>
+    <li>Die KI hat keinen Zugriff auf echte Daten, Passwörter oder Fachsysteme.</li>
+  </ul></div>
+
+  <h2>Was ist ein Skill?</h2>
+  <p>Stellen Sie sich eine neue Kollegin vor, die sehr schnell schreibt, aber die Hochschule noch nicht kennt. Bevor sie anfängt, bekommt sie Merkblätter: „So sieht bei uns eine Seite aus“, „So gehen wir mit Passwörtern um“, „So schreiben wir Fehlermeldungen“. Genau das ist ein Skill – ein Merkblatt für die KI.</p>
+  <p>Die Skills liegen in jedem Projekt im Ordner <code>.agents/skills/</code>. Das Plattform-Team pflegt sie zentral. Sie lesen sie nicht und ändern sie nicht – aber es hilft zu wissen, was drinsteht.</p>
+
+  <figure class="fig"><div class="fig-body anat-wrap">
+    <div class="anat">
+      <div class="anat-file" aria-hidden="true">
+        <div class="mock-bar"><span class="ttl">.agents/skills/design/SKILL.md</span></div>
+        <div class="anat-src">
+          <span class="m">---</span><br>
+          <span class="k1">name:</span> design<br>
+          <span class="k1">description:</span> Verwenden, wenn Aussehen, Farben …<br>
+          <span class="m">---</span><br><br>
+          <b># Design</b><br><br>
+          <b>## Regeln</b><br>
+          | R-DES-1 | Farben nur über var(--…) | muss |<br><br>
+          <b>## So geht es im <span class="lang-v py">Python-Starter</span><span class="lang-v js">JavaScript-Starter</span></b><br><br>
+          <b>## Gut / schlecht</b><br><br>
+          <b>## Prüfungen, die das absichern</b><br><br>
+          <b>## Vor dem Abschluss</b><br>
+          - [ ] Keine Farbwerte im eigenen CSS
+        </div>
+      </div>
+      <dl class="anat-parts">
+        <div><dt>Kopf</dt><dd>Name und ein Satz „Verwenden, wenn …“. Daran erkennt die KI, wann sie das Merkblatt braucht.</dd></div>
+        <div><dt>Regeln</dt><dd>Kurze Sätze mit fester Kennung wie <code>R-DES-1</code> und Stufe <b>muss</b> oder <b>soll</b>.</dd></div>
+        <div><dt>So geht es</dt><dd>Wie die Regel im Starter umgesetzt wird – mit Beispielcode.</dd></div>
+        <div><dt>Gut / schlecht</dt><dd>Gegenüberstellung typischer Fehler und der richtigen Lösung.</dd></div>
+        <div><dt>Prüfungen</dt><dd>Welche automatische oder menschliche Prüfung die Regel absichert.</dd></div>
+        <div><dt>Checkliste</dt><dd>Was die KI vor dem Abschluss selbst abhakt.</dd></div>
+      </dl>
+    </div>
+  </div><figcaption>Jeder Skill ist gleich aufgebaut. Die Regeln sind Wort für Wort aus dem Regelpapier des Golden Master übernommen.</figcaption></figure>
+
+  <h2>So arbeitet die KI mit den Skills</h2>
+  <ol class="tl">
+    <li><span class="a">Sie</span><p>Sie beschreiben Ihr Anliegen in eigenen Worten, zum Beispiel „Zeig meine Noten als Tabelle“.</p></li>
+    <li><span class="a acc">KI</span><p>Sie vergleicht Ihre Worte mit dem Kopf jedes Skills und lädt nur die passenden – hier <code>portal</code>, <code>schnittstellen</code> und <code>barrierefreiheit</code>.</p></li>
+    <li><span class="a">KI</span><p>Sie schreibt den Code nach diesen Regeln und hakt am Ende die Checkliste jedes Skills ab.</p></li>
+    <li><span class="a">Prüfung</span><p><code>make check</code> und die Pipeline prüfen automatisch, ob die Regeln eingehalten sind.</p></li>
+    <li><span class="a">Sie</span><p>Sie schauen sich die Änderungen an, probieren die App aus und sichern den Stand.</p></li>
+  </ol>
+  <div class="callout c-tip"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></div><div><h5>Gut zu wissen</h5><p>Sie müssen keinen Skill beim Namen nennen. Sprechen Sie so, wie Sie es einer Kollegin erklären würden. Die Beschreibungen der Skills sind bewusst mit Sätzen geschrieben, die Menschen wirklich sagen.</p></div></div>
+
+  <h2>Die sieben Skills</h2>
+  <p>Jeder Skill deckt ein Thema ab. Unter jedem steht ein Satz, bei dem die KI ihn typischerweise lädt.</p>
+  <div class="skills">
+    <article class="skill">
+      <header><span class="skill-ic"><svg class="i" aria-hidden="true"><use href="#i-palette"/></svg></span><div><code>design</code><h3>Aussehen wie die Hochschule</h3></div></header>
+      <p class="skill-when">„Mach es wie im Intranet.“</p>
+      <ul class="l">
+        <li>Farben, Schrift und Abstände kommen aus dem Portal, nie aus eigenen Werten.</li>
+        <li>Keine fremden Bibliotheken wie Bootstrap, nichts aus dem Internet.</li>
+        <li>Den Seitenrahmen mit Kopf und Menü liefert das Portal.</li>
+      </ul>
+      <p class="skill-meta">R-DES-1 bis R-DES-5 · 4 muss · 1 soll</p>
+    </article>
+    <article class="skill">
+      <header><span class="skill-ic"><svg class="i" aria-hidden="true"><use href="#i-access"/></svg></span><div><code>barrierefreiheit</code><h3>Für alle nutzbar</h3></div></header>
+      <p class="skill-when">„Das muss barrierefrei sein.“</p>
+      <ul class="l">
+        <li>Genug Kontrast, alles per Tastatur bedienbar, Fokus immer sichtbar.</li>
+        <li>Jedes Feld hat eine Beschriftung, jede Tabelle eine Überschrift.</li>
+        <li>Nichts wird nur durch Farbe gezeigt. Einfache Sprache.</li>
+      </ul>
+      <p class="skill-meta">R-A11Y-1 bis R-A11Y-8 · WCAG 2.1 AA · 7 muss · 1 soll</p>
+    </article>
+    <article class="skill">
+      <header><span class="skill-ic"><svg class="i" aria-hidden="true"><use href="#i-dialog"/></svg></span><div><code>ui-regeln</code><h3>Überall gleich bedienbar</h3></div></header>
+      <p class="skill-when">„Vor dem Löschen soll nachgefragt werden.“</p>
+      <ul class="l">
+        <li>Knöpfe nennen ein Verb: „Speichern“, nicht „OK“.</li>
+        <li>Ein Dialog hat genau zwei Knöpfe: „Abbrechen“ und die Aktion.</li>
+        <li>Pflichtfelder sind als „(Pflichtfeld)“ beschriftet, Fehler sagen, was zu tun ist.</li>
+      </ul>
+      <p class="skill-meta">R-UI-1 bis R-UI-7 · 4 muss · 3 soll</p>
+    </article>
+    <article class="skill">
+      <header><span class="skill-ic"><svg class="i" aria-hidden="true"><use href="#i-plug"/></svg></span><div><code>schnittstellen</code><h3>Daten aus Fachsystemen</h3></div></header>
+      <p class="skill-when">„Hol die Noten aus dem Notensystem.“</p>
+      <ul class="l">
+        <li>Andere Systeme nur über den Adapter des Portals, nie direkt.</li>
+        <li>Nur was in der Beschreibung des Systems steht – nichts erfinden.</li>
+        <li>Persönliche Daten aus Fachsystemen werden nicht gespeichert.</li>
+      </ul>
+      <p class="skill-meta">R-SCHN-1 bis R-SCHN-5 · 5 muss</p>
+    </article>
+    <article class="skill">
+      <header><span class="skill-ic"><svg class="i" aria-hidden="true"><use href="#i-portal"/></svg></span><div><code>portal</code><h3>Anmeldung, Rollen, Kachel</h3></div></header>
+      <p class="skill-when">„Fertig. Bring sie ins Portal.“</p>
+      <ul class="l">
+        <li>Kein eigenes Login – wer angemeldet ist, sagt das Portal.</li>
+        <li>Jede Seite verlangt Anmeldung, Rollen so klein wie möglich.</li>
+        <li><code>manifest.json</code> ist vollständig, keine Cookies.</li>
+      </ul>
+      <p class="skill-meta">R-PORT-1 bis R-PORT-7 · 6 muss · 1 soll</p>
+    </article>
+    <article class="skill">
+      <header><span class="skill-ic"><svg class="i" aria-hidden="true"><use href="#i-pipe"/></svg></span><div><code>pipeline-fehler</code><h3>Rote Pipeline verständlich erklärt</h3></div></header>
+      <p class="skill-when">„Die Pipeline ist rot und ich verstehe die Meldung nicht.“</p>
+      <ul class="l">
+        <li>Erklärt in einfachen Worten: was passiert ist, warum es wichtig ist, was Sie jetzt tun.</li>
+        <li>Nennt den <a href="#fehlercodes">Fehlercode</a> und den nächsten konkreten Schritt.</li>
+        <li>Schlägt nie vor, eine Prüfung zu umgehen.</li>
+      </ul>
+      <p class="skill-meta">R-PF-1 bis R-PF-4 · 3 muss · 1 soll</p>
+    </article>
+    <article class="skill">
+      <header><span class="skill-ic"><svg class="i" aria-hidden="true"><use href="#i-lock"/></svg></span><div><code>secrets</code><h3>Passwörter bleiben geheim</h3></div></header>
+      <p class="skill-when">„Leg mein Passwort in die Konfiguration.“</p>
+      <ul class="l">
+        <li>Kein Passwort, Schlüssel oder Token in Code, Konfiguration oder Logs.</li>
+        <li>Die KI lehnt solche Bitten freundlich ab und zeigt den richtigen Weg.</li>
+        <li>Ist ein Geheimnis doch in Git gelandet: melden, es gilt als verbraucht.</li>
+      </ul>
+      <p class="skill-meta">R-SEC-1 bis R-SEC-4 · 4 muss</p>
+    </article>
+    <aside class="skill skill-more">
+      <header><span class="skill-ic"><svg class="i" aria-hidden="true"><use href="#i-folder"/></svg></span><div><code>.agents/skills/</code><h3>Im Projekt nachlesen</h3></div></header>
+      <p>Alle Skills liegen als Textdateien in Ihrem Projekt. Neugierig? Öffnen Sie eine <code>SKILL.md</code> in VS Code – sie ist in einfachem Deutsch geschrieben.</p>
+      <p>Ändern Sie die Dateien nicht. Das Plattform-Team pflegt sie für alle Apps gleich, und die Pipeline meldet Änderungen.</p>
+      <p class="skill-meta">Python- und JavaScript-Vorlage · gleiche Regeln</p>
+    </aside>
+  </div>
+
+  <h2>So klingt das im Alltag</h2>
+  <p>Drei typische Situationen. Die Antworten folgen den Beispielen in den Skills.</p>
+  <div class="chat">
+    <p class="chat-topic"><svg class="i" aria-hidden="true"><use href="#i-lock"/></svg> Sie möchten es sich leicht machen</p>
+    <div class="chat-me"><span class="who">Sie</span><p>Leg bitte mein Passwort für das Notensystem in die Konfiguration, dann geht es schneller.</p></div>
+    <div class="chat-ai"><span class="who">KI · Skill <code>secrets</code></span><p>Das lege ich nicht in die Konfiguration. Dann könnte jede Person, die den Code sieht, mit Ihrem Passwort arbeiten.</p><p>Für das Notensystem brauchen Sie auch keines: Die App holt die Noten über <code>portal.adapters</code>, und das Portal regelt den Zugang.</p></div>
+  </div>
+  <div class="chat">
+    <p class="chat-topic"><svg class="i" aria-hidden="true"><use href="#i-pipe"/></svg> Die Pipeline ist rot</p>
+    <div class="chat-me"><span class="who">Sie</span><p>Die Pipeline ist rot und ich verstehe die Meldung nicht.</p></div>
+    <div class="chat-ai"><span class="who">KI · Skill <code>pipeline-fehler</code></span><p>Die Pipeline ist in der Stufe „lint“ stehen geblieben. Der Fehlercode ist <b>PF-101</b>.</p><p><b>Was passiert ist:</b> In <code>src/app/views.py</code> (Zeile 42) wird <code>requests</code> geladen. Andere Systeme dürfen nur über das Portal angesprochen werden.</p><p><b>Warum das wichtig ist:</b> So bleiben die Daten geschützt, und die App läuft im Betrieb ohne Internet.</p><p><b>Was Sie tun:</b> Holen Sie die Daten mit <code>portal.adapters</code>. Prüfen Sie danach mit <code>make lint</code>.</p></div>
+  </div>
+  <div class="chat">
+    <p class="chat-topic"><svg class="i" aria-hidden="true"><use href="#i-dialog"/></svg> Eine Aktion lässt sich nicht zurücknehmen</p>
+    <div class="chat-me"><span class="who">Sie</span><p>Mit dem Knopf „OK“ soll die Nachricht sofort ans Studienbüro gehen.</p></div>
+    <div class="chat-ai"><span class="who">KI · Skill <code>ui-regeln</code></span><p>Ich nenne den Knopf „Senden …“ und frage vorher in einem Dialog nach: „Nachricht senden?“ mit den Knöpfen „Abbrechen“ und „Senden“. Eine gesendete Nachricht lässt sich nicht zurückholen.</p></div>
+  </div>
+
+  <h2>Wer macht was?</h2>
+  <div class="grid2">
+    <div class="card top"><span class="k">Übernimmt die KI</span><h4>Technik nach Hochschul-Regeln</h4>
+      <ul class="l small-list">
+        <li>Seiten im Design des Portals, barrierefrei</li>
+        <li>Anmeldung und Rollen über das Portal</li>
+        <li>Deutsche Texte und verständliche Fehlermeldungen</li>
+        <li>Zugriff auf Fachsysteme über den Adapter</li>
+        <li>Automatische Tests für jede Seite</li>
+      </ul></div>
+    <div class="card top fx"><span class="k">Bleibt bei Ihnen</span><h4>Fachwissen und Verantwortung</h4>
+      <ul class="l small-list">
+        <li>Beschreiben, wer die App nutzt und was sie tun soll</li>
+        <li>Rollen, Ablageorte und Berechtigungen nennen</li>
+        <li>Rückfragen der KI fachlich beantworten</li>
+        <li>Ergebnis ausprobieren und Änderungen ansehen</li>
+        <li>Sichern (Commit) und Review anstoßen</li>
+      </ul></div>
+  </div>
+
+  <h2>Regeln auf einen Blick</h2>
+  <p>Die sieben Skills setzen zusammen <b>40 Einzelregeln</b> um. Regeln der Stufe <b>muss</b> entscheiden, ob eine App ins Portal darf. Regeln der Stufe <b>soll</b> werden im Prüfbericht gemeldet, blockieren aber nicht.</p>
+  <div class="tbl-wrap"><table><thead><tr><th>Skill</th><th>Kennungen</th><th class="num">muss</th><th class="num">soll</th></tr></thead><tbody>
+    <tr><td><code>design</code></td><td>R-DES-1 … 5</td><td class="num">4</td><td class="num">1</td></tr>
+    <tr><td><code>barrierefreiheit</code></td><td>R-A11Y-1 … 8</td><td class="num">7</td><td class="num">1</td></tr>
+    <tr><td><code>ui-regeln</code></td><td>R-UI-1 … 7</td><td class="num">4</td><td class="num">3</td></tr>
+    <tr><td><code>schnittstellen</code></td><td>R-SCHN-1 … 5</td><td class="num">5</td><td class="num">0</td></tr>
+    <tr><td><code>portal</code></td><td>R-PORT-1 … 7</td><td class="num">6</td><td class="num">1</td></tr>
+    <tr><td><code>pipeline-fehler</code></td><td>R-PF-1 … 4</td><td class="num">3</td><td class="num">1</td></tr>
+    <tr><td><code>secrets</code></td><td>R-SEC-1 … 4</td><td class="num">4</td><td class="num">0</td></tr>
+    <tr class="sum"><td>Zusammen</td><td>40 Einzelregeln</td><td class="num">33</td><td class="num">7</td></tr>
+  </tbody></table></div>
+  <p>Geprüft wird auf drei Arten: <b>automatisch</b> durch ein Skript, <b>halbautomatisch</b> (ein Skript bewertet, eine Person bestätigt) oder <b>von Hand</b> durch eine Person im Prüfprotokoll. Die Kennung einer verletzten Regel steht im <a href="#t7">Prüfnachweis</a>.</p>
+
+  <h2>Grenzen</h2>
+  <div class="callout c-warn"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-warn"/></svg></div><div><h5>Die KI darf nicht</h5><p>selbst committen oder veröffentlichen, eine Prüfung abschalten, Passwörter in Dateien schreiben oder Daten anderer Personen abfragen. Bietet sie etwas davon an: ablehnen und das Plattform-Team fragen.</p></div></div>
+  <div class="callout c-info"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-info"/></svg></div><div><h5>Sicherheit</h5><p>Während die KI Code schreibt, greift sie <b>nie</b> auf Fachsysteme oder echte Daten zu. Im Test und mit <code>make dev</code> arbeitet die App mit festen Testdaten.</p></div></div>
+  <div class="callout c-wip"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-wip"/></svg></div><div><h5>Noch in Arbeit</h5><p>Die Skills sind ein Entwurf (Version 0.1.0). Sie werden mit einer festen Testaufgabe geprüft – einer Noten-Übersicht in sechs Prompts – und danach verbessert. Wünsche und Fehler bitte an das Plattform-Team.</p></div></div>
+  <p>Wie Sie gute Prompts schreiben: <a class="cta" href="#t5">Mit der KI bauen</a></p>
+</article>
+
+<article class="page" data-page="git" data-title="Git &amp; Review" data-group="Konzepte">
+  <h1>Git, Branches und Review</h1>
+  <p class="lede">Git speichert jede Änderung – wie ein „Rückgängig-Knopf“ für das ganze Projekt. Das Projekt liegt als Repository auf GitHub.</p>
+  <div class="tldr"><h5>Kurz gesagt</h5><ul><li>Sie arbeiten auf <code>develop</code>.</li><li><code>main</code> ist geschützt – nur mit Review einer zweiten Person.</li></ul></div>
+  <h2>Die zwei Branches</h2>
+  <figure class="fig"><div class="fig-body">
+    <svg class="diag" viewBox="0 0 900 230" role="img" aria-labelledby="gitT">
+      <title id="gitT">Branches develop und main mit Pull Request und Review</title>
+      <defs><marker id="h4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="d-head-acc"/></marker></defs>
+      <text x="14" y="66" class="d-mono" style="font-weight:700">main</text>
+      <text x="14" y="176" class="d-mono" style="font-weight:700">develop</text>
+      <path d="M90 60 H860" style="stroke:var(--accent);stroke-width:4;fill:none"/>
+      <path d="M90 170 H700" style="stroke:var(--focus);stroke-width:4;fill:none"/>
+      <path d="M130 60 C170 60 160 170 200 170" style="stroke:var(--focus);stroke-width:3;fill:none"/>
+      <circle cx="130" cy="60" r="10" class="d-acc"/>
+      <g style="fill:var(--surface);stroke:var(--focus);stroke-width:3">
+        <circle cx="250" cy="170" r="10"/><circle cx="350" cy="170" r="10"/><circle cx="450" cy="170" r="10"/><circle cx="550" cy="170" r="10"/>
+      </g>
+      <text x="226" y="204" class="d-s">Commit</text><text x="326" y="204" class="d-s">Commit</text><text x="426" y="204" class="d-s">Commit</text><text x="526" y="204" class="d-s">Commit</text>
+      <path d="M560 166 C640 150 650 70 712 62" class="d-arrow-acc d-flow" marker-end="url(#h4)"/>
+      <circle cx="730" cy="60" r="12" class="d-acc"/>
+      <rect x="580" y="96" width="210" height="44" class="d-box"/>
+      <text x="594" y="114" class="d-t" style="font-size:13px">Pull Request</text>
+      <text x="594" y="131" class="d-s">Review · Pipeline grün</text>
+      <!-- lock -->
+      <g transform="translate(800 30)"><rect x="0" y="12" width="26" height="20" class="d-acc"/><path d="M5 12 V7 a8 8 0 0 1 16 0 V12" style="fill:none;stroke:var(--accent);stroke-width:3"/></g>
+      <text x="760" y="92" class="d-s">geschützt</text>
+      <text x="96" y="40" class="d-s">Vorlage</text>
+    </svg>
+  </div><figcaption>Sie sichern Zwischenstände auf <code>develop</code>. Über einen Pull Request mit Review und automatischer Prüfung (Pipeline) gelangt der Stand nach <code>main</code>.</figcaption></figure>
+  <div class="tbl-wrap"><table><thead><tr><th>Branch</th><th>Bedeutung</th><th>Wer darf speichern?</th></tr></thead><tbody>
+    <tr><td><code>develop</code></td><td>Arbeitsstand</td><td>Sie selbst</td></tr>
+    <tr><td><code>main</code></td><td>Geprüfter Stand – nur dieser darf auf die Test-VM</td><td>Niemand direkt, nur per Pull Request</td></tr>
+  </tbody></table></div>
+  <h2>Warum Vier-Augen-Prinzip?</h2>
+  <p>Eine App kann auf Daten in Fachsystemen zugreifen. Ein Fehler – aus Versehen oder absichtlich – könnte Daten löschen. Das Review schützt davor. Zusätzlich laufen bei jedem Pull Request automatische Prüfungen (<b>Pipeline</b>).</p>
+</article>
+
+<article class="page" data-page="anmeldung" data-title="Anmeldung &amp; Fachsysteme" data-group="Konzepte">
+  <h1>Anmeldung und Fachsysteme</h1>
+  <p class="lede">Alle Apps nutzen dieselbe Anmeldung. Für manche Fachsysteme verbinden Sie zusätzlich Ihr eigenes Konto.</p>
+  <div class="tldr"><h5>Kurz gesagt</h5><ul><li>Einmal anmelden – alle Apps kennen Sie und Ihre Rolle.</li><li>Zugangsdaten für Fachsysteme liegen verschlüsselt im Adapter und lassen sich jederzeit löschen.</li></ul></div>
+  <h2>Konto verbinden</h2>
+  <ol class="tl">
+    <li><span class="a">Sie</span><p>„Konto verbinden“ in der App, beim Fachsystem anmelden.</p></li>
+    <li><span class="a acc">Adapter</span><p>Speichert die Zugangsdaten <b>verschlüsselt</b> (SQLite). Verbindung über HTTPS.</p></li>
+    <li><span class="a">App</span><p>Arbeitet über den Adapter in Ihrem Namen – nur mit Ihren Rechten.</p></li>
+    <li><span class="a">Sie</span><p>„Konto trennen“ löscht die Zugangsdaten sofort.</p></li>
+  </ol>
+  <div class="callout c-wip"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-wip"/></svg></div><div><h5>Noch in Arbeit</h5><p>Automatisches Löschen nach fester Frist (z. B. 7 Tage). Langfristig: zentrale Hochschul-Anmeldung (Shibboleth mit OIDC/SAML), Zugangsdaten nur für die Dauer der Sitzung.</p></div></div>
+</article>
+
+<article class="page" data-page="daten" data-title="Wo Daten liegen dürfen" data-group="Konzepte">
+  <h1>Wo Daten liegen dürfen</h1>
+  <p class="lede">Bevor Sie bauen, stellen Sie eine Frage: <b>Was passiert, wenn meine App morgen gelöscht wird?</b></p>
+  <div class="tldr"><h5>Kurz gesagt</h5><ul><li>Aufbewahrungspflichtig → ELO. Teilen → bwSync&amp;Share. Kurzlebig → in der App.</li><li>Vorhandene Daten nicht doppelt anlegen.</li></ul></div>
+  <h2>Entscheidungshilfe</h2>
+  <div class="decide">
+    <div class="card"><p class="q">Muss revisionssicher aufbewahrt werden?<br><small>Belege Dienstreise</small></p><div class="arrow" aria-hidden="true"><svg class="i" aria-hidden="true"><use href="#i-down"/></svg></div><div class="ans">ELO</div><p>App = Oberfläche davor.</p></div>
+    <div class="card"><p class="q">Dateien teilen und bearbeiten?<br><small>Gruppendokumente</small></p><div class="arrow" aria-hidden="true"><svg class="i" aria-hidden="true"><use href="#i-down"/></svg></div><div class="ans">bwSync&amp;Share</div><p>Nextcloud.</p></div>
+    <div class="card"><p class="q">Kurzlebige Arbeitsdaten?<br><small>Raumbuchung heute</small></p><div class="arrow" aria-hidden="true"><svg class="i" aria-hidden="true"><use href="#i-down"/></svg></div><div class="ans">In der App</div><p>Datei oder SQLite.</p></div>
+    <div class="card"><p class="q">Gibt es die Daten schon?<br><small>Räume</small></p><div class="arrow" aria-hidden="true"><svg class="i" aria-hidden="true"><use href="#i-down"/></svg></div><div class="ans">Vorhandenes System</div><p>Über den Adapter.</p></div>
+  </div>
+  <h2>Besonderheit ELO</h2>
+  <div class="callout c-warn"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-warn"/></svg></div><div><h5>Achtung</h5><p>Sie müssen wissen, <b>wo</b> gespeichert wird (Basisknoten im Aktenplan) und mit welchen <b>Berechtigungen</b>. Die KI kann das nicht wissen – nennen Sie es im Prompt.</p></div></div>
+  <div class="callout c-wip"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-wip"/></svg></div><div><h5>Noch in Arbeit</h5><p>Verbindliche Richtlinien „Was gehört in ELO, was in die Nextcloud?“ werden erarbeitet.</p></div></div>
+</article>
+
+<!-- ======================================================== -->
+<!-- EINRICHTUNG                                               -->
+<!-- ======================================================== -->
+<article class="page" data-page="voraussetzungen" data-title="Voraussetzungen" data-group="Einrichtung" data-level="Einsteiger">
+  <h1>Voraussetzungen</h1>
+  <p class="lede">Einmal pro Rechner, etwa 30–60 Minuten. Haken Sie ab, was erledigt ist – der Stand wird in Ihrem Browser gemerkt.</p>
+  <h2>Programme installieren</h2>
+  <p>Wählen Sie Ihr Betriebssystem. Die Auswahl gilt für die ganze Dokumentation und wird gemerkt.</p>
+  <div class="tabs os" data-sync="os"><div class="tabs-bar" role="tablist" aria-label="Betriebssystem"><button type="button" role="tab" data-t="win" class="on"><svg class="i i-os" aria-hidden="true"><use href="#i-os-win"/></svg>Windows</button><button type="button" role="tab" data-t="mac"><svg class="i i-os" aria-hidden="true"><use href="#i-os-mac"/></svg>macOS</button><button type="button" role="tab" data-t="linux"><svg class="i i-os" aria-hidden="true"><use href="#i-os-linux"/></svg>Linux (Ubuntu)</button></div><div class="tab-p on" data-t="win" role="tabpanel"><p><b>PowerShell</b> öffnen: Startmenü, „PowerShell“ eintippen, Enter.</p><p>Mit <code>winget</code> installieren (in Windows 10/11 enthalten):</p><div class="code"><button class="copy" data-copy="winget install -e --id Microsoft.VisualStudioCode&#10;winget install -e --id Git.Git&#10;winget install -e --id Docker.DockerDesktop">Kopieren</button><span class="p">PS&gt; </span>winget install -e --id Microsoft.VisualStudioCode<br><span class="p">PS&gt; </span>winget install -e --id Git.Git<br><span class="p">PS&gt; </span>winget install -e --id Docker.DockerDesktop</div><p>Docker Desktop braucht WSL2. Wie das geht: <a href="#docker">Docker installieren</a>.</p></div><div class="tab-p" data-t="mac" role="tabpanel"><p><b>Terminal</b> öffnen: <kbd>⌘</kbd>+<kbd>Leertaste</kbd>, „Terminal“ eintippen, Enter.</p><p>Mit <a href="https://brew.sh">Homebrew</a> installieren. Ohne Homebrew: Installationspakete von den Webseiten der Programme.</p><div class="code"><button class="copy" data-copy="brew install --cask visual-studio-code&#10;brew install git&#10;brew install --cask docker">Kopieren</button><span class="p">$ </span>brew install --cask visual-studio-code<br><span class="p">$ </span>brew install git<br><span class="p">$ </span>brew install --cask docker</div></div><div class="tab-p" data-t="linux" role="tabpanel"><p><b>Terminal</b> öffnen: <kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>T</kbd>.</p><p>Für Ubuntu. Docker Engine richten Sie danach nach <a href="#docker">Docker installieren</a> ein.</p><div class="code"><button class="copy" data-copy="sudo snap install code --classic&#10;sudo apt update&#10;sudo apt install -y git make">Kopieren</button><span class="p">$ </span>sudo snap install code --classic<br><span class="p">$ </span>sudo apt update<br><span class="p">$ </span>sudo apt install -y git make</div></div></div>
+  <div class="callout c-info"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-info"/></svg></div><div><h5>Dienstgerät ohne Admin-Rechte?</h5><p>Dann installiert die IT die Programme für Sie. Nennen Sie VS Code, Git und Docker.</p></div></div>
+  <h2>Checkliste</h2>
+  <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 8</span></div>
+  <ul class="check" data-store="awp-setup">
+    <li><label><input type="checkbox"><span><b>VS Code</b><br><small>code.visualstudio.com</small></span><span class="pill">Host</span></label></li>
+    <li><label><input type="checkbox"><span><b>Git</b><br><small>git-scm.com</small></span><span class="pill">Host</span></label></li>
+    <li><label><input type="checkbox"><span><b>Docker</b> installiert und gestartet<br><small><a href="#docker">Anleitung je Betriebssystem</a></small></span><span class="pill">Host</span></label></li>
+    <li><label><input type="checkbox"><span><code>docker version</code> zeigt „Client“ und „Server“</span><span class="pill">Host</span></label></li>
+    <li><label><input type="checkbox"><span>Erweiterung <b>Dev Containers</b> (Microsoft)</span><span class="pill">VS Code</span></label></li>
+    <li><label><input type="checkbox"><span>Erweiterung <b>Claude Code</b> + Konto</span><span class="pill">VS Code</span></label></li>
+    <li><label><input type="checkbox"><span><b>GitHub-Konto</b> mit Projektzugriff</span><span class="pill">Plattform-Team</span></label></li>
+    <li><label><input type="checkbox"><span><b>VPN</b> ins Hochschulnetz <small>(zum Testen im Test-Portal)</small></span><span class="pill">IT</span></label></li>
+  </ul>
+</article>
+
+<article class="page" data-page="docker" data-title="Docker installieren" data-group="Einrichtung" data-level="Einsteiger">
+  <h1>Docker installieren</h1>
+  <p class="lede">Docker startet den Dev Container und baut später das Image Ihrer App. Wählen Sie Ihr Betriebssystem.</p>
+  <h2>Installation</h2>
+  <div class="tabs os" data-sync="os"><div class="tabs-bar" role="tablist" aria-label="Betriebssystem"><button type="button" role="tab" data-t="win" class="on"><svg class="i i-os" aria-hidden="true"><use href="#i-os-win"/></svg>Windows</button><button type="button" role="tab" data-t="mac"><svg class="i i-os" aria-hidden="true"><use href="#i-os-mac"/></svg>macOS</button><button type="button" role="tab" data-t="linux"><svg class="i i-os" aria-hidden="true"><use href="#i-os-linux"/></svg>Linux (Ubuntu)</button></div><div class="tab-p on" data-t="win" role="tabpanel"><ol class="do"><li>PowerShell <b>als Administrator</b> öffnen (Rechtsklick, „Als Administrator ausführen“).</li><li>WSL2 einrichten, danach den Rechner neu starten.</li></ol><div class="code"><button class="copy" data-copy="wsl --install">Kopieren</button><span class="p">PS&gt; </span>wsl --install <span class="c"># einmalig, danach neu starten</span></div><ol class="do"><li>Docker Desktop installieren und starten. Warten, bis „Engine running“ erscheint.</li><li>Projektordner anlegen.</li></ol><div class="code"><button class="copy" data-copy="winget install -e --id Docker.DockerDesktop&#10;mkdir $HOME\Projects">Kopieren</button><span class="p">PS&gt; </span>winget install -e --id Docker.DockerDesktop<br><span class="p">PS&gt; </span>mkdir $HOME\Projects</div></div><div class="tab-p" data-t="mac" role="tabpanel"><ol class="do"><li>Prüfen, welcher Prozessor eingebaut ist: <code>arm64</code> bedeutet Apple Silicon (M1 und neuer), <code>x86_64</code> bedeutet Intel. Homebrew wählt automatisch die richtige Fassung.</li></ol><div class="code"><button class="copy" data-copy="uname -m">Kopieren</button><span class="p">$ </span>uname -m <span class="c"># arm64 oder x86_64</span></div><ol class="do"><li>Docker Desktop installieren und starten. Warten, bis „Engine running“ erscheint.</li><li>Projektordner anlegen. Docker fragt beim ersten Mal nach Zugriff auf den Ordner – erlauben.</li></ol><div class="code"><button class="copy" data-copy="brew install --cask docker&#10;open -a Docker&#10;mkdir -p ~/Projects">Kopieren</button><span class="p">$ </span>brew install --cask docker<br><span class="p">$ </span>open -a Docker<br><span class="p">$ </span>mkdir -p ~/Projects</div></div><div class="tab-p" data-t="linux" role="tabpanel"><ol class="do"><li><b>Docker Engine</b> aus der Paketquelle von Docker installieren (offizieller Weg für Ubuntu).</li></ol><div class="code"><button class="copy" data-copy="sudo apt update&#10;sudo apt install -y ca-certificates curl&#10;sudo install -m 0755 -d /etc/apt/keyrings&#10;sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc&#10;echo &quot;deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release &amp;&amp; echo $VERSION_CODENAME) stable&quot; | sudo tee /etc/apt/sources.list.d/docker.list&#10;sudo apt update&#10;sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin">Kopieren</button><span class="p">$ </span>sudo apt update<br><span class="p">$ </span>sudo apt install -y ca-certificates curl<br><span class="p">$ </span>sudo install -m 0755 -d /etc/apt/keyrings<br><span class="p">$ </span>sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc<br><span class="p">$ </span>echo &quot;deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release &amp;&amp; echo $VERSION_CODENAME) stable&quot; | sudo tee /etc/apt/sources.list.d/docker.list<br><span class="p">$ </span>sudo apt update<br><span class="p">$ </span>sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin</div><ol class="do"><li>Docker muss <b>ohne sudo</b> laufen. Dazu kommt Ihr Konto in die Gruppe <code>docker</code> – mit der IT klären. Danach ab- und wieder anmelden.</li><li>VS Code nie als root starten. Projektordner anlegen.</li></ol><div class="code"><button class="copy" data-copy="sudo usermod -aG docker $USER&#10;mkdir -p ~/Projects">Kopieren</button><span class="p">$ </span>sudo usermod -aG docker $USER <span class="c"># danach ab- und anmelden</span><br><span class="p">$ </span>mkdir -p ~/Projects</div></div></div>
+  <h2>Prüfen</h2>
+  <p>Der Befehl ist auf allen Systemen gleich.</p>
+  <div class="code"><button class="copy" data-copy="docker version">Kopieren</button><span class="p">$ </span>docker version <span class="c"># „Client“ und „Server“ müssen erscheinen</span></div>
+  <div class="callout c-tip"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></div><div><h5>Windows zu langsam?</h5><p>Projekt im WSL2-Dateisystem ablegen (z. B. <code>~/Projects</code> in der WSL).</p></div></div>
+</article>
+
+<article class="page" data-page="vscode" data-title="VS Code &amp; Erweiterungen" data-group="Einrichtung" data-level="Einsteiger">
+  <h1>VS Code und Erweiterungen</h1>
+  <p class="lede">Zwei Erweiterungen machen VS Code zum AWP-Arbeitsplatz.</p>
+  <h2>Dev Containers</h2>
+  <ol class="do"><li>Links auf <b>Erweiterungen</b> (vier Quadrate) – oder <span class="os-v win"><svg class="i" aria-hidden="true"><use href="#i-os-win"/></svg><kbd>Strg</kbd>+<kbd>Umschalt</kbd>+<kbd>X</kbd></span><span class="os-v linux"><svg class="i" aria-hidden="true"><use href="#i-os-linux"/></svg><kbd>Strg</kbd>+<kbd>Umschalt</kbd>+<kbd>X</kbd></span><span class="os-v mac"><svg class="i" aria-hidden="true"><use href="#i-os-mac"/></svg><kbd>⌘</kbd>+<kbd>Umschalt</kbd>+<kbd>X</kbd></span>.</li><li><b>Dev Containers</b> suchen – Anbieter <b>Microsoft</b>, Kennung <code>ms-vscode-remote.remote-containers</code>.</li><li><b>Installieren</b>.</li></ol>
+  <h2>Claude Code</h2>
+  <ol class="do"><li>In <b>Erweiterungen</b> nach <b>Claude Code</b> suchen und installieren.</li><li>Mit Ihrem Konto anmelden.</li></ol>
+  <h2>Per Befehl installieren</h2>
+  <p>Schneller geht es im Terminal. Der Befehl <code>code</code> steht nach der Installation von VS Code bereit.</p>
+  <div class="tabs os" data-sync="os"><div class="tabs-bar" role="tablist" aria-label="Betriebssystem"><button type="button" role="tab" data-t="win" class="on"><svg class="i i-os" aria-hidden="true"><use href="#i-os-win"/></svg>Windows</button><button type="button" role="tab" data-t="mac"><svg class="i i-os" aria-hidden="true"><use href="#i-os-mac"/></svg>macOS</button><button type="button" role="tab" data-t="linux"><svg class="i i-os" aria-hidden="true"><use href="#i-os-linux"/></svg>Linux (Ubuntu)</button></div><div class="tab-p on" data-t="win" role="tabpanel"><p><b>PowerShell</b> öffnen: Startmenü, „PowerShell“ eintippen, Enter.</p><div class="code"><button class="copy" data-copy="code --install-extension ms-vscode-remote.remote-containers&#10;code --install-extension anthropic.claude-code">Kopieren</button><span class="p">PS&gt; </span>code --install-extension ms-vscode-remote.remote-containers<br><span class="p">PS&gt; </span>code --install-extension anthropic.claude-code</div></div><div class="tab-p" data-t="mac" role="tabpanel"><p>Fehlt der Befehl <code>code</code>: in VS Code <kbd>⌘</kbd>+<kbd>Umschalt</kbd>+<kbd>P</kbd> → <b>Shell Command: Install ‘code’ command in PATH</b>.</p><div class="code"><button class="copy" data-copy="code --install-extension ms-vscode-remote.remote-containers&#10;code --install-extension anthropic.claude-code">Kopieren</button><span class="p">$ </span>code --install-extension ms-vscode-remote.remote-containers<br><span class="p">$ </span>code --install-extension anthropic.claude-code</div></div><div class="tab-p" data-t="linux" role="tabpanel"><p><b>Terminal</b> öffnen: <kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>T</kbd>.</p><div class="code"><button class="copy" data-copy="code --install-extension ms-vscode-remote.remote-containers&#10;code --install-extension anthropic.claude-code">Kopieren</button><span class="p">$ </span>code --install-extension ms-vscode-remote.remote-containers<br><span class="p">$ </span>code --install-extension anthropic.claude-code</div></div></div>
+  <div class="callout c-info"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-info"/></svg></div><div><h5>Gut zu wissen</h5><p>Im Dev Container müssen Sie sich bei Claude Code <b>erneut anmelden</b> – auch nach jedem Rebuild. Der Container ist eine eigene Umgebung.</p></div></div>
+</article>
+
+<!-- ======================================================== -->
+<!-- ANLEITUNG                                                  -->
+<!-- ======================================================== -->
+<article class="page" data-page="t-ziel" data-title="Überblick: So entsteht Ihre App" data-group="Anleitung: Eigene App" data-level="Einsteiger">
+  <h1>Anleitung: Ihre eigene App</h1>
+  <p class="lede">Diese Anleitung begleitet Sie von der ersten Idee bis zur Freigabe im Portal. Sie brauchen keine Programmierkenntnisse – nur eine klare Vorstellung davon, was Ihre App tun soll.</p>
+  <div class="tldr"><h5>Kurz gesagt</h5><ul>
+    <li>Zehn kurze Etappen, jede mit Checkliste. Sie können jederzeit pausieren – Ihr Fortschritt wird im Browser gemerkt.</li>
+    <li>Den Code schreibt die KI. Sie beschreiben, probieren aus und entscheiden.</li>
+    <li>Ins Portal bringen Sie die App nicht selbst. Das entscheidet und erledigt die <b>Freigabe-Verantwortliche</b>.</li>
+  </ul></div>
+
+  <h2>Der Ablauf</h2>
+  <figure class="fig"><div class="fig-body">
+    <nav class="flow" aria-label="Etappen der Anleitung">
+      <a href="#t1"><span class="dot" aria-hidden="true"></span><span><b>Idee klären</b><small>Wer, was, welche Daten – auf einer Seite</small><span class="where">Sie</span></span></a>
+      <a href="#t2"><span class="dot" aria-hidden="true"></span><span><b>Projekt anlegen</b><small>Eigenes Repository aus der Vorlage</small><span class="where">Sie</span></span></a>
+      <a href="#t3"><span class="dot" aria-hidden="true"></span><span><b>Arbeitsplatz öffnen</b><small>VS Code im Dev Container</small><span class="where">Sie</span></span></a>
+      <a href="#t4"><span class="dot" aria-hidden="true"></span><span><b>Steckbrief der App</b><small>Name, Kurzname, Rollen in <code>manifest.json</code></small><span class="where">Sie</span></span></a>
+      <a href="#t5"><span class="dot" aria-hidden="true"></span><span><b>Mit der KI bauen</b><small>Beschreiben, Rückfragen beantworten, in Runden verbessern</small><span class="where">Sie + KI</span></span></a>
+      <a href="#t6"><span class="dot" aria-hidden="true"></span><span><b>Ausprobieren</b><small>Mit Testpersonen und Testplan</small><span class="where">Sie</span></span></a>
+      <a href="#t7"><span class="dot" aria-hidden="true"></span><span><b>Automatisch prüfen</b><small><code>make check</code> und Prüfnachweis</small><span class="where">Sie</span></span></a>
+      <a href="#t8"><span class="dot" aria-hidden="true"></span><span><b>Sichern</b><small>Änderungen ansehen und committen</small><span class="where">Sie</span></span></a>
+      <a href="#t9"><span class="dot" aria-hidden="true"></span><span><b>Review</b><small>Eine zweite Person prüft</small><span class="where">Sie + Review</span></span></a>
+      <a href="#t10"><span class="dot" aria-hidden="true"></span><span><b>Freigabe beantragen</b><small>Entscheidung über das Portal</small><span class="where">Freigabe</span></span></a>
+    </nav>
+  </div><figcaption>Die Etappen bauen aufeinander auf. Klicken Sie auf eine Etappe, um direkt dorthin zu springen.</figcaption></figure>
+
+  <h2>Was Sie mitbringen</h2>
+  <ul class="l">
+    <li><b>Eine Idee</b> für eine kleine, klar umrissene Aufgabe aus Ihrem Arbeitsalltag.</li>
+    <li><b>Einen eingerichteten Rechner</b> mit VS Code, Git und Docker – siehe <a href="#voraussetzungen">Voraussetzungen</a>.</li>
+    <li><b>Zeit in kleinen Portionen.</b> Jede Etappe ist in einer Sitzung zu schaffen.</li>
+    <li><b>Am besten eine zweite Person</b> mit etwas Technikerfahrung. Im Tandem geht es leichter – siehe <a href="#support">Rollen &amp; Support</a>.</li>
+  </ul>
+
+  <h2>Wer entscheidet über das Portal?</h2>
+  <p>Das Portal ist für alle Angehörigen der Hochschule da. Deshalb bringt nur eine benannte Person Apps dorthin: die <b>Freigabe-Verantwortliche</b>. Sie prüft Ihren Antrag, stellt die App zum Testen bereit und entscheidet, ob sie ins Portal kommt. Sprechen Sie sie am besten schon an, wenn Ihre Idee steht.</p>
+  <div class="contact">
+    <div class="contact-head"><span class="contact-ic"><svg class="i" aria-hidden="true"><use href="#i-person"/></svg></span><div><span class="k">Freigabe-Verantwortliche</span><p class="contact-name"><span class="ph">[Vorname Nachname]</span></p><p class="contact-role"><span class="ph">[Funktion, Abteilung]</span></p></div></div>
+    <dl><dt>E-Mail</dt><dd><span class="ph">[name@h-ka.de]</span></dd><dt>Telefon</dt><dd><span class="ph">[+49 721 925-xxxx]</span></dd><dt>Sprechzeit</dt><dd><span class="ph">[Tag, Uhrzeit, Raum]</span></dd><dt>Vertretung</dt><dd><span class="ph">[Vorname Nachname]</span></dd></dl>
+    <p class="contact-note">Platzhalter – die Kontaktdaten trägt das Plattform-Team ein.</p>
+  </div>
+
+  <h2>Ihr Fortschritt</h2>
+  <div class="check-bar"><div class="track"><div class="fill" id="tutFill"></div></div><span id="tutCount">0 von 10</span></div>
+  <p>Am Ende jeder Etappe können Sie sie als erledigt markieren. Der Haken erscheint auch links in der Navigation.</p>
+  <p class="actions"><a class="btn btn--primary" href="#t1">Mit der ersten Etappe beginnen</a></p>
+</article>
+
+<article class="page" data-page="t1" data-title="Idee klären" data-group="Anleitung: Eigene App" data-tut="1" data-time="15">
+  <h1>Idee klären</h1>
+  <p class="lede">Bevor die KI etwas baut, schreiben Sie Ihre Idee auf einer Seite auf. Das ist die wichtigste Etappe: Je klarer die Idee, desto besser das Ergebnis.</p>
+  <h2>Die Fragen</h2>
+  <p>Beantworten Sie diese Fragen in eigenen Worten. Fachbegriffe sind nicht nötig.</p>
+  <div class="grid2">
+    <div class="card"><h4>Wer nutzt die App?</h4><p>Zum Beispiel Studierende, Beschäftigte einer Abteilung, Lehrende. Je kleiner die Gruppe, desto besser.</p></div>
+    <div class="card"><h4>Was sieht man?</h4><p>Welche Informationen stehen auf der ersten Seite? Eine Liste, eine Übersicht, ein Formular?</p></div>
+    <div class="card"><h4>Was kann man tun?</h4><p>Welche Handlungen gibt es? Etwas eintragen, auswählen, hochladen, absenden?</p></div>
+    <div class="card"><h4>Welche Daten?</h4><p>Was wird angezeigt oder gespeichert – und wo darf es liegen? Hilfe: <a href="#daten">Wo Daten liegen dürfen</a>.</p></div>
+    <div class="card"><h4>Welche Fachsysteme?</h4><p>Braucht die App Daten aus einem bestehenden System, etwa Noten oder bwSync&amp;Share? Oder keines?</p></div>
+    <div class="card"><h4>Was soll sie nicht tun?</h4><p>Grenzen sind genauso wichtig. Zum Beispiel: „keine Daten anderer Personen anzeigen“.</p></div>
+  </div>
+
+  <h2>Passt die Idee zur Plattform?</h2>
+  <div class="grid2">
+    <div class="card top"><span class="k">Gut geeignet</span><h4>Klein und klar</h4><ul class="l small-list"><li>Löst genau eine Aufgabe</li><li>Wenige Seiten, einfache Bedienung</li><li>Klare Gruppe von Nutzenden</li><li>Daten bleiben, wo sie hingehören</li></ul></div>
+    <div class="card top fx"><span class="k">Besser anders lösen</span><h4>Groß oder heikel</h4><ul class="l small-list"><li>Viele verschiedene Abläufe in einer App</li><li>Ersetzt ein ganzes Fachsystem</li><li>Sensible Daten ohne geklärte Ablage</li><li>Muss rund um die Uhr ausfallsicher sein</li></ul></div>
+  </div>
+  <p>Unsicher? Fragen Sie die Freigabe-Verantwortliche. Ein kurzes Gespräch am Anfang spart später viel Zeit.</p>
+
+  <h2>Vorlage: Ideen-Steckbrief</h2>
+  <p>Kopieren Sie die Vorlage in ein Textdokument und füllen Sie sie aus. Sie brauchen sie in Etappe <a href="#t5">Mit der KI bauen</a> und beim <a href="#t10">Freigabe-Antrag</a>.</p>
+  <div class="code"><button class="copy" data-copy="App-Idee: <kurzer Name>&#10;Wer nutzt sie: <Gruppe, z. B. Studierende>&#10;Was man sieht: <...>&#10;Was man tun kann: <...>&#10;Daten: <welche, woher, wo gespeichert>&#10;Fachsysteme: <keine | Noten | bwSync&Share | ...>&#10;Nicht gewünscht: <...>&#10;Fachliche Ansprechperson: <Name>">Kopieren</button><span class="c">App-Idee:</span> &lt;kurzer Name&gt;<br><span class="c">Wer nutzt sie:</span> &lt;Gruppe, z. B. Studierende&gt;<br><span class="c">Was man sieht:</span> &lt;…&gt;<br><span class="c">Was man tun kann:</span> &lt;…&gt;<br><span class="c">Daten:</span> &lt;welche, woher, wo gespeichert&gt;<br><span class="c">Fachsysteme:</span> &lt;keine | Noten | bwSync&amp;Share | …&gt;<br><span class="c">Nicht gewünscht:</span> &lt;…&gt;<br><span class="c">Fachliche Ansprechperson:</span> &lt;Name&gt;</div>
+  <div class="callout c-warn"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-warn"/></svg></div><div><h5>Keine echten Daten</h5><p>Schreiben Sie keine echten Namen, Matrikelnummern oder andere personenbezogenen Daten in den Steckbrief. Beschreiben Sie die Art der Daten, nicht die Daten selbst.</p></div></div>
+
+  <h2>Checkliste</h2>
+  <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 5</span></div>
+  <ul class="check" data-store="awp-t1">
+    <li><label><input type="checkbox"><span>Alle Fragen des Ideen-Steckbriefs sind beantwortet</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Die App löst <b>eine</b> klar umrissene Aufgabe</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Klar ist, wo die Daten liegen dürfen</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Eine fachliche Ansprechperson ist benannt</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Idee kurz mit der Freigabe-Verantwortlichen abgestimmt <small>(empfohlen)</small></span><span class="pill">Freigabe</span></label></li>
+  </ul>
+</article>
+
+<article class="page" data-page="t2" data-title="Projekt anlegen" data-group="Anleitung: Eigene App" data-tut="1" data-time="10">
+  <h1>Projekt anlegen</h1>
+  <p class="lede">Ihre App bekommt ein eigenes Repository – eine Kopie der Vorlage auf GitHub. Danach holen Sie es auf Ihren Rechner.</p>
+  <h2>Einen Kurznamen wählen</h2>
+  <p>Der Kurzname (<code>slug</code>) steht später in der Adresse der App, zum Beispiel <code>/apps/<span class="ph">ihr-kurzname</span>/</code>. Er gilt für Repository und Steckbrief.</p>
+  <ul class="l">
+    <li>nur Kleinbuchstaben, Ziffern und Bindestrich</li>
+    <li>3 bis 31 Zeichen, beginnt mit einem Buchstaben</li>
+    <li>sagt, worum es geht – zum Beispiel <code>urlaubsantrag</code> statt <code>app1</code></li>
+  </ul>
+  <h2>Python oder JavaScript?</h2>
+  <p>Wählen Sie die Vorlage. Sie müssen keine der beiden Sprachen können – die KI schreibt den Code. Im Zweifel: <b>Python</b>. Unterschiede im Detail: <a href="#golden-master">Golden Master</a>.</p>
+  <div class="lg-pick" role="group" aria-label="Programmiersprache wählen"><div class="lg-opt" data-lang-opt="py"><button type="button" data-pick-lang="py"><span class="lg-ic"><svg class="i" aria-hidden="true"><use href="#i-lang-py"/></svg></span><b>Python <span class="lg-badge">Standard</span></b><small>FastAPI, Jinja2, pytest<span class="lg-state"></span></small></button><a class="cta" href="https://github.com/alexandru-tatar/awp-hka-gold-python" target="_blank" rel="noopener">awp-hka-gold-python auf GitHub</a></div><div class="lg-opt" data-lang-opt="js"><button type="button" data-pick-lang="js"><span class="lg-ic"><svg class="i" aria-hidden="true"><use href="#i-lang-js"/></svg></span><b>JavaScript</b><small>Node.js, Express, Jest<span class="lg-state"></span></small></button><a class="cta" href="https://github.com/alexandru-tatar/awp-hka-gold-js" target="_blank" rel="noopener">awp-hka-gold-js auf GitHub</a></div></div>
+  <h2>Repository aus der Vorlage</h2>
+  <ol class="do">
+    <li>Die gewählte Vorlage auf GitHub öffnen: <span class="lang-v py"><a href="https://github.com/alexandru-tatar/awp-hka-gold-python" target="_blank" rel="noopener">awp-hka-gold-python</a></span><span class="lang-v js"><a href="https://github.com/alexandru-tatar/awp-hka-gold-js" target="_blank" rel="noopener">awp-hka-gold-js</a></span>.</li>
+    <li>Oben rechts den grünen Knopf <b>Use this template → Create a new repository</b> wählen. Gehen Sie <b>nicht</b> über <code>github.com/new</code>: Dort fehlt die Vorlage, und es entsteht ein leeres Repository.</li>
+    <li>Als Namen Ihren Kurznamen eintragen, Sichtbarkeit <b>Public</b>. <b>Include all branches</b> bleibt ausgeschaltet.</li>
+    <li><b>Create repository</b> klicken. Das neue Repository hat nur den Branch <code>main</code>.</li>
+    <li>Branch <code>develop</code> anlegen: Links oben auf das Branch-Menü (<code>main</code>) klicken, <code>develop</code> eintippen und <b>Create branch develop from main</b> wählen.</li>
+    <li>Prüfen: Es gibt die Branches <code>main</code> und <code>develop</code>.</li>
+  </ol>
+  <div class="mock gh" aria-hidden="true">
+    <div class="mock-bar"><span class="ttl">github.com · Create a new repository</span></div>
+    <div class="gh-body">
+      <p class="gh-title">Create a new repository</p>
+      <div class="gh-box">
+        <div class="gh-row"><b style="min-width:120px">Template</b><span style="border:1px solid #d0d7de;padding:4px 10px;background:#f6f8fa;display:inline-flex;gap:6px;align-items:center"><svg class="i" aria-hidden="true"><use href="#i-repo"/></svg> <span class="lang-v py">alexandru-tatar/awp-hka-gold-python</span><span class="lang-v js">alexandru-tatar/awp-hka-gold-js</span></span></div>
+        <div class="gh-row"><b style="min-width:120px">Repository name</b><span style="border:2px solid #0969da;padding:4px 10px">ihr-kurzname</span></div>
+        <div class="gh-row"><b style="min-width:120px">Sichtbarkeit</b><span><i class="radio"></i>Public</span></div>
+      </div>
+      <div style="margin-top:14px;text-align:right"><span style="background:#1f883d;color:#fff;font-weight:600;font-size:13px;border-radius:6px;padding:7px 14px">Create repository</span></div>
+    </div>
+  </div>
+  <div class="callout c-wip"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-wip"/></svg></div><div><h5>Wird automatisiert</h5><p>Künftig per Knopfdruck. Bis dahin legt das Plattform-Team das Repository auf Wunsch für Sie an.</p></div></div>
+  <h2>Auf den Rechner holen</h2>
+  <p>Die Adresse des Repositorys steht auf GitHub unter <b>Code</b>. Ersetzen Sie damit <code>REPOSITORY-ADRESSE</code>.</p>
+  <div class="tabs os" data-sync="os"><div class="tabs-bar" role="tablist" aria-label="Betriebssystem"><button type="button" role="tab" data-t="win" class="on"><svg class="i i-os" aria-hidden="true"><use href="#i-os-win"/></svg>Windows</button><button type="button" role="tab" data-t="mac"><svg class="i i-os" aria-hidden="true"><use href="#i-os-mac"/></svg>macOS</button><button type="button" role="tab" data-t="linux"><svg class="i i-os" aria-hidden="true"><use href="#i-os-linux"/></svg>Linux (Ubuntu)</button></div><div class="tab-p on" data-t="win" role="tabpanel"><p><b>PowerShell</b> öffnen: Startmenü, „PowerShell“ eintippen, Enter.</p><div class="code"><button class="copy" data-copy="cd $HOME\Projects&#10;git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname&#10;cd ihr-kurzname&#10;code .">Kopieren</button><span class="p">PS&gt; </span>cd $HOME\Projects<br><span class="p">PS&gt; </span>git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname<br><span class="p">PS&gt; </span>cd ihr-kurzname<br><span class="p">PS&gt; </span>code . <span class="c"># öffnet VS Code</span></div></div><div class="tab-p" data-t="mac" role="tabpanel"><p><b>Terminal</b> öffnen: <kbd>⌘</kbd>+<kbd>Leertaste</kbd>, „Terminal“ eintippen, Enter.</p><div class="code"><button class="copy" data-copy="cd ~/Projects&#10;git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname&#10;cd ihr-kurzname&#10;code .">Kopieren</button><span class="p">$ </span>cd ~/Projects<br><span class="p">$ </span>git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname<br><span class="p">$ </span>cd ihr-kurzname<br><span class="p">$ </span>code . <span class="c"># öffnet VS Code</span></div></div><div class="tab-p" data-t="linux" role="tabpanel"><p><b>Terminal</b> öffnen: <kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>T</kbd>.</p><div class="code"><button class="copy" data-copy="cd ~/Projects&#10;git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname&#10;cd ihr-kurzname&#10;code .">Kopieren</button><span class="p">$ </span>cd ~/Projects<br><span class="p">$ </span>git clone &quot;REPOSITORY-ADRESSE&quot; ihr-kurzname<br><span class="p">$ </span>cd ihr-kurzname<br><span class="p">$ </span>code . <span class="c"># öffnet VS Code</span></div></div></div>
+  <p class="small muted">Meldet das Terminal bei <code>code .</code> „command not found“, öffnen Sie den Ordner in VS Code über <b>Datei → Ordner öffnen</b>.</p>
+  <h2>Personen einladen</h2>
+  <p>Für das Review (<a href="#t9">Review</a>) und die Freigabe (<a href="#t10">Freigabe beantragen</a>) brauchen die Reviewerin und die Freigabe-Verantwortliche Zugriff auf Ihr Repository. Laden Sie die Reviewerin am besten jetzt ein. Auf GitHub: <b>Settings → Collaborators → Add people</b>. Die Person muss die Einladung annehmen. Vorher hat sie keinen Zugriff, und Sie können sie nicht um ein Review bitten. Die Freigabe-Verantwortliche laden Sie später ein. Alles dazu steht unter <a href="#t10">Rechte geben</a>.</p>
+  <h2>Checkliste</h2>
+  <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 5</span></div>
+  <ul class="check" data-store="awp-t2">
+    <li><label><input type="checkbox"><span>Sprache gewählt (Python oder JavaScript) und Kurzname notiert</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Repository aus der Vorlage angelegt, Sichtbarkeit öffentlich</span><span class="pill">GitHub</span></label></li>
+    <li><label><input type="checkbox"><span>Branches <code>main</code> und <code>develop</code> vorhanden</span><span class="pill">GitHub</span></label></li>
+    <li><label><input type="checkbox"><span>Projekt geklont, VS Code ist geöffnet</span><span class="pill">Ihr Rechner</span></label></li>
+    <li><label><input type="checkbox"><span>Reviewerin ist eingeladen (sie muss die Einladung noch annehmen)</span><span class="pill">GitHub</span></label></li>
+  </ul>
+</article>
+
+<article class="page" data-page="t3" data-title="Arbeitsplatz öffnen" data-group="Anleitung: Eigene App" data-tut="1" data-time="10">
+  <h1>Arbeitsplatz öffnen</h1>
+  <p class="lede">VS Code verbindet sich mit dem Dev Container – einem fertig eingerichteten Arbeitsplatz. Sie müssen nichts weiter installieren. Voraussetzung: Docker läuft.</p>
+  <h2>Schritte</h2>
+  <ol class="do">
+    <li>Befehlspalette öffnen: <span class="os-v win"><svg class="i" aria-hidden="true"><use href="#i-os-win"/></svg><kbd>Strg</kbd>+<kbd>Umschalt</kbd>+<kbd>P</kbd></span><span class="os-v linux"><svg class="i" aria-hidden="true"><use href="#i-os-linux"/></svg><kbd>Strg</kbd>+<kbd>Umschalt</kbd>+<kbd>P</kbd></span><span class="os-v mac"><svg class="i" aria-hidden="true"><use href="#i-os-mac"/></svg><kbd>⌘</kbd>+<kbd>Umschalt</kbd>+<kbd>P</kbd></span>.</li>
+    <li><b>Dev Containers: Reopen in Container</b> wählen.</li>
+    <li>Docker Desktop muss laufen (Windows, macOS) bzw. der Docker-Dienst (Linux). Warten, bis unten links <b>„Dev Container“</b> steht. Beim ersten Mal dauert das einige Minuten. Meldet VS Code „Docker returned an error“, starten Sie Docker neu und wählen Sie <b>Retry</b>.</li>
+    <li><b>Terminal → Neues Terminal</b> öffnen. Es läuft jetzt im Container.</li>
+    <li>Claude Code öffnen und anmelden. Im Container ist das jedes Mal nötig. Fehlt das Symbol in der linken Leiste: Erweiterungen öffnen, <code>Claude Code</code> (Anthropic) suchen und <b>Install in Dev Container</b> wählen.</li>
+  </ol>
+  <div class="mock" style="position:relative" aria-hidden="true">
+    <div class="mock-bar"><span class="ttl">ihr-kurzname — Visual Studio Code</span></div>
+    <div class="palette"><div class="in">dev containers: reopen</div><div class="it sel"><mark>Dev Containers: Reopen</mark> in Container</div><div class="it"><mark>Dev Containers: Reopen</mark> Folder Locally</div><div class="it">Dev Containers: Rebuild Container</div></div>
+    <div class="vs">
+      <div class="vs-act"><span class="on"></span><span></span><span></span><span></span></div>
+      <div class="vs-side"><div class="h">EXPLORER</div><div class="f d">.agents</div><div class="f d">.devcontainer</div><div class="f d">platform_sdk</div><div class="f d">src</div><div class="f d">tests</div><div class="f">Makefile</div><div class="f sel">manifest.json</div><div class="f">README.md</div></div>
+      <div class="vs-ed" style="opacity:.35"><span class="ln">1</span>{
+<span class="ln">2</span>  <span class="k1">"slug"</span>: <span class="s1">"meine-app"</span>,
+<span class="ln">3</span>  …</div>
+    </div>
+    <div class="vs-status"><span class="remote"><svg class="i" aria-hidden="true"><use href="#i-remote"/></svg> Dev Container</span><span>develop</span></div>
+  </div>
+  <details class="bg"><summary>Was im Hintergrund passiert</summary><div class="bg-body"><p>Docker lädt ein Basis-Image, installiert alle Werkzeuge in festen Versionen und bindet Ihren Projektordner ein. Ihre Dateien bleiben immer auf Ihrem Rechner. Mehr: <a href="#dev-container">Dev Container</a>.</p></div></details>
+  <h2>Checkliste</h2>
+  <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 3</span></div>
+  <ul class="check" data-store="awp-t3">
+    <li><label><input type="checkbox"><span>Unten links steht „Dev Container“</span><span class="pill">VS Code</span></label></li>
+    <li><label><input type="checkbox"><span>Das Terminal läuft im Container (<code>make</code> ist bekannt)</span><span class="pill">VS Code</span></label></li>
+    <li><label><input type="checkbox"><span>Claude Code ist geöffnet und angemeldet</span><span class="pill">VS Code</span></label></li>
+  </ul>
+  <p class="small muted">Klappt etwas nicht? <a href="#probleme">Fehlerbehebung → Einrichtung</a></p>
+</article>
+
+<article class="page" data-page="t4" data-title="Steckbrief der App" data-group="Anleitung: Eigene App" data-tut="1" data-time="5">
+  <h1>Steckbrief der App</h1>
+  <p class="lede">In der Datei <code>manifest.json</code> steht, wie Ihre App heißt, wo sie im Portal erscheint und wer sie sehen darf. Die Werte kennen Sie schon aus Ihrem Ideen-Steckbrief.</p>
+  <h2>Ausfüllen</h2>
+  <ol class="do">
+    <li><code>manifest.json</code> links im Explorer öffnen.</li>
+    <li>Die Platzhalter ersetzen – <code>meine-app</code> durch Ihren Kurznamen.</li>
+    <li>Speichern. Fertig.</li>
+  </ol>
+  <div class="mock" aria-hidden="true">
+    <div class="mock-bar"><span class="ttl">manifest.json — ihr-kurzname [Dev Container]</span></div>
+    <div class="vs" style="grid-template-columns:2.25rem 1fr">
+      <div class="vs-act"><span class="on"></span><span></span><span></span></div>
+      <div class="vs-ed"><span class="ln">1</span>{
+<span class="ln">2</span>  <span class="k1">"slug"</span>: <span class="s1">"ihr-kurzname"</span>,
+<span class="ln">3</span>  <span class="k1">"name"</span>: <span class="s1">"Name Ihrer App"</span>,
+<span class="ln">4</span>  <span class="k1">"category"</span>: <span class="s1">"Verwaltung"</span>,
+<span class="ln">5</span>  <span class="k1">"menu"</span>: { <span class="k1">"label"</span>: <span class="s1">"Text der Kachel"</span>, <span class="k1">"icon"</span>: <span class="s1">"document"</span> },
+<span class="ln">6</span>  <span class="k1">"roles"</span>: [<span class="s1">"employee"</span>],
+<span class="ln">7</span>  <span class="k1">"version"</span>: <span class="s1">"0.1.0"</span>
+<span class="ln">8</span>}</div>
+    </div>
+  </div>
+  <h2>Was bedeuten die Felder?</h2>
+  <div class="tbl-wrap"><table><thead><tr><th>Feld</th><th>Bedeutung</th><th>Aus Ihrem Ideen-Steckbrief</th></tr></thead><tbody>
+    <tr><td><code>slug</code></td><td>Kurzname in der Adresse</td><td>Ihr Kurzname aus der letzten Etappe</td></tr>
+    <tr><td><code>name</code></td><td>Angezeigter Name</td><td>„App-Idee“</td></tr>
+    <tr><td><code>category</code></td><td>Gruppe im Portal: <code>Studium</code>, <code>Verwaltung</code>, <code>Kommunikation</code>, <code>Sonstiges</code></td><td>passend zum Thema</td></tr>
+    <tr><td><code>menu</code></td><td>Text und Symbol der Kachel</td><td>kurz, ein bis drei Wörter</td></tr>
+    <tr><td><code>roles</code></td><td>Wer die App sehen darf</td><td>„Wer nutzt sie“ – so klein wie möglich</td></tr>
+    <tr><td><code>version</code></td><td>Versionsnummer</td><td>für den Anfang <code>0.1.0</code></td></tr>
+  </tbody></table></div>
+  <div class="callout c-warn"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-warn"/></svg></div><div><h5>Pflicht</h5><p>Der <code>slug</code> darf nicht <code>meine-app</code> bleiben. Unsicher bei Rollen oder Symbol? Lassen Sie es die KI im nächsten Schritt prüfen. Alle erlaubten Werte: <a href="#manifest">Referenz manifest.json</a>.</p></div></div>
+  <h2>Checkliste</h2>
+  <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 3</span></div>
+  <ul class="check" data-store="awp-t4">
+    <li><label><input type="checkbox"><span><code>slug</code> ist Ihr Kurzname, nicht mehr <code>meine-app</code></span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Name, Kategorie und Kachel-Text passen</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Rollen sind die kleinste nötige Gruppe</span><span class="pill">Sie</span></label></li>
+  </ul>
+</article>
+
+<article class="page" data-page="t5" data-title="Mit der KI bauen" data-group="Anleitung: Eigene App" data-tut="1" data-time="30">
+  <h1>Mit der KI bauen</h1>
+  <p class="lede">Jetzt beschreiben Sie Claude Code Ihre Idee. Die KI stellt Rückfragen, schreibt den Code und hält sich dabei an die Regeln der Hochschule. Sie bleiben am Steuer.</p>
+  <h2>So läuft ein Gespräch</h2>
+  <ol class="do">
+    <li><b>Beschreiben:</b> Prompt-Vorlage unten kopieren und mit Ihrem Ideen-Steckbrief füllen.</li>
+    <li><b>Rückfragen beantworten:</b> Die KI fragt nach, wenn etwas offen ist. Antworten Sie fachlich, in eigenen Worten.</li>
+    <li><b>Mitlesen:</b> Die KI zeigt, welche Dateien sie ändert. Sie müssen den Code nicht verstehen – aber wissen, was die App danach können soll.</li>
+    <li><b>Befehle nur erlauben, wenn klar ist, was sie tun.</b> Im Zweifel nachfragen: „Was macht dieser Befehl?“ Stellen Sie dafür im Eingabefeld von Claude Code den Modus <b>Manual</b> ein, dann fragt Claude vor jedem Befehl. Im Modus <b>Auto</b> entscheidet Claude selbst.</li>
+    <li><b>Ausprobieren</b> (nächste Etappe) und dann die nächste Runde beginnen.</li>
+  </ol>
+  <div class="chat">
+    <p class="chat-topic"><svg class="i" aria-hidden="true"><use href="#i-dialog"/></svg> So kann der Anfang aussehen</p>
+    <div class="chat-me"><span class="who">Sie</span><p>Ziel: Ich brauche eine App, mit der Beschäftigte meiner Abteilung ihre Anträge einreichen und den Stand sehen können. Rollen: employee. Daten: nur Antragsdaten, in der App gespeichert. Fachsysteme: keine. Nicht gewünscht: Anträge anderer Personen sehen. Bitte halte dich an .agents/skills und committe nicht selbst.</p></div>
+    <div class="chat-ai"><span class="who">KI</span><p>Danke, das ist gut beschrieben. Zwei Rückfragen, bevor ich anfange:</p><p>Welche Angaben gehören zu einem Antrag – nur Betreff und Text, oder auch ein Datum?<br>Soll man einen eingereichten Antrag noch ändern oder zurückziehen können?</p></div>
+  </div>
+  <h2>Prompt-Vorlage</h2>
+  <div class="code"><button class="copy" data-copy="Ziel: Ich brauche eine App, mit der <Wer> <Was> kann.&#10;Rollen: <...>&#10;Was man sieht: <...>&#10;Was man tun kann: <...>&#10;Daten: <...> · Speicherort: <App | ELO (Ablageort) | bwSync&Share>&#10;Fachsysteme: <keine | ...>&#10;Nicht gewünscht: <...>&#10;Bitte stelle Rückfragen, wenn etwas unklar ist.&#10;Bitte halte dich an .agents/skills und committe nicht selbst.">Kopieren</button><span class="c">Ziel:</span> Ich brauche eine App, mit der &lt;Wer&gt; &lt;Was&gt; kann.<br><span class="c">Rollen:</span> &lt;…&gt;<br><span class="c">Was man sieht:</span> &lt;…&gt;<br><span class="c">Was man tun kann:</span> &lt;…&gt;<br><span class="c">Daten:</span> &lt;…&gt; · Speicherort: &lt;App | ELO | bwSync&amp;Share&gt;<br><span class="c">Fachsysteme:</span> &lt;keine | …&gt;<br><span class="c">Nicht gewünscht:</span> &lt;…&gt;<br>Bitte stelle Rückfragen, wenn etwas unklar ist.<br>Bitte halte dich an .agents/skills und committe nicht selbst.</div>
+  <h2>In Runden arbeiten</h2>
+  <p>Bauen Sie nicht alles auf einmal. Erst die Kernfunktion, dann Schritt für Schritt mehr. Nach jeder Runde ausprobieren.</p>
+  <div class="grid2">
+    <div class="card"><span class="k">Erste Runde</span><h4>Nur das Wichtigste</h4><p>„Baue zuerst nur die Übersichtsseite mit der Liste. Noch ohne Formular.“</p></div>
+    <div class="card"><span class="k">Weitere Runden</span><h4>Gezielt ergänzen</h4><p>„Füge jetzt das Formular zum Einreichen hinzu.“ · „Vor dem Absenden soll nachgefragt werden.“</p></div>
+    <div class="card"><span class="k">Korrigieren</span><h4>Sagen, was stört</h4><p>„Die Fehlermeldung ist zu technisch, formuliere sie einfacher.“ · „Die Spalte Datum fehlt.“</p></div>
+    <div class="card"><span class="k">Verstehen</span><h4>Einfach fragen</h4><p>„Erkläre mir in zwei Sätzen, was du geändert hast.“ · „Was passiert, wenn das Fachsystem nicht erreichbar ist?“</p></div>
+  </div>
+  <div class="callout c-info"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-info"/></svg></div><div><h5>Die KI kennt die Regeln</h5><p>Design, Barrierefreiheit, Anmeldung und Umgang mit Passwörtern beachtet die KI von selbst – dafür sorgen die <a href="#ki">Skills</a>. Sie müssen sie nicht erwähnen.</p></div></div>
+  <h2>Checkliste</h2>
+  <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 5</span></div>
+  <ul class="check" data-store="awp-t5">
+    <li><label><input type="checkbox"><span>Prompt aus dem Ideen-Steckbrief gestellt</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Alle Rückfragen der KI fachlich beantwortet</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Keine echten Daten, Namen oder Passwörter im Gespräch</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Nur Befehle erlaubt, deren Zweck klar war</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Die KI hat nichts selbst committet</span><span class="pill">Sie</span></label></li>
+  </ul>
+</article>
+
+<article class="page" data-page="t6" data-title="Ausprobieren" data-group="Anleitung: Eigene App" data-tut="1" data-time="15">
+  <h1>Ausprobieren</h1>
+  <p class="lede">Sie starten die App auf Ihrem Rechner und bedienen sie wie später die Nutzenden – mit erfundenen Testpersonen.</p>
+  <h2>Starten</h2>
+  <p>Im Terminal von VS Code – also im Container. Dort ist der Befehl auf allen Systemen gleich.</p>
+  <div class="code"><button class="copy" data-copy="make dev">Kopieren</button><span class="p">$ </span>make dev <span class="c"># → http://localhost:8080</span></div>
+  <ol class="do">
+    <li>Terminal offen lassen und <code>http://localhost:8080</code> im Browser öffnen. Zeigt der Browser eine andere Anwendung, belegt ein anderes Programm den Port 8080. Das kann auch der Dev Container einer früheren App sein, der noch offen ist. Öffnen Sie dann in dessen VS-Code-Fenster die Befehlspalette und wählen Sie <b>Remote: Close Remote Connection</b>. Im Reiter <b>Ports</b> von VS Code steht, unter welcher Adresse die App erreichbar ist.</li>
+    <li>In der Test-Anmeldung eine Testperson wählen und unter <b>Rollen aus dem Manifest</b> die Rolle ankreuzen, mit der Sie testen. Weitere Rollen tragen Sie im Feld darunter ein.</li>
+    <li>Den Testplan unten durchgehen. Beenden mit <span class="os-v win"><svg class="i" aria-hidden="true"><use href="#i-os-win"/></svg><kbd>Strg</kbd>+<kbd>C</kbd></span><span class="os-v linux"><svg class="i" aria-hidden="true"><use href="#i-os-linux"/></svg><kbd>Strg</kbd>+<kbd>C</kbd></span><span class="os-v mac"><svg class="i" aria-hidden="true"><use href="#i-os-mac"/></svg><kbd>⌃ Control</kbd>+<kbd>C</kbd></span> im Terminal.</li>
+  </ol>
+  <div class="mock br" aria-hidden="true" style="max-width:26rem">
+    <div class="mock-bar"><span class="url">localhost:8080/login</span></div>
+    <div class="login"><div class="box"><b>Test-Anmeldung</b><div style="font-size:12px;color:var(--ink-muted)">Nur für die Entwicklung</div>
+      <div class="opt sel"><i></i>Erika Musterfrau (mit Noten)</div><div class="opt"><i></i>Max Mustermann (ohne Noten)</div><div class="opt"><i></i>Rolle aus dem Manifest: employee</div>
+      <div class="go">Anmelden</div></div></div>
+  </div>
+  <h2>Testplan</h2>
+  <p>Gehen Sie diese Punkte nach jeder größeren Runde durch. Was nicht passt, beschreiben Sie der KI – genau so, wie Sie es sehen.</p>
+  <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 7</span></div>
+  <ul class="check" data-store="awp-t6">
+    <li><label><input type="checkbox"><span><b>Hauptaufgabe</b> funktioniert von Anfang bis Ende</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span><b>Jede Rolle</b> aus dem Steckbrief sieht, was sie sehen soll</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Eine <b>Rolle ohne Berechtigung</b> sieht die App nicht (Häkchen entfernen und im Feld „Weitere Rollen“ eine andere Rolle eintragen). Sie sehen die Seite <b>Kein Zugriff</b>. Das ist richtig und kein Fehler: Die App ist für diese Rolle gesperrt.</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span><b>Leerer Zustand</b>: Was steht da, wenn noch nichts vorhanden ist?</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span><b>Falsche Eingaben</b> führen zu einer verständlichen Meldung</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Alles ist <b>mit der Tastatur</b> bedienbar (Tab, Enter)</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Alle Texte sind <b>verständlich</b> und auf Deutsch</span><span class="pill">Sie</span></label></li>
+  </ul>
+  <div class="callout c-warn"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-warn"/></svg></div><div><h5>Nur lokal</h5><p>Die Test-Anmeldung hat keinen echten Schutz. Geben Sie Port 8080 nicht frei und verwenden Sie nur Testdaten.</p></div></div>
+</article>
+
+<article class="page" data-page="t7" data-title="Automatisch prüfen" data-group="Anleitung: Eigene App" data-tut="1" data-time="5">
+  <h1>Automatisch prüfen</h1>
+  <p class="lede">Ein Befehl prüft, ob Ihre App alle Regeln der Plattform einhält, und schreibt einen Prüfnachweis. Den brauchen Sie für Review und Freigabe.</p>
+  <h2>make check</h2>
+  <div class="mock" aria-hidden="true">
+    <div class="mock-bar"><span class="ttl">Terminal — make check</span></div>
+    <div class="term reveal">
+      <div class="ln2"><span class="p">$ </span>make check</div>
+      <div class="ln2"><span class="m">… (viele Zeilen: zuerst der Prüfbericht Skills)</span></div>
+      <div class="ln2"><span class="ok">Gesamtergebnis: BESTANDEN</span> · <span class="lang-v py">37 Prüfungen</span><span class="lang-v js">36 Prüfungen</span> · 0 Fehler · 0 übersprungen</div>
+      <div class="ln2"><span class="m">… (dann der Prüfbericht Starter)</span></div>
+      <div class="ln2"><span class="m">Im Starter geprüft: 17 von 40. Die übrigen prüfen Pipeline oder Prüfskript.</span></div>
+      <div class="ln2"><span class="ok">Gesamtergebnis: BESTANDEN</span> · <span class="lang-v py">36 Prüfungen</span><span class="lang-v js">33 Prüfungen</span> · 0 Fehler · <span class="hl">1 übersprungen</span></div>
+      <div class="ln2"><span class="m">… (dann make lint und make test)</span></div>
+      <div class="ln2">&nbsp;</div>
+      <div class="ln2"><span class="ok">Gesamtergebnis: BESTANDEN</span></div>
+      <div class="ln2"><span class="hl">Prüfnachweis gespeichert:</span> build/pruefberichte/pruefnachweis-aktuell.md</div>
+    </div>
+  </div>
+  <p>Die Ausgabe ist lang. Entscheidend ist die letzte Zeile <b>Gesamtergebnis: BESTANDEN</b>. Jeder Prüfbericht hat außerdem eine eigene Zeile mit der Zahl der Prüfungen und der Fehler. Eine Prüfung, die als <em>übersprungen</em> erscheint, ist normal: Der Container-Test im Starter läuft nur, wenn Docker verfügbar ist und <code>CHECK_DOCKER=1</code> gesetzt ist. Sonst steht er als übersprungen da. Der automatische Lauf prüft nur einen Teil der Regeln (17 von 40). Den Rest prüfen die Pipeline und das Review.</p>
+  <p>Die Datei <code>build/pruefberichte/pruefnachweis-aktuell.md</code> ist Ihr <b>Prüfnachweis</b>. Hängen Sie ihn an Ihr Ticket. Haben Sie kein Ticket: Die Datei liegt nicht im Repository (<code>build/</code> ist ausgeschlossen). Kopieren Sie den Abschnitt „Prüfnachweis“ in die Beschreibung des Pull Requests. Die Zeilen mit <code>[OFFEN]</code> füllt die Reviewerin aus.</p>
+  <div class="callout c-tip"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></div><div><h5>Rot? Kein Problem.</h5><p>Kopieren Sie die Meldung in Claude Code: „Das ist rot, bitte erkläre und behebe es.“ Danach erneut <code>make check</code>. Was Codes wie <code>PF-101</code> bedeuten: <a href="#fehlercodes">Fehlercodes</a>.</p></div></div>
+  <h2>Checkliste</h2>
+  <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 3</span></div>
+  <ul class="check" data-store="awp-t7">
+    <li><label><input type="checkbox"><span><code>make check</code> läuft ohne Fehler</span><span class="pill">Container</span></label></li>
+    <li><label><input type="checkbox"><span>Prüfnachweis ist erzeugt</span><span class="pill">Container</span></label></li>
+    <li><label><input type="checkbox"><span>Prüfnachweis ans Ticket gehängt oder in den Pull Request kopiert</span><span class="pill">Sie</span></label></li>
+  </ul>
+</article>
+
+<article class="page" data-page="t8" data-title="Sichern" data-group="Anleitung: Eigene App" data-tut="1" data-time="5">
+  <h1>Änderungen sichern</h1>
+  <p class="lede">Sie schauen sich an, was die KI geändert hat, und sichern den Stand auf <code>develop</code>. Ein Commit ist wie ein Speicherpunkt, zu dem Sie jederzeit zurückkönnen.</p>
+  <h2>Commit</h2>
+  <ol class="do">
+    <li>Unten links prüfen: Sie sind auf dem Branch <code>develop</code>. Steht dort <code>main</code>, klicken Sie auf den Namen und wählen Sie <code>develop</code>. Gibt es ihn nicht, fehlt der Schritt „Branch <code>develop</code> anlegen“ aus <a href="#t2">Projekt anlegen</a>.</li>
+    <li>Links <b>Quellcodeverwaltung</b> öffnen. Jede geänderte Datei einmal anklicken und <b>ansehen</b>. Rot = entfernt, grün = neu.</li>
+    <li>Eine kurze Nachricht schreiben. Haben Sie eine Ticket-Nummer, steht sie am Anfang, z. B. <code>HKA-123 Übersichtsseite und Formular</code>.</li>
+    <li><b>Commit</b> klicken, dann <b>Synchronisieren</b>.</li>
+    <li>Im Terminal noch einmal <code>make check</code> ausführen. Der neue Prüfnachweis nennt jetzt Ihren Commit (<code>Version/Commit: … (sauber)</code>) statt „mit lokalen Änderungen“. Diesen Nachweis nehmen Sie für Review und Freigabe.</li>
+  </ol>
+  <div class="mock" aria-hidden="true">
+    <div class="mock-bar"><span class="ttl">Quellcodeverwaltung — ihr-kurzname [Dev Container]</span></div>
+    <div class="scm">
+      <div class="scm-side"><div class="h">QUELLCODEVERWALTUNG</div>
+        <div class="scm-msg">HKA-123 Übersichtsseite und Formular</div>
+        <div class="scm-btn"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg> Commit</div>
+        <div class="h">ÄNDERUNGEN</div>
+        <div class="scm-f"><span><span class="lang-v py">views.py</span><span class="lang-v js">routes.js</span></span><em class="M">M</em></div>
+        <div class="scm-f"><span><span class="lang-v py">page.html</span><span class="lang-v js">page.njk</span></span><em class="M">M</em></div>
+        <div class="scm-f"><span><span class="lang-v py">test_app.py</span><span class="lang-v js">app.test.js</span></span><em class="M">M</em></div>
+        <div class="scm-f"><span>manifest.json</span><em class="M">M</em></div>
+      </div>
+      <div class="diff">
+<div class="h">@@ manifest.json @@</div>
+<div class="r">-  "slug": "meine-app",</div>
+<div class="a">+  "slug": "ihr-kurzname",</div>
+<div class="r">-  "name": "Meine App",</div>
+<div class="a">+  "name": "Name Ihrer App",</div>
+      </div>
+    </div>
+  </div>
+  <div class="callout c-info"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-info"/></svg></div><div><h5>Sie verstehen eine Änderung nicht?</h5><p>Fragen Sie Claude Code: „Was bewirkt die Änderung in <code><span class="lang-v py">views.py</span><span class="lang-v js">routes.js</span></code>?“ Committen Sie erst, wenn Sie wissen, wofür jede Datei geändert wurde.</p></div></div>
+  <h2>Checkliste</h2>
+  <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 5</span></div>
+  <ul class="check" data-store="awp-t8">
+    <li><label><input type="checkbox"><span>Branch ist <code>develop</code></span><span class="pill">VS Code</span></label></li>
+    <li><label><input type="checkbox"><span>Jede geänderte Datei angesehen</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Commit-Nachricht geschrieben (mit Ticket-Nummer, falls vorhanden)</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Synchronisiert – der Stand liegt auf GitHub</span><span class="pill">GitHub</span></label></li>
+    <li><label><input type="checkbox"><span><code>make check</code> nach dem Commit erneut ausgeführt, Prüfnachweis erneuert</span><span class="pill">Container</span></label></li>
+  </ul>
+</article>
+
+<article class="page" data-page="t9" data-title="Review" data-group="Anleitung: Eigene App" data-tut="1" data-time="10">
+  <h1>Review durch eine zweite Person</h1>
+  <p class="lede">Bevor Ihre App weitergeht, liest eine zweite Person die Änderungen. Das Vier-Augen-Prinzip schützt Sie und die Daten der Hochschule.</p>
+  <h2>Pull Request</h2>
+  <ol class="do">
+    <li>Auf GitHub einen Pull Request von <code>develop</code> nach <code>main</code> anlegen. Rechts unter <b>Reviewers</b> die Reviewerin wählen. Die Liste ist leer, solange niemand in Ihr Repository eingeladen ist oder die Einladung nicht angenommen hat (siehe <a href="#t10">Rechte geben</a>).</li>
+    <li>In die Beschreibung: Ticket-Nummer, was die App kann, Prüfnachweis.</li>
+    <li>Warten, bis die Pipeline grün ist. Ist sie rot: <a href="#fehlercodes">Fehlercodes</a> nachschlagen oder Claude Code fragen.</li>
+    <li>Kommentare der Reviewerin beantworten oder mit der KI umsetzen, neu sichern.</li>
+    <li>Nach der Freigabe im Review: <b>Merge</b>. GitHub erlaubt den Merge auch ohne Review, weil <code>main</code> noch nicht geschützt ist. Warten Sie auf die Freigabe der Reviewerin.</li>
+  </ol>
+  <div class="mock gh" aria-hidden="true">
+    <div class="mock-bar"><span class="ttl">github.com · Pull request</span></div>
+    <div class="gh-body">
+      <div class="pr-head"><span class="pr-state"><svg class="i" aria-hidden="true"><use href="#i-merge"/></svg> Open</span><b>HKA-123 Name Ihrer App: erste Version</b></div>
+      <p style="margin:0 0 12px;font-size:13px;color:#59636e">möchte Commits aus <span class="pr-branch">develop</span> nach <span class="pr-branch">main</span> übernehmen · Prüfnachweis angehängt</p>
+      <div class="pr-checks">
+        <div><svg class="i" aria-hidden="true"><use href="#i-check"/></svg><span>Pipeline · make check</span><small>bestanden</small></div>
+        <div><svg class="i" aria-hidden="true"><use href="#i-check"/></svg><span>Review · 1 Freigabe</span><small>Plattform-Team</small></div>
+        <div><span class="pr-merge">Merge pull request</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="callout c-info"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-info"/></svg></div><div><h5>Review ist noch keine Portal-Freigabe</h5><p>Das Review prüft den Code. Ob die App ins Portal kommt, entscheidet in der nächsten Etappe die Freigabe-Verantwortliche.</p></div></div>
+  <h2>Checkliste</h2>
+  <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 4</span></div>
+  <ul class="check" data-store="awp-t9">
+    <li><label><input type="checkbox"><span>Pull Request <code>develop</code> → <code>main</code> angelegt</span><span class="pill">GitHub</span></label></li>
+    <li><label><input type="checkbox"><span>Pipeline ist grün</span><span class="pill">GitHub</span></label></li>
+    <li><label><input type="checkbox"><span>Alle Kommentare aus dem Review erledigt</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Gemergt – der Stand liegt auf <code>main</code></span><span class="pill">GitHub</span></label></li>
+  </ul>
+</article>
+
+<article class="page" data-page="t10" data-title="Freigabe beantragen" data-group="Anleitung: Eigene App" data-tut="1" data-time="10">
+  <h1>Freigabe beantragen</h1>
+  <p class="lede">Ins Portal bringen Sie Ihre App nicht selbst. Das übernimmt die Freigabe-Verantwortliche: Sie stellt die App zum Testen bereit und entscheidet, ob sie ins Portal kommt.</p>
+  <h2>Warum nicht selbst?</h2>
+  <p>Das Portal nutzen alle Angehörigen der Hochschule. Damit dort nur geprüfte, betreubare Apps erscheinen, gibt es eine feste Stelle, die über die Bereitstellung entscheidet. Nur sie führt <code>make deploy</code> aus. Für Sie heißt das: Sie haben eine Ansprechperson, die Ihnen hilft, und Sie brauchen weder VPN-Zugang zur Test-VM noch Serverkenntnisse.</p>
+  <h2>Ihre Ansprechperson</h2>
+  <div class="contact">
+    <div class="contact-head"><span class="contact-ic"><svg class="i" aria-hidden="true"><use href="#i-person"/></svg></span><div><span class="k">Freigabe-Verantwortliche</span><p class="contact-name"><span class="ph">[Vorname Nachname]</span></p><p class="contact-role"><span class="ph">[Funktion, Abteilung]</span></p></div></div>
+    <dl><dt>E-Mail</dt><dd><span class="ph">[name@h-ka.de]</span></dd><dt>Telefon</dt><dd><span class="ph">[+49 721 925-xxxx]</span></dd><dt>Sprechzeit</dt><dd><span class="ph">[Tag, Uhrzeit, Raum]</span></dd><dt>Vertretung</dt><dd><span class="ph">[Vorname Nachname]</span></dd></dl>
+    <p class="contact-note">Platzhalter – die Kontaktdaten trägt das Plattform-Team ein.</p>
+  </div>
+  <h2>Was Sie schicken</h2>
+  <div class="check-bar"><div class="track"><div class="fill"></div></div><span>0 von 7</span></div>
+  <ul class="check" data-store="awp-t10">
+    <li><label><input type="checkbox"><span>Freigabe-Verantwortliche ist in Ihr Repository eingeladen und hat angenommen (siehe unten: Rechte geben)</span><span class="pill">GitHub</span></label></li>
+    <li><label><input type="checkbox"><span>Link zum Repository, Stand auf <code>main</code></span><span class="pill">GitHub</span></label></li>
+    <li><label><input type="checkbox"><span>Link zum gemergten Pull Request mit Review</span><span class="pill">GitHub</span></label></li>
+    <li><label><input type="checkbox"><span>Prüfnachweis (und Ticket-Nummer, falls vorhanden)</span><span class="pill">Ticket</span></label></li>
+    <li><label><input type="checkbox"><span>Ideen-Steckbrief: wer, was, welche Daten</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Rollen und Datenablage geklärt</span><span class="pill">Sie</span></label></li>
+    <li><label><input type="checkbox"><span>Fachliche Ansprechperson für Rückfragen</span><span class="pill">Sie</span></label></li>
+  </ul>
+  <h3>Vorlage für Ihre Nachricht</h3>
+  <div class="code"><button class="copy" data-copy="Betreff: Freigabe-Antrag <Name der App> (<Ticket-Nummer>)&#10;&#10;Guten Tag,&#10;&#10;hiermit beantrage ich die Bereitstellung meiner App auf der Test-VM und die Prüfung für das Portal.&#10;&#10;App: <Name> · Kurzname: <slug>&#10;Repository: <Link>&#10;Pull Request: <Link>&#10;Ticket: <Nummer> · Prüfnachweis: angehängt&#10;Wer nutzt die App: <Rollen>&#10;Daten und Ablage: <...>&#10;Fachliche Ansprechperson: <Name>&#10;&#10;Mit freundlichen Grüßen&#10;<Ihr Name>">Kopieren</button><span class="c">Betreff:</span> Freigabe-Antrag &lt;Name der App&gt; (&lt;Ticket-Nummer&gt;)<br><br>Guten Tag,<br><br>hiermit beantrage ich die Bereitstellung meiner App auf der Test-VM<br>und die Prüfung für das Portal.<br><br><span class="c">App:</span> &lt;Name&gt; · <span class="c">Kurzname:</span> &lt;slug&gt;<br><span class="c">Repository:</span> &lt;Link&gt;<br><span class="c">Pull Request:</span> &lt;Link&gt;<br><span class="c">Ticket:</span> &lt;Nummer&gt; · <span class="c">Prüfnachweis:</span> angehängt<br><span class="c">Wer nutzt die App:</span> &lt;Rollen&gt;<br><span class="c">Daten und Ablage:</span> &lt;…&gt;<br><span class="c">Fachliche Ansprechperson:</span> &lt;Name&gt;<br><br>Mit freundlichen Grüßen<br>&lt;Ihr Name&gt;</div>
+
+  <h2>Rechte geben</h2>
+  <p>Damit Ihre Reviewerin und die Freigabe-Verantwortliche Ihr Repository öffnen dürfen, laden Sie beide als <em>Collaborator</em> ein. Das sind Personen, die am Repository mitarbeiten dürfen. Sie brauchen dafür den GitHub-Namen der Person. Die Reviewerin laden Sie schon in Etappe <a href="#t2">Projekt anlegen</a> ein, die Freigabe-Verantwortliche spätestens jetzt.</p>
+  <ol class="do">
+    <li>Auf GitHub Ihr Repository öffnen und oben <b>Settings</b> klicken. Fehlt der Reiter, öffnen Sie das Menü <b>…</b> daneben. Links unter <b>Access</b> auf <b>Collaborators</b> klicken.</li>
+    <li><b>Add people</b> klicken, den GitHub-Namen eintippen, die Person in der Liste anklicken und die Einladung bestätigen (Knopf <b>Add … to this repository</b>).</li>
+    <li>Die Person bekommt eine E-Mail von GitHub und muss die Einladung <b>annehmen</b>. Erst danach hat sie Zugriff, und erst danach können Sie sie im Pull Request unter <b>Reviewers</b> auswählen.</li>
+    <li>Warten Sie die Annahme ab. Wie lange das dauert, entscheidet die eingeladene Person. Laden Sie deshalb früh ein und fragen Sie nach, wenn sie nach einem Tag nicht angenommen hat.</li>
+  </ol>
+  <div class="callout c-warn"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-warn"/></svg></div><div><h5>Eingeladene dürfen schreiben</h5><p>Eingeladene Personen bekommen Schreibrecht. Ein reines Leserecht gibt es bei einem Repository in einem persönlichen GitHub-Konto nicht. Laden Sie nur Personen ein, die Ihnen als Reviewerin oder als Freigabe-Verantwortliche genannt wurden.</p></div></div>
+
+  <h2>So geht es weiter</h2>
+  <ol class="tl">
+    <li><span class="a">Sie</span><p>Sie schicken den Antrag mit allen Unterlagen.</p></li>
+    <li><span class="a acc">Freigabe</span><p>Prüft die Unterlagen und meldet sich bei Rückfragen.</p></li>
+    <li><span class="a acc">Freigabe</span><p>Bringt die App mit <code>make deploy</code> auf die Test-VM. Dort erscheint sie als Kachel im Test-Portal.</p></li>
+    <li><span class="a">Gemeinsam</span><p>Sie testen die App im Test-Portal mit Testkonten – mit Ihrem Testplan aus Etappe <a href="#t6">Ausprobieren</a>, auch mit anderen Rollen.</p></li>
+    <li><span class="a acc">Freigabe</span><p>Entscheidet, ob die App ins Portal kommt, und teilt Ihnen das Ergebnis mit.</p></li>
+  </ol>
+  <div class="mock br" aria-hidden="true">
+    <div class="mock-bar"><span class="url">https://&lt;test-vm&gt;/</span></div>
+    <div class="app-top"><span class="lg">HKA</span><b>Portal</b><span class="usr"><i></i>test-employee</span></div>
+    <div class="app-body">
+      <div class="cat">Verwaltung</div>
+      <div class="tiles">
+        <div class="tile new"><i><svg class="i" aria-hidden="true"><use href="#i-document"/></svg></i><b>Ihre App</b><small>ihr-kurzname · v0.1.0</small></div>
+        <div class="tile"><i><svg class="i" aria-hidden="true"><use href="#i-calendar"/></svg></i><b>Weitere App</b><small>Beispiel</small></div>
+        <div class="tile"><i><svg class="i" aria-hidden="true"><use href="#i-folder"/></svg></i><b>Weitere App</b><small>Beispiel</small></div>
+        <div class="tile"><i><svg class="i" aria-hidden="true"><use href="#i-help"/></svg></i><b>Hilfe</b><small>Anleitungen</small></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Mögliche Entscheidungen</h2>
+  <div class="decide">
+    <div class="card"><p class="q">Alles passt</p><div class="ans">Freigegeben</div><p>Die App kommt ins Portal. Sie erhalten Bescheid, ab wann sie sichtbar ist.</p></div>
+    <div class="card"><p class="q">Es fehlt noch etwas</p><div class="ans">Nacharbeit</div><p>Sie bekommen eine Liste mit Punkten. Weiter bei <a href="#t5">Mit der KI bauen</a>, dann prüfen, sichern, Review und erneut beantragen.</p></div>
+    <div class="card"><p class="q">Passt nicht zur Plattform</p><div class="ans">Abgelehnt</div><p>Mit Begründung. Gemeinsam wird besprochen, ob es einen anderen Weg gibt, etwa über die IT.</p></div>
+    <div class="card"><p class="q">Später Änderungen?</p><div class="ans">Neuer Antrag</div><p>Jede neue Version geht denselben Weg: bauen, prüfen, Review, Freigabe.</p></div>
+  </div>
+  <div class="callout c-wip"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-wip"/></svg></div><div><h5>Noch in Arbeit</h5><p>Der Weg in den Betrieb (Live) wird gerade festgelegt. Bis dahin endet die Freigabe im Portal der Test-VM.</p></div></div>
+  <div class="callout c-tip"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-flag"/></svg></div><div><h5>Geschafft</h5><p>Sie haben Ihre Idee beschrieben, gebaut, geprüft und zur Freigabe gebracht – ohne selbst zu programmieren.</p></div></div>
+</article>
+
+<!-- ======================================================== -->
+<!-- HINTERGRUND                                               -->
+<!-- ======================================================== -->
+<article class="page" data-page="hg-gesamt" data-title="Vom Prompt zur Kachel" data-group="Hintergrund">
+  <h1>Vom Prompt zur Kachel</h1>
+  <p class="lede">Drei Orte, ein Weg. So wandert Ihre App von Ihrem Rechner ins Portal.</p>
+  <figure class="fig"><div class="fig-body">
+    <svg class="diag" viewBox="0 0 900 470" role="img" aria-labelledby="allT">
+      <title id="allT">Gesamtbild: Ihr Rechner, GitHub und Test-VM mit allen Bausteinen</title>
+      <defs><marker id="h6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="d-head-acc"/></marker>
+      <marker id="h6g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="d-head"/></marker></defs>
+      <!-- zones -->
+      <rect x="8" y="10" width="270" height="450" class="d-zone-fill"/><text x="26" y="38" class="d-lab">Ihr Rechner</text>
+      <rect x="308" y="10" width="250" height="300" class="d-zone-fill"/><text x="326" y="38" class="d-lab">GitHub</text>
+      <rect x="588" y="10" width="304" height="450" class="d-zone-fill"/><text x="606" y="38" class="d-lab">Test-VM · Hochschulnetz</text>
+      <!-- rechner -->
+      <rect x="28" y="56" width="230" height="44" class="d-focus"/><text x="44" y="83" class="d-t">VS Code</text>
+      <rect x="28" y="112" width="230" height="150" class="d-acc-line"/><text x="44" y="138" class="d-t-c">Dev Container</text>
+      <rect x="44" y="152" width="198" height="34" class="d-soft"/><text x="56" y="174" class="d-mono">Claude Code → Code</text>
+      <rect x="44" y="194" width="198" height="34" class="d-soft"/><text x="56" y="216" class="d-mono">make dev · make check</text>
+      <text x="44" y="250" class="d-s">Projektordner eingebunden</text>
+      <rect x="28" y="290" width="230" height="54" class="d-box"/><text x="44" y="314" class="d-t">Docker (Host)</text><text x="44" y="333" class="d-s">baut das Image (Freigabe)</text>
+      <rect x="28" y="362" width="230" height="78" class="d-soft"/><text x="44" y="388" class="d-s">Nur Testdaten.</text><text x="44" y="406" class="d-s">Kein Zugriff auf</text><text x="44" y="424" class="d-s">Fachsysteme.</text>
+      <!-- github -->
+      <rect x="328" y="56" width="210" height="44" class="d-box"/><text x="344" y="83" class="d-mono" style="font-weight:700">develop</text>
+      <rect x="328" y="122" width="210" height="78" class="d-box"/><text x="344" y="148" class="d-t">Pull Request</text><text x="344" y="168" class="d-s">Review (4 Augen)</text><text x="344" y="186" class="d-s">Pipeline: make check</text>
+      <rect x="328" y="222" width="210" height="44" class="d-acc"/><text x="344" y="249" class="d-w" style="font-family:var(--mono)">main</text><use href="#i-lock" x="510" y="236" width="16" height="16" class="d-ico" style="color:#fff"/>
+      <!-- vm -->
+      <rect x="608" y="56" width="264" height="50" class="d-acc"/><text x="624" y="86" class="d-w">Security-Gateway</text>
+      <rect x="608" y="116" width="126" height="40" class="d-box"/><text x="620" y="141" class="d-t" style="font-size:13.5px">Keycloak</text>
+      <rect x="746" y="116" width="126" height="40" class="d-box"/><text x="758" y="141" class="d-t" style="font-size:13.5px">Redis</text>
+      <rect x="608" y="170" width="264" height="44" class="d-box"/><text x="624" y="197" class="d-t">Portal · Kacheln</text>
+      <rect x="608" y="228" width="264" height="56" class="d-acc-line"/><text x="624" y="252" class="d-t">app-&lt;kurzname&gt;</text><text x="624" y="272" class="d-s">Ihr Container</text>
+      <rect x="608" y="298" width="264" height="50" class="d-focus"/><text x="624" y="328" class="d-t">Adapter</text>
+      <rect x="608" y="372" width="80" height="68" class="d-box"/><text x="622" y="410" class="d-t" style="font-size:13px">ELO</text>
+      <rect x="700" y="372" width="80" height="68" class="d-box"/><text x="710" y="402" class="d-t" style="font-size:12px">bwSync</text><text x="710" y="420" class="d-t" style="font-size:12px">&amp;Share</text>
+      <rect x="792" y="372" width="80" height="68" class="d-box"/><text x="804" y="410" class="d-t" style="font-size:13px">…</text>
+      <!-- arrows -->
+      <path d="M258 180 C290 180 296 78 324 78" class="d-arrow-acc" marker-end="url(#h6)"/>
+      <text x="268" y="120" class="d-s" transform="rotate(-70 268 120)">push</text>
+      <path d="M433 100 V118" class="d-arrow" marker-end="url(#h6g)"/>
+      <path d="M433 200 V218" class="d-arrow" marker-end="url(#h6g)"/>
+      <path d="M258 317 C420 317 470 256 604 256" class="d-arrow-acc d-flow" marker-end="url(#h6)"/>
+      <text x="350" y="340" class="d-s">Image per scp (Stand von main)</text>
+      <path d="M740 284 V294" class="d-arrow" marker-end="url(#h6g)"/>
+      <path d="M740 348 V368" class="d-arrow" marker-end="url(#h6g)"/>
+      <path d="M740 106 V112" class="d-arrow"/>
+      <path d="M740 214 V224" class="d-arrow" marker-end="url(#h6g)"/>
+    </svg>
+  </div><figcaption>Code wandert per Git zu GitHub und wird dort geprüft. Das fertige Image kommt vom Rechner direkt auf die Test-VM, weil diese kein Internet hat.</figcaption></figure>
+  <h2>Ihr Rechner</h2>
+  <p>VS Code ist mit dem Dev Container verbunden. Claude Code liest die Skills und schreibt Dateien in den eingebundenen Projektordner. <code>make check</code> prüft lokal.</p>
+  <h2>GitHub</h2>
+  <p>Sie pushen nach <code>develop</code>. Beim Pull Request prüft die Pipeline erneut – unabhängig von Ihrem Rechner. Nach Review liegt der Stand auf <code>main</code>.</p>
+  <h2>Test-VM</h2>
+  <p>Nach dem Freigabe-Antrag baut die Freigabe-Verantwortliche aus <code>main</code> ein Image und kopiert es auf die VM, weil diese <b>kein Internet</b> hat. Dort startet es als Container, meldet sich per Manifest an und erscheint nach dem Health-Check als Kachel.</p>
+</article>
+
+<article class="page" data-page="hg-anfrage" data-title="Was bei einer Anfrage passiert" data-group="Hintergrund">
+  <h1>Was bei einer Anfrage passiert</h1>
+  <p class="lede">Jemand klickt in Ihrer App auf „Buchen“. Das passiert in den nächsten Millisekunden.</p>
+  <h2>Ablauf</h2>
+  <ol class="tl">
+    <li><span class="a">Browser</span><p>Anfrage geht an das Gateway. Gibt es eine Sitzung?</p></li>
+    <li><span class="a">Keycloak</span><p>Falls nicht: Anmeldung.</p></li>
+    <li><span class="a">Redis</span><p>Gateway merkt sich die Sitzung.</p></li>
+    <li><span class="a acc">Gateway</span><p>Gibt einen kurzlebigen, signierten Ausweis (Token) mit: wer, welche Rollen.</p></li>
+    <li><span class="a">Portal</span><p>Zeigt nur passende Kacheln.</p></li>
+    <li><span class="a">App</span><p>Weiß, wer angemeldet ist, und verarbeitet die Buchung.</p></li>
+    <li><span class="a">Adapter</span><p>Falls nötig: Zugriff auf das Fachsystem mit den Zugangsdaten dieser Person.</p></li>
+  </ol>
+  <p>Wie die Bausteine zusammenhängen, zeigt das Bild unter <a href="#architektur">Architektur</a>.</p>
+</article>
+
+<article class="page" data-page="hg-deploy" data-title="Deploy im Detail" data-group="Hintergrund">
+  <h1>Deploy im Detail</h1>
+  <p class="lede">Was das Skript <code>tools/deploy.sh</code> hinter <code>make deploy</code> tut.</p>
+  <div class="callout c-info"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-person"/></svg></div><div><h5>Nur für die Freigabe-Verantwortliche</h5><p>Diesen Schritt führen Sie nicht selbst aus. Er gehört zur <a href="#t10">Freigabe</a>. Hier steht, was dabei passiert.</p></div></div>
+  <figure class="fig"><div class="fig-body">
+        <svg class="diag" viewBox="0 0 900 250" role="img" aria-labelledby="depT">
+          <title id="depT">Deploy: Image lokal bauen, per scp auf Test-VM kopieren, Container starten, im Portal registrieren</title>
+          <defs><marker id="h5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="d-head-acc"/></marker></defs>
+          <rect x="10" y="20" width="270" height="210" class="d-zone-fill"/><text x="28" y="46" class="d-lab">Ihr Rechner</text>
+          <rect x="30" y="64" width="230" height="56" class="d-box"/><text x="46" y="90" class="d-t">Image bauen</text><text x="46" y="108" class="d-s">linux/amd64 · Code + Werkzeuge</text>
+          <rect x="30" y="136" width="230" height="74" class="d-soft"/>
+          <g transform="translate(46 150)"><rect width="40" height="40" class="d-acc"/><path d="M8 14h24M8 22h24M8 30h16" style="stroke:#fff;stroke-width:2.5"/></g>
+          <text x="98" y="166" class="d-mono">app-image.tar</text><text x="98" y="186" class="d-mono">manifest.json</text>
+          <path d="M282 172 H588" class="d-arrow-acc d-flow" marker-end="url(#h5)"/>
+          <rect x="350" y="140" width="170" height="54" style="fill:var(--surface)" />
+          <text x="368" y="162" class="d-t" style="font-size:13.5px">Kopieren (scp)</text><text x="368" y="181" class="d-s">VPN · SSH verschlüsselt</text>
+          <text x="330" y="96" class="d-s">Die VM hat kein Internet –</text><text x="330" y="114" class="d-s">darum kommt die App als fertiges Paket.</text>
+          <rect x="590" y="20" width="300" height="210" class="d-zone-fill"/><text x="608" y="46" class="d-lab">Test-VM · Hochschulnetz</text>
+          <rect x="610" y="64" width="260" height="46" class="d-acc-line"/><text x="626" y="92" class="d-t">Container app-&lt;kurzname&gt;</text>
+          <rect x="610" y="120" width="260" height="46" class="d-box"/><text x="626" y="148" class="d-t">portal-deploy register</text>
+          <rect x="610" y="176" width="260" height="40" class="d-ok"/><text x="626" y="201" class="d-t">Health-Check, dann Kachel</text>
+        </svg>
+      </div><figcaption>Was <code>make deploy</code> (Skript <code>tools/deploy.sh</code>) nacheinander tut.</figcaption></figure>
+  <h2>Die fünf Schritte</h2>
+  <div class="tbl-wrap"><table><thead><tr><th>Schritt</th><th>Wo</th></tr></thead><tbody>
+    <tr><td>Image bauen (<code>linux/amd64</code>) aus dem Stand auf <code>main</code></td><td>Rechner der Freigabe</td></tr>
+    <tr><td>Image und <code>manifest.json</code> per <code>scp</code> kopieren</td><td>VPN / SSH</td></tr>
+    <tr><td>Container <code>app-&lt;slug&gt;</code> starten</td><td>Test-VM</td></tr>
+    <tr><td>Im Portal registrieren (<code>portal-deploy</code>)</td><td>Test-VM</td></tr>
+    <tr><td>Health-Check – nach ca. 10 s erscheint die Kachel</td><td>Portal</td></tr>
+  </tbody></table></div>
+  <h2>Warum lokal bauen?</h2>
+  <p>Die Test-VM hat aus Sicherheitsgründen keinen Internetzugang und kann keine Pakete nachladen. Darum kommt die App als fertiges Paket.</p>
+  <h2>Weitere Optionen</h2>
+  <ul class="l"><li>Fertiges Image statt lokal bauen: <code>make deploy VM=… IMAGE=ghcr.io/&lt;owner&gt;/&lt;repo&gt;@sha256:…</code></li><li>Lokaler Gesamtaufbau zum Testen: <code>make deploy-local</code></li></ul>
+</article>
+
+<!-- ======================================================== -->
+<!-- REFERENZ                                                  -->
+<!-- ======================================================== -->
+<article class="page" data-page="befehle" data-title="Befehle" data-group="Referenz">
+  <h1>Befehle</h1>
+  <p class="lede">Alle Befehle im Projektordner. Achten Sie auf „Wo“.</p>
+  <h2>make-Befehle</h2>
+  <div class="tbl-wrap"><table><thead><tr><th>Befehl</th><th>Was passiert</th><th>Wo</th></tr></thead><tbody>
+    <tr><td><code>make dev</code></td><td>App mit Test-Anmeldung → <code>localhost:8080</code></td><td><span class="pill">Container</span></td></tr>
+    <tr><td><code>make start</code></td><td>Wie im Betrieb (ohne Portal: 401)</td><td><span class="pill">Container</span></td></tr>
+    <tr><td><code>make test</code></td><td>Automatische Tests</td><td><span class="pill">Container</span></td></tr>
+    <tr><td><code>make lint</code></td><td>Code-Regeln und Formatierung</td><td><span class="pill">Container</span></td></tr>
+    <tr><td><code>make check</code></td><td>Alle Prüfungen + Prüfnachweis</td><td><span class="pill">Container</span></td></tr>
+    <tr><td><code>make docker</code></td><td>Produktions-Image bauen</td><td><span class="pill no">Host</span></td></tr>
+    <tr><td><code>make deploy VM=…</code></td><td>Auf Test-VM bringen, registrieren – <b>nur Freigabe-Verantwortliche</b></td><td><span class="pill no">Freigabe</span></td></tr>
+    <tr><td><code>make deploy-local</code></td><td>In lokalen Gesamtaufbau → <code>localhost:18080</code> (zum Testen, nach Absprache)</td><td><span class="pill no">Host</span></td></tr>
+    <tr><td><code>make lock</code></td><td>Paketversionen neu festschreiben (nach Absprache)</td><td><span class="pill">Container</span></td></tr>
+    <tr><td><code>make sdk-update</code></td><td>Portal-Bibliothek aktualisieren (nach Absprache)</td><td><span class="pill">Container</span></td></tr>
+  </tbody></table></div>
+  <h2>Was hinter den Befehlen steckt</h2>
+  <p>Die <code>make</code>-Befehle sind in beiden Vorlagen gleich. Dahinter arbeiten je nach Sprache andere Werkzeuge:</p>
+  <div class="tabs os" data-sync="lang"><div class="tabs-bar" role="tablist" aria-label="Programmiersprache"><button type="button" role="tab" data-t="py" class="on"><svg class="i i-os" aria-hidden="true"><use href="#i-lang-py"/></svg>Python</button><button type="button" role="tab" data-t="js"><svg class="i i-os" aria-hidden="true"><use href="#i-lang-js"/></svg>JavaScript</button></div><div class="tab-p on" data-t="py" role="tabpanel"><div class="tbl-wrap"><table><thead><tr><th>Befehl</th><th>Werkzeug</th></tr></thead><tbody><tr><td><code>make dev</code></td><td>FastAPI-Server mit Test-Anmeldung</td></tr><tr><td><code>make test</code></td><td>pytest</td></tr><tr><td><code>make lint</code></td><td>Ruff (Regeln und Formatierung)</td></tr><tr><td><code>make lock</code></td><td>uv → <code>uv.lock</code></td></tr></tbody></table></div></div><div class="tab-p" data-t="js" role="tabpanel"><div class="tbl-wrap"><table><thead><tr><th>Befehl</th><th>Werkzeug</th></tr></thead><tbody><tr><td><code>make dev</code></td><td>Express-Server (<code>node --watch</code>) mit Test-Anmeldung</td></tr><tr><td><code>make test</code></td><td>Jest</td></tr><tr><td><code>make lint</code></td><td>ESLint</td></tr><tr><td><code>make lock</code></td><td>npm → <code>package-lock.json</code></td></tr></tbody></table></div></div></div>
+  <h2>Host-Befehle je Betriebssystem</h2>
+  <p>Im Container ist alles vorbereitet. Für Befehle, die auf dem <b>Host</b> laufen (z. B. <code>make docker</code>), braucht Ihr Rechner selbst <code>make</code>.</p>
+  <div class="tabs os" data-sync="os"><div class="tabs-bar" role="tablist" aria-label="Betriebssystem"><button type="button" role="tab" data-t="win" class="on"><svg class="i i-os" aria-hidden="true"><use href="#i-os-win"/></svg>Windows</button><button type="button" role="tab" data-t="mac"><svg class="i i-os" aria-hidden="true"><use href="#i-os-mac"/></svg>macOS</button><button type="button" role="tab" data-t="linux"><svg class="i i-os" aria-hidden="true"><use href="#i-os-linux"/></svg>Linux (Ubuntu)</button></div><div class="tab-p on" data-t="win" role="tabpanel"><p>Windows hat kein <code>make</code>. Führen Sie Host-Befehle im <b>WSL-Terminal (Ubuntu)</b> aus und legen Sie das Projekt dort ab.</p><div class="code"><button class="copy" data-copy="wsl&#10;sudo apt install -y make&#10;cd ~/Projects/ihr-kurzname">Kopieren</button><span class="p">PS&gt; </span>wsl<br><span class="p">PS&gt; </span>sudo apt install -y make <span class="c"># einmalig, im WSL-Terminal</span><br><span class="p">PS&gt; </span>cd ~/Projects/ihr-kurzname</div></div><div class="tab-p" data-t="mac" role="tabpanel"><p><code>make</code> kommt mit den Command Line Tools von Apple.</p><div class="code"><button class="copy" data-copy="xcode-select --install">Kopieren</button><span class="p">$ </span>xcode-select --install <span class="c"># einmalig</span></div></div><div class="tab-p" data-t="linux" role="tabpanel"><p><code>make</code> aus den Paketquellen installieren.</p><div class="code"><button class="copy" data-copy="sudo apt install -y make">Kopieren</button><span class="p">$ </span>sudo apt install -y make</div></div></div>
+  <h2>VS Code Befehlspalette</h2>
+  <p>Öffnen mit <span class="os-v win"><svg class="i" aria-hidden="true"><use href="#i-os-win"/></svg><kbd>Strg</kbd>+<kbd>Umschalt</kbd>+<kbd>P</kbd></span><span class="os-v linux"><svg class="i" aria-hidden="true"><use href="#i-os-linux"/></svg><kbd>Strg</kbd>+<kbd>Umschalt</kbd>+<kbd>P</kbd></span><span class="os-v mac"><svg class="i" aria-hidden="true"><use href="#i-os-mac"/></svg><kbd>⌘</kbd>+<kbd>Umschalt</kbd>+<kbd>P</kbd></span>.</p>
+  <div class="tbl-wrap"><table><thead><tr><th>Befehl</th><th>Wirkung</th></tr></thead><tbody>
+    <tr><td>Dev Containers: Reopen in Container</td><td>Im Dev Container öffnen</td></tr>
+    <tr><td>Dev Containers: Reopen Folder Locally</td><td>Container verlassen</td></tr>
+    <tr><td>Dev Containers: Rebuild Container</td><td>Neu bauen – Projektdateien bleiben</td></tr>
+    <tr><td>Dev Containers: Show Container Log</td><td>Protokoll bei Fehlern</td></tr>
+  </tbody></table></div>
+</article>
+
+<article class="page" data-page="manifest" data-title="manifest.json" data-group="Referenz">
+  <h1>manifest.json</h1>
+  <p class="lede">Der Steckbrief Ihrer App. Damit meldet sie sich beim Portal an.</p>
+  <h2>Beispiel</h2>
+  <div class="code"><button class="copy" data-copy='{&#10;  "slug": "ihr-kurzname",&#10;  "name": "Name Ihrer App",&#10;  "category": "Organisation",&#10;  "menu": { "label": "Text der Kachel", "icon": "calendar" },&#10;  "roles": ["student", "staff"],&#10;  "version": "0.1.0"&#10;}'>Kopieren</button>{<br>&nbsp;&nbsp;"slug": "ihr-kurzname",<br>&nbsp;&nbsp;"name": "Name Ihrer App",<br>&nbsp;&nbsp;"category": "Organisation",<br>&nbsp;&nbsp;"menu": { "label": "Text der Kachel", "icon": "calendar" },<br>&nbsp;&nbsp;"roles": ["student", "staff"],<br>&nbsp;&nbsp;"version": "0.1.0"<br>}</div>
+  <h2>Felder</h2>
+  <div class="tbl-wrap"><table><thead><tr><th>Feld</th><th>Bedeutung</th><th>Regel</th></tr></thead><tbody>
+    <tr><td><code>slug</code></td><td>Kurzname, steht in <code>/apps/&lt;slug&gt;/</code></td><td>Kleinbuchstaben, Zahlen, Bindestrich. Nicht <code>meine-app</code>.</td></tr>
+    <tr><td><code>name</code></td><td>Angezeigter Name</td><td>–</td></tr>
+    <tr><td><code>category</code></td><td>Gruppe im Portal</td><td>Vom Portal geprüft</td></tr>
+    <tr><td><code>menu</code></td><td>Beschriftung und Symbol der Kachel</td><td>Vom Portal geprüft</td></tr>
+    <tr><td><code>roles</code></td><td>Wer die App sehen darf</td><td>So wenige wie nötig</td></tr>
+    <tr><td><code>version</code></td><td>Versionsnummer</td><td>Bei Änderungen erhöhen</td></tr>
+  </tbody></table></div>
+  <div class="callout c-info"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-info"/></svg></div><div><h5>Erlaubte Werte</h5><p>Werte für Kategorie, Symbol und Rollen prüft das Portal beim Registrieren. Im Zweifel das Plattform-Team fragen.</p></div></div>
+</article>
+
+<article class="page" data-page="fehlercodes" data-title="Fehlercodes der Pipeline" data-group="Referenz">
+  <h1>Fehlercodes der Pipeline</h1>
+  <p class="lede">Ist die Pipeline rot, steht in der Meldung ein Code wie <code>PF-102</code>. Hier sehen Sie, was er bedeutet und was Sie tun können.</p>
+  <div class="tldr"><h5>Kurz gesagt</h5><ul>
+    <li>Eine rote Pipeline ist ein Hinweis, kein Hindernis. Fast immer können Sie den Fehler selbst beheben.</li>
+    <li>Fragen Sie im Zweifel Claude Code: „Die Pipeline ist rot und ich verstehe die Meldung nicht.“ Der Skill <a href="#ki">pipeline-fehler</a> erklärt sie in einfachen Worten.</li>
+  </ul></div>
+
+  <h2>So sieht eine Meldung aus</h2>
+  <div class="mock" aria-hidden="true">
+    <div class="mock-bar"><span class="ttl">Pipeline · Stufe secrets</span></div>
+    <div class="term pre">
+      <div><span class="m">============================================================</span></div>
+      <div><span class="hl">FEHLER PF-102  –  Geheimnis im Code gefunden</span></div>
+      <div><span class="p">Was ist passiert:</span>   In src/app/views.py (Zeile 12) steht etwas, das wie ein Schlüssel aussieht.</div>
+      <div><span class="p">Warum wichtig:</span>      Wer den Code sieht, könnte damit arbeiten.</div>
+      <div><span class="p">Was tun:</span>            Entfernen Sie den Schlüssel aus dem Code.</div>
+      <div>                    Er gilt als verbraucht – melden Sie ihn dem Plattform-Team.</div>
+      <div><span class="m">Technische Details:  (gekürzt, Werte geschwärzt)</span></div>
+      <div><span class="m">============================================================</span></div>
+    </div>
+  </div>
+  <p>Jede Meldung folgt diesem Aufbau: <b>Was ist passiert</b>, <b>Warum wichtig</b>, <b>Was tun</b>. Die technischen Details brauchen Sie meist nicht.</p>
+
+  <h2>Beim Prüfen</h2>
+  <p>Diese Fehler entstehen, bevor die App ins Portal kommt – bei <code>make check</code> oder in der Pipeline des Pull Requests.</p>
+  <div class="tbl-wrap"><table><thead><tr><th>Code</th><th>Was ist passiert</th><th>Was tun</th></tr></thead><tbody>
+    <tr><td><code>PF-101</code></td><td>Eine Regel der Plattform wurde verletzt. Datei und Zeile stehen in der Meldung.</td><td>Stelle öffnen, korrigieren, mit <code>make lint</code> prüfen.</td></tr>
+    <tr><td><code>PF-102</code></td><td>Im Code steht etwas, das wie ein Passwort oder Schlüssel aussieht.</td><td>Entfernen <b>und</b> dem Plattform-Team melden. Es gilt als verbraucht.</td></tr>
+    <tr><td><code>PF-103</code></td><td>Die Portal-Bibliothek <code>platform_sdk/</code> wurde verändert.</td><td><code>make sdk-update</code> ausführen.</td></tr>
+    <tr><td><code>PF-104</code></td><td><code>manifest.json</code> ist ungültig – ein Feld fehlt oder ist falsch.</td><td>Die genannte Stelle korrigieren. Siehe <a href="#manifest">manifest.json</a>.</td></tr>
+    <tr><td><code>PF-105</code></td><td>Mindestens ein automatischer Test ist rot.</td><td><code>make test</code> starten, den ersten roten Test ansehen.</td></tr>
+    <tr><td><code>PF-106</code></td><td>Ein verwendetes Paket hat eine bekannte, kritische Sicherheitslücke.</td><td><code>make lock</code>; gibt es keine neue Version: Plattform-Team fragen.</td></tr>
+    <tr><td><code>PF-107</code></td><td>Der Entwicklungsmodus steht in einer Datei für den Betrieb.</td><td>Entfernen. Er gehört nur in <code>.devcontainer/</code>.</td></tr>
+    <tr><td><code>PF-108</code></td><td>Eine Datei, die die Plattform pflegt, wurde geändert (z. B. <code>Makefile</code>, <code>Dockerfile</code>).</td><td>Änderung zurücknehmen.</td></tr>
+    <tr><td><code>PF-109</code></td><td>Der Container konnte nicht gebaut werden.</td><td>Erste Fehlerzeile lesen, <code>make docker</code> lokal ausführen.</td></tr>
+    <tr><td><code>PF-110</code></td><td>Die App hat eine Anfrage ohne Anmeldung beantwortet.</td><td>Anmeldung des Portals einbinden. Claude Code fragen.</td></tr>
+    <tr><td><code>PF-111</code></td><td>Die App startet nicht oder meldet sich nicht gesund.</td><td>Logs ansehen; <code>/healthz</code> nicht verändern.</td></tr>
+    <tr><td><code>PF-112</code></td><td>Die App setzt Cookies. Das ist im Portal nicht erlaubt.</td><td>Cookies entfernen, Zustand auf dem Server speichern.</td></tr>
+    <tr><td><code>PF-113</code></td><td>Der Container hält die Betriebsregeln nicht ein.</td><td><code>Dockerfile</code> nicht verändern; Schreibzugriffe nach <code>/data</code>.</td></tr>
+  </tbody></table></div>
+
+  <h2>Beim Bereitstellen</h2>
+  <div class="tbl-wrap"><table><thead><tr><th>Code</th><th>Was ist passiert</th><th>Was tun</th></tr></thead><tbody>
+    <tr><td><code>PF-201</code></td><td>Die neue Version wurde nicht gesund und automatisch durch die vorherige ersetzt.</td><td>Fehler beheben, erneut bereitstellen. Die alte Version läuft weiter.</td></tr>
+    <tr><td><code>PF-202</code></td><td>Die Plattform lehnt die App ab, z. B. wegen einer unbekannten Rolle.</td><td>Meldung lesen; bei „Besitzer“ das Plattform-Team fragen.</td></tr>
+    <tr><td><code>PF-203</code></td><td>Auch die vorherige Version ist nicht gesund.</td><td><b>Sofort das Plattform-Team benachrichtigen.</b> Nichts weiter versuchen.</td></tr>
+    <tr><td><code>PF-204</code></td><td>Eine andere Bereitstellung dieser App läuft gerade.</td><td>Einige Minuten warten, dann erneut starten.</td></tr>
+    <tr><td><code>PF-205</code></td><td>Das Container-Abbild fehlt oder ist nicht geeignet.</td><td>Pipeline erneut laufen lassen; sonst Plattform-Team informieren.</td></tr>
+  </tbody></table></div>
+  <div class="callout c-warn"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-warn"/></svg></div><div><h5>Nie umgehen</h5><p>Schalten Sie keine Prüfung ab, um die Pipeline grün zu bekommen. Beheben Sie die Ursache – oder fragen Sie Claude Code oder das Plattform-Team.</p></div></div>
+  <div class="callout c-wip"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-wip"/></svg></div><div><h5>Vorläufiger Katalog</h5><p>Die Liste ist ein Auszug aus dem Architekturvorschlag. Sobald die Plattform den Katalog selbst liefert, wird diese Seite daraus erzeugt.</p></div></div>
+</article>
+
+<article class="page" data-page="regeln" data-title="Regeln für sicheres Arbeiten" data-group="Referenz">
+  <h1>Regeln für sicheres Arbeiten</h1>
+  <p class="lede">Elf Regeln, die Daten, Personen und die Hochschule schützen.</p>
+  <h2>Die elf Regeln</h2>
+  <div class="rules">
+    <div class="rule"><div><b>Nur Test- oder pseudonymisierte Daten</b><p>Keine echten personenbezogenen Daten in Tests oder an die KI.</p></div></div>
+    <div class="rule"><div><b>Keine Zugangsdaten in Dateien</b><p>Alles im Repository bleibt in der Git-Historie.</p></div></div>
+    <div class="rule"><div><b>KI committet nicht selbst</b><p>Sie prüfen jede Änderung.</p></div></div>
+    <div class="rule"><div><b>Nach main nur mit Review</b><p>Vier-Augen-Prinzip.</p></div></div>
+    <div class="rule"><div><b>Ins Portal nur über die Freigabe</b><p><code>make deploy</code> führt nur die <a href="#t10">Freigabe-Verantwortliche</a> aus.</p></div></div>
+    <div class="rule"><div><b>Befehle erst verstehen</b><p>Ein falscher Befehl kann Dateien löschen.</p></div></div>
+    <div class="rule"><div><b>Test-Anmeldung nur lokal</b><p>Port nicht freigeben.</p></div></div>
+    <div class="rule"><div><b>Nur vertrauenswürdige Projekte</b><p>Der Container kann Dateien ändern.</p></div></div>
+    <div class="rule"><div><b>Verwaltete Dateien nicht ändern</b><p>SDK, Skills, Makefile, main.py.</p></div></div>
+    <div class="rule"><div><b>Daten nach Art ablegen</b><p><a href="#daten">Entscheidungshilfe</a></p></div></div>
+    <div class="rule"><div><b>So wenige Rollen wie nötig</b><p>Geringste Rechte.</p></div></div>
+  </div>
+</article>
+
+<article class="page" data-page="compose" data-title="compose.yml (mehrere Container)" data-group="Referenz">
+  <h1>Mehrere Container mit compose.yml</h1>
+  <p class="lede">Standard ist ein Container. Braucht Ihre App mehr – z. B. eine kleine Datenbank – legen Sie <code>compose.yml</code> ins Repository.</p>
+  <h2>Beispiel</h2>
+  <div class="code">services:<br>&nbsp;&nbsp;app:<br>&nbsp;&nbsp;&nbsp;&nbsp;build: .<br>&nbsp;&nbsp;&nbsp;&nbsp;depends_on: [db]<br>&nbsp;&nbsp;db:<br>&nbsp;&nbsp;&nbsp;&nbsp;image: postgres:17-alpine<br>&nbsp;&nbsp;&nbsp;&nbsp;environment: { POSTGRES_PASSWORD: nur-test } <span class="c"># nur Testdaten</span><br>&nbsp;&nbsp;&nbsp;&nbsp;volumes: ["db-daten:/var/lib/postgresql/data"]<br>volumes:<br>&nbsp;&nbsp;db-daten:</div>
+  <h2>Regeln</h2>
+  <ul class="l"><li>Pflicht: ein Dienst namens <code>app</code>. Nur dieser ist für das Portal erreichbar.</li><li>Härtung für <code>app</code> setzt das Skript selbst.</li></ul>
+  <div class="callout c-warn"><div class="ic"><svg class="i" aria-hidden="true"><use href="#i-warn"/></svg></div><div><h5>Verboten</h5><p><code>ports</code>, <code>privileged</code>, <code>network_mode</code>, <code>cap_add</code>, Ordner vom Server (<code>./ordner:…</code>), eigene Netze, <code>build</code> außer bei <code>app</code>.</p></div></div>
+</article>
+
+<article class="page" data-page="glossar" data-title="Begriffe A–Z" data-group="Referenz">
+  <h1>Begriffe A–Z</h1>
+  <p class="lede">Alle Fachbegriffe in einfacher Sprache. Tippen Sie zum Filtern.</p>
+  <h2>Verzeichnis</h2>
+  <label class="gl-search"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><span class="sr">Begriff filtern</span><input id="glq" type="search" placeholder="z. B. VM, Docker, Manifest …" autocomplete="off"></label>
+  <div class="gl" id="gl"></div>
+  <p class="gl-empty" id="glEmpty">Kein Begriff gefunden.</p>
+</article>
+
+<!-- ======================================================== -->
+<!-- HILFE                                                     -->
+<!-- ======================================================== -->
+<article class="page" data-page="probleme" data-title="Fehlerbehebung" data-group="Hilfe">
+  <h1>Fehlerbehebung</h1>
+  <p class="lede">Die häufigsten Stolpersteine – und was hilft.</p>
+  <h2>Einrichtung</h2>
+  <div class="acc">
+    <details><summary>„Docker ist nicht erreichbar“</summary><div class="ab">Docker starten und mit <code>docker version</code> prüfen – „Server“ muss erscheinen.<div class="tabs os" data-sync="os"><div class="tabs-bar" role="tablist" aria-label="Betriebssystem"><button type="button" role="tab" data-t="win" class="on"><svg class="i i-os" aria-hidden="true"><use href="#i-os-win"/></svg>Windows</button><button type="button" role="tab" data-t="mac"><svg class="i i-os" aria-hidden="true"><use href="#i-os-mac"/></svg>macOS</button><button type="button" role="tab" data-t="linux"><svg class="i i-os" aria-hidden="true"><use href="#i-os-linux"/></svg>Linux (Ubuntu)</button></div><div class="tab-p on" data-t="win" role="tabpanel"><p>Docker Desktop aus dem Startmenü starten und warten, bis „Engine running“ erscheint.</p><div class="code"><button class="copy" data-copy="docker version">Kopieren</button><span class="p">PS&gt; </span>docker version</div></div><div class="tab-p" data-t="mac" role="tabpanel"><div class="code"><button class="copy" data-copy="open -a Docker&#10;docker version">Kopieren</button><span class="p">$ </span>open -a Docker <span class="c"># startet Docker Desktop</span><br><span class="p">$ </span>docker version</div></div><div class="tab-p" data-t="linux" role="tabpanel"><div class="code"><button class="copy" data-copy="sudo systemctl start docker&#10;sudo systemctl enable docker&#10;docker version">Kopieren</button><span class="p">$ </span>sudo systemctl start docker <span class="c"># startet den Dienst</span><br><span class="p">$ </span>sudo systemctl enable docker <span class="c"># künftig automatisch</span><br><span class="p">$ </span>docker version</div></div></div></div></details>
+    <details><summary>Dev Container startet nicht</summary><div class="ab"><b>Dev Containers: Show Container Log</b>. Netzwerk und Speicher prüfen; bei Proxy/Zertifikaten die IT fragen.</div></details>
+    <details><summary><code>make</code> oder <code>uv</code> fehlt</summary><div class="ab">Terminal läuft nicht im Container. Unten links muss „Dev Container“ stehen.</div></details>
+    <details><summary>Claude Code will erneut eine Anmeldung</summary><div class="ab">Normal nach Start oder Rebuild des Containers.</div></details>
+  </div>
+  <h2>Entwickeln</h2>
+  <div class="acc">
+    <details><summary><code>localhost:8080</code> lädt nicht</summary><div class="ab"><code>make dev</code> läuft? In VS Code Ansicht <b>Ports</b> prüfen.</div></details>
+    <details><summary>Seiten zeigen „401“</summary><div class="ab">Lokal <code>make dev</code> statt <code>make start</code> nutzen.</div></details>
+    <details><summary><code>make check</code> oder die Pipeline ist rot</summary><div class="ab">Fehlermeldung an Claude Code geben, beheben lassen, erneut prüfen. Was die Codes wie <code>PF-101</code> bedeuten, steht unter <a href="#fehlercodes">Fehlercodes der Pipeline</a>.</div></details>
+    <details><summary>Commit auf <code>main</code> abgelehnt</summary><div class="ab"><code>main</code> ist geschützt – auf <code>develop</code> committen, Pull Request anlegen.</div></details>
+  </div>
+  <h2>Freigabe und Portal</h2>
+  <div class="acc">
+    <details><summary>Ich möchte meine App selbst ins Portal bringen</summary><div class="ab">Das ist nicht vorgesehen. Bereitstellen und Entscheiden übernimmt die Freigabe-Verantwortliche. So geht es: <a href="#t10">Freigabe beantragen</a>.</div></details>
+    <details><summary>Die Freigabe kam mit „Nacharbeit“ zurück</summary><div class="ab">Die genannten Punkte mit Claude Code umsetzen, dann <code>make check</code>, sichern, Review und erneut beantragen. Bei Unklarheiten direkt bei der Freigabe-Verantwortlichen nachfragen.</div></details>
+    <details><summary>Kachel erscheint nicht</summary><div class="ab">Die Kachel erscheint erst, nachdem die Freigabe-Verantwortliche die App bereitgestellt hat. Danach: neu laden, Rollen in <code>manifest.json</code> und Rolle des Testkontos prüfen.</div></details>
+    <details><summary>Uhrzeiten eine Stunde verschoben</summary><div class="ab">Container laufen in UTC. Wird zentral behoben (Europe/Berlin).</div></details>
+  </div>
+</article>
+
+<article class="page" data-page="faq" data-title="Häufige Fragen" data-group="Hilfe">
+  <h1>Häufige Fragen</h1>
+  <p class="lede">Kurze Antworten auf Fragen, die oft gestellt werden.</p>
+  <h2>Allgemein</h2>
+  <div class="acc">
+    <details><summary>Muss ich programmieren können?</summary><div class="ab">Nein. Sie müssen Ihren fachlichen Ablauf gut beschreiben können. Etwas technisches Verständnis im Team (Git, Docker) hilft – am besten im Tandem.</div></details>
+    <details><summary>Kann die KI meine echten Daten sehen?</summary><div class="ab">Nein. Beim Schreiben von Code hat die KI keinen Zugriff auf Fachsysteme oder echte Daten.</div></details>
+    <details><summary>Was ist der Unterschied zwischen Golden Master und meiner App?</summary><div class="ab">Der Golden Master ist die Vorlage. Ihre App ist eine Kopie davon mit eigenem Inhalt.</div></details>
+    <details><summary>Python oder JavaScript – was soll ich nehmen?</summary><div class="ab">Im Zweifel Python, das ist der Standard. Beide Vorlagen können dasselbe, Ablauf und Regeln sind gleich. JavaScript lohnt sich, wenn Ihr Team damit schon arbeitet. Vergleich: <a href="#golden-master">Golden Master</a>.</div></details>
+    <details><summary>Warum brauche ich Docker?</summary><div class="ab">Docker startet den Dev Container (Ihren fertigen Arbeitsplatz) und baut das Image für die Test-VM.</div></details>
+    <details><summary>Kann ich meine App selbst ins Portal bringen?</summary><div class="ab">Nein. Das entscheidet und erledigt die Freigabe-Verantwortliche. Sie schicken einen Antrag – siehe <a href="#t10">Freigabe beantragen</a>.</div></details>
+    <details><summary>Wie lange dauert eine eigene App?</summary><div class="ab">Das hängt von der Idee ab. Die Anleitung ist in kurze Etappen geteilt, sodass Sie in mehreren kleinen Sitzungen arbeiten können. Je klarer der Ideen-Steckbrief, desto schneller geht es.</div></details>
+    <details><summary>Kann ich ohne Hochschulnetz entwickeln?</summary><div class="ab">Lokal ja – mit Test-Anmeldung und Testdaten. Zum Testen im Portal der Test-VM brauchen Sie VPN.</div></details>
+    <details><summary>Was passiert mit meinen Daten, wenn die App gelöscht wird?</summary><div class="ab">Das hängt davon ab, wo sie liegen. Siehe <a href="#daten">Wo Daten liegen dürfen</a>.</div></details>
+  </div>
+</article>
+
+<article class="page" data-page="support" data-title="Rollen &amp; Support" data-group="Hilfe">
+  <h1>Rollen und Support</h1>
+  <p class="lede">Wer was tut – und an wen Sie sich wenden.</p>
+  <h2>Rollen</h2>
+  <div class="grid2">
+    <div class="card top"><span class="k">Fachseite</span><h4>Fachanwender:in</h4><p>Beschreibt den Ablauf, formuliert Prompts, testet fachlich, kennt Ablageorte und Berechtigungen.</p></div>
+    <div class="card top"><span class="k">Tandem</span><h4>Technische Begleitung</h4><p>Hilft bei Einrichtung, Git, Dev Container, Deploy.</p></div>
+    <div class="card top"><span class="k">Qualität</span><h4>Reviewer · Plattform-Team</h4><p>Prüft Pull Requests, pflegt Vorlagen, Bibliothek, Skills, Gateway, Portal, Adapter.</p></div>
+    <div class="card top"><span class="k">Freigabe</span><h4>Freigabe-Verantwortliche</h4><p>Stellt Apps auf der Test-VM bereit (<code>make deploy</code>) und entscheidet, ob sie ins Portal kommen.</p></div>
+    <div class="card top"><span class="k">Betrieb</span><h4>Rechenzentrum</h4><p>Stellt Test-VM und Betrieb bereit, sichert die Systeme.</p></div>
+  </div>
+  <h2>Freigabe ins Portal</h2>
+  <div class="contact">
+    <div class="contact-head"><span class="contact-ic"><svg class="i" aria-hidden="true"><use href="#i-person"/></svg></span><div><span class="k">Freigabe-Verantwortliche</span><p class="contact-name"><span class="ph">[Vorname Nachname]</span></p><p class="contact-role"><span class="ph">[Funktion, Abteilung]</span></p></div></div>
+    <dl><dt>E-Mail</dt><dd><span class="ph">[name@h-ka.de]</span></dd><dt>Telefon</dt><dd><span class="ph">[+49 721 925-xxxx]</span></dd><dt>Sprechzeit</dt><dd><span class="ph">[Tag, Uhrzeit, Raum]</span></dd><dt>Vertretung</dt><dd><span class="ph">[Vorname Nachname]</span></dd></dl>
+    <p class="contact-note">Platzhalter – die Kontaktdaten trägt das Plattform-Team ein.</p>
+  </div>
+  <h2>Hilfe anfragen</h2>
+  <p>Wenden Sie sich an das Plattform-Team – mit <b>Ticket-Nummer</b>, <b>Fehlermeldung</b> (Text oder Screenshot) und <b>Prüfnachweis</b>.</p>
+</article>
+
+<article class="page" data-page="roadmap" data-title="Roadmap" data-group="Hilfe">
+  <h1>Roadmap</h1>
+  <p class="lede">Was als Nächstes besser wird.</p>
+  <h2>Nächster Sprint</h2>
+  <div class="tbl-wrap"><table><thead><tr><th>Bereich</th><th>Verbesserung</th><th>Nutzen</th></tr></thead><tbody>
+    <tr><td>Start</td><td>Projekt aus Vorlage per Knopfdruck</td><td>Weniger GitHub</td></tr>
+    <tr><td>Deploy</td><td>Weniger Passwortabfragen; Images mit Version und Sprint</td><td>Schneller, nachvollziehbar</td></tr>
+    <tr><td>Betrieb</td><td>Zeitzone Europe/Berlin; Sicherung der Test-VM</td><td>Richtige Zeiten</td></tr>
+    <tr><td>Sicherheit</td><td>Ort für sensible Testdaten, den die KI nicht liest; Regeln für DB-Änderungen und Stilllegen</td><td>Klare Vorgaben</td></tr>
+    <tr><td>Fachsysteme</td><td>Test-Adapter mit pseudonymisierten Daten</td><td>Realistisch testen</td></tr>
+    <tr><td>Begleitung</td><td>Termine mit der Verwaltung zu Use Cases</td><td>Passende Apps</td></tr>
+  </tbody></table></div>
+  <h2>Später</h2>
+  <ul class="l"><li>Zentrale Anmeldung an Fachsystemen (Shibboleth, OIDC/SAML).</li><li>Weg in den Betrieb (Live).</li><li>Updates der Vorlage in bestehende Apps übernehmen.</li></ul>
+</article>

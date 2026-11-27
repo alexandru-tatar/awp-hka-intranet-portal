@@ -43,6 +43,7 @@ docs/              diese Dokumentation (Markdown); docs/api/ = Sphinx-Konfigurat
 | neue Registry-Quelle | Klasse in `registry/sources.py` mit `load()` und `fingerprint()` (`RegistrySource`) |
 | Konfigurationswert | `core/config.py` (unbekannte Keys sind Fehler) und die Dateien in `dev/` |
 | Rollenzuordnung vom IdP | `dev/roles.yml` (Claim → Rolle), `dev/grants.yml` (je Subject) |
+| Inhalt der Dokumentation | im Browser unter `/_portal/docs` (Rolle `maintainer`); Ausgangsstand `src/portal/docs/seed.html`, Hülle `shell.html`, Editor `editor.js`/`editor.css` |
 | wiederverwendbares HTML | `templates/macros/` (Feld, Dialog, Tabelle), `templates/partials/` |
 | CSS, Farben, Schriften, Icons | `kit/` (Farbwerte nur in `kit/css/tokens.css`), danach `make kit contrast` |
 | Funktion nur für Entwicklung | `router/dev_router.py` (nur bei `env: dev`) |
@@ -63,6 +64,9 @@ docs/              diese Dokumentation (Markdown); docs/api/ = Sphinx-Konfigurat
 | `/` | Session | Startseite mit Menü |
 | `/_portal/status` | `platform-admin` | Status aller Apps |
 | `/_portal/connections` | Session | „Meine Verbindungen" |
+| `/_portal/docs` | `docs.read_roles` oder `docs.edit_roles` (Standard: `maintainer`, `platform-admin`) | AWP-Dokumentation mit Editor, Versionsverlauf und Seite „Letzte Änderungen“ ([06](06-oberflaeche.md#dokumentation-_portaldocs)) |
+| `/_portal/docs/api/…` | wie oben; ändern nur `docs.edit_roles`, mit `X-CSRF-Token` | JSON: Seiten, Versionen, Wiederherstellen, Löschen, Hochladen von Bildern und PDFs |
+| `/_portal/docs/assets/<datei>` | wie `/_portal/docs` | Hochgeladene Bilder und PDFs |
 | `/_portal/error/{code}` | – | Fehlerseite (HTML) mit dem angefragten Status 400–599, für die `errors`-Middleware von Traefik |
 | `/nav` | Session (dev) bzw. Gateway-Assertion oder App-Token (`Authorization: Bearer`) | Menü-Fragment (ETag, `X-Portal-Kit`); ohne beides 401 als JSON für das SDK |
 | `/login` | – | nur `auth_mode: dev`: Testpersonen-Auswahl (im Gateway-Modus 404, Login macht das Gateway) |
