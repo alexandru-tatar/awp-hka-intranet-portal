@@ -6,5 +6,5 @@ users:
   neumann:   { name: Prof. Dr.-Ing. Rainer Neumann, roles: [professor] }
   max:       { name: Max Beispiel,                 roles: [employee] }
   entwickler: { name: Eva Entwicklerin,            roles: [employee, maintainer] }
-  admin:     { name: Sam Betrieb,                  roles: [employee, platform-admin] }
+  admin:     { name: Admin,                        roles: [employee, platform-admin] }
   gast:      { name: Gast ohne Rolle,              roles: [] }

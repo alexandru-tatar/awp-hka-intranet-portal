@@ -230,7 +230,7 @@ def test_admin_adds_and_removes_maintainer_effective_immediately(client):
     assert client.post("/_portal/admin/maintainers", data={"csrf": admin_csrf, "sub": ""}).status_code == 422
     r = client.post("/_portal/admin/maintainers", data={"csrf": admin_csrf, "sub": "dev:alexandru"})
     assert r.status_code == 303 and "maintainer_added" in r.headers["location"]
-    assert re.search(r"Freigabe von Sam Betrieb am \d\d\.\d\d\.\d{4}", client.get("/_portal/admin").text)
+    assert re.search(r"Freigabe von Admin am \d\d\.\d\d\.\d{4}", client.get("/_portal/admin").text)
     client.post("/logout", data={"csrf": admin_csrf})
 
     login(client, "alexandru")  # ohne Rolle maintainer, aber freigegeben
