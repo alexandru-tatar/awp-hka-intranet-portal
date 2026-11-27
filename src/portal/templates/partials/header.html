@@ -7,7 +7,6 @@
   {% if user %}
   <div class="site-header__user">
     <span class="muted"><span class="visually-hidden">{{ t('header.signed_in_as') }} </span>{{ user.name }}</span>
-    {% if cfg.app_creation and (cfg.app_creation.creator_roles | select('in', user.roles) | list) %}<a href="/_portal/neue-app">{{ t('header.new_app') }}</a>{% endif %}
     {% if 'platform-admin' in user.roles %}<a href="/_portal/admin">{{ t('header.admin') }}</a>{% endif %}
     <button type="button" class="btn btn--link" data-dialog-open="logout-dialog">{{ t('header.logout') }}</button>
     <noscript><a href="/logout">{{ t('header.logout') }}</a></noscript>

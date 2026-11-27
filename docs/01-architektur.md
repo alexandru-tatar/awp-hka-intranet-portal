@@ -5,17 +5,16 @@ Python-Paket `portal` (`src/portal`), FastAPI + Jinja2, serverseitig gerendertes
 ## Schichten
 
 ```text
-router/    HTTP-Handler, dünn                      page · admin · app_creation · auth · nav · health · internal_registry · dev_login · dev
+router/    HTTP-Handler, dünn                      page · admin · auth · nav · health · internal_registry · dev_login · dev
 web/       deps · views · errors · middleware      Session/Rolle prüfen, Templates rendern, Exceptions → HTTP
-service/   Geschäftslogik, DTOs, Exceptions        AppService · AdminService · AppCreationService · AuditLog · SessionService · SessionWriteService
-registry/  Apps aus Manifesten                     models · validation · sources · store · registration
-github/    GitHub-Zugriff als GitHub App           client (Schlüssel bleibt im Prozess, HKA-82)
+service/   Geschäftslogik, DTOs, Exceptions        AppService · AdminService · SessionService · SessionWriteService
+registry/  Apps aus Manifesten                     models · validation · sources · store
 auth/      Sessions (dev), Gateway-Identität, Grants  sessions · gateway · grants · dev_users · redirects
 core/      Konfiguration, Texte, Kit-Assets, Logging  config · i18n · kit · log
 ```
 
 Abhängigkeiten gehen nur nach unten. `service/` importiert nie aus `web/` oder `router/`, `core/` nie aus den
-anderen Schichten. `github/` ist wie `registry/` und `auth/` Zugriffsschicht: `service/` darf es nutzen, es kennt nur `core/`. `context.py` baut aus der Konfiguration alle Objekte (`Portal`), `app.py` verdrahtet nur.
+anderen Schichten. `context.py` baut aus der Konfiguration alle Objekte (`Portal`), `app.py` verdrahtet nur.
 
 ## Verzeichnisse
 
@@ -37,7 +36,6 @@ docs/              diese Dokumentation (Markdown); docs/api/ = Sphinx-Konfigurat
 | neue Seite | Handler in `router/<thema>_router.py` (+ Export in `router/__init__.py`, `include_router` in `app.py`), Template in `templates/pages/`, Texte in `locales/messages.de.yml` |
 | neue Geschäftsregel | `service/<entity>_service.py` (lesen) bzw. `<entity>_write_service.py` (schreiben) |
 | neue Rückgabestruktur eines Services | `service/<entity>_dto.py`, Export in `service/__init__.py` |
-| neuer GitHub-Aufruf | Methode in `github/client.py` (Fehler nur als `GitHubError` mit Schritt und Status, nie mit Header oder Antworttext), Test gegen `tests/fakes/fake_github.py` |
 | neue fachliche Exception | `service/exceptions.py` und Statuscode in `web/errors.py` (`SERVICE_ERROR_STATUS`) |
 | neue App im Menü | lokal `dev/manifests/<slug>.json`, Status in `dev/state.yml`; auf der VM per `scp` kopiert und mit `sudo portal-deploy register` abgelegt (`python -m portal.registry`), der Prober setzt den Status |
 | App auf der VM anzeigen oder entfernen | `sudo portal-deploy list` bzw. `remove <slug> --owner <owner/repo>` (`registry/registration.py`, Klasse `Registrar`); Status aus `registry.status_file`, die der Prober schreibt (`registry/status_file.py`) |
@@ -65,8 +63,6 @@ docs/              diese Dokumentation (Markdown); docs/api/ = Sphinx-Konfigurat
 | `/` | Session | Startseite mit Menü |
 | `/_portal/status` | `platform-admin` | Status aller Apps |
 | `/_portal/connections` | Session | „Meine Verbindungen" |
-| `/_portal/neue-app` | Rolle aus `app_creation.creator_roles` | Neue App anlegen (Formular, POST legt an); 404, wenn `app_creation` fehlt |
-| `/_portal/api/apps` | Session + Rolle + `X-CSRF-Token` | Neue App anlegen als JSON (`docs/02-entwicklung.md`) |
 | `/_portal/error/{code}` | – | Fehlerseite (HTML) mit dem angefragten Status 400–599, für die `errors`-Middleware von Traefik |
 | `/nav` | Session (dev) bzw. Gateway-Assertion oder App-Token (`Authorization: Bearer`) | Menü-Fragment (ETag, `X-Portal-Kit`); ohne beides 401 als JSON für das SDK |
 | `/login` | – | nur `auth_mode: dev`: Testpersonen-Auswahl (im Gateway-Modus 404, Login macht das Gateway) |

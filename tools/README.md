@@ -2,12 +2,6 @@
 
 ## neue-app.sh: neue App aus dem Golden Master anlegen (HKA-54)
 
-> **Veraltet (HKA-82).** Neue Apps legt das Portal an, über die Seite „Neue App anlegen“ (`/_portal/neue-app`) oder die
-> Schnittstelle `POST /_portal/api/apps`. Das Portal nutzt dafür eine GitHub App, die Person braucht weder `gh` noch
-> Rechte auf GitHub noch Zugriff auf dieses Repository. Anleitung: [`docs/02-entwicklung.md`](../docs/02-entwicklung.md),
-> Abschnitt „Neue App anlegen“. Das Skript bleibt für den Notfall und weil es dieselben Schritte beschreibt; die Tests
-> von `tests/test_neue_app.py` laufen weiter. Es entfällt, sobald die GitHub App eingerichtet ist.
-
 Ein Befehl legt das GitHub-Repository `app-<slug>` an. Danach funktionieren Prüf-Pipeline und Review-Pflicht ohne eigene
 Einrichtung. Das Deployment läuft von Hand per `scp` (HKA-50, HKA-53; Ablauf in Confluence „CI/CD und Deployment“): Das
 Skript legt dafür keine Secrets und keine Environments an.
