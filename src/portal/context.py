@@ -14,9 +14,11 @@ from .auth.sessions import MemorySessionStore, SessionStore
 from .core.config import Config
 from .core.i18n import Messages
 from .core.kit import Kit
+from .docs import DocStore
 from .registry import ManifestDirectorySource, ManifestValidator, Prober, Registry, StatusWriter
 from .registry.registration import Registrar
-from .service import AdminService, AppService, SessionService, SessionWriteService
+from .service import AdminService, AppService, DocService, DocWriteService, SessionService, SessionWriteService
+from .web.docs_page import DocsPage
 from .web.views import Views
 
 PACKAGE_DIR = Path(__file__).resolve().parent
@@ -39,6 +41,9 @@ class Portal:
     :ivar session_store: Session-Store im Speicher, nur bei ``auth_mode: dev``
     :ivar views: Rendert Seiten aus Templates
     :ivar dev_users: Testpersonen, leer bei ``auth_mode: gateway``
+    :ivar doc_service: Lesender Service der Dokumentation
+    :ivar doc_write_service: Schreibender Service der Dokumentation
+    :ivar docs_page: Rendert die Docs-Seite
     :ivar prober: Prüft ``/healthz`` der Apps und setzt den Status, ``None`` ohne ``registry.probe``
     """
     cfg: Config
@@ -52,6 +57,9 @@ class Portal:
     session_store: SessionStore | None
     views: Views
     dev_users: Mapping[str, DevUser]
+    doc_service: DocService
+    doc_write_service: DocWriteService
+    docs_page: DocsPage
     prober: Prober | None = None
 
 
@@ -87,6 +95,7 @@ def build_portal(
     )
     admin_service = AdminService(registry, registrar, grants, cfg.role_vocabulary, writable=cfg.registry.admin_write)
     session_write_service = SessionWriteService(sessions, dev_users) if sessions is not None else None
+    docs = DocStore(cfg.docs.dir)
     return Portal(
         cfg=cfg,
         kit=kit,
@@ -99,6 +108,9 @@ def build_portal(
         session_store=sessions,
         views=Views(TEMPLATES_DIR, apps=app_service, t=t, kit=kit, cfg=cfg),
         dev_users=dev_users,
+        doc_service=DocService(docs),
+        doc_write_service=DocWriteService(docs, max_upload_bytes=cfg.docs.max_upload_bytes),
+        docs_page=DocsPage(),
         prober=(
             Prober(registry, cfg.apps, app_transport,
                    status_writer=StatusWriter(cfg.registry.status_file) if cfg.registry.status_file else None)

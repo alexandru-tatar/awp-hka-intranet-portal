@@ -1,6 +1,8 @@
 <footer class="site-footer">
   <p class="site-footer__brand"><strong>{{ t('brand.name') }}</strong>{{ t('brand.sub') }}</p>
+  {% if can_read_docs(user) %}
   <ul>
     <li><a class="cta" href="/_portal/docs">{{ t('footer.docs') }}</a></li>
   </ul>
+  {% endif %}
 </footer>

@@ -12,6 +12,8 @@ from ..context import Portal
 from ..service import (
     AdminService,
     AppService,
+    DocService,
+    DocWriteService,
     InvalidCsrfError,
     LoginRequiredError,
     NotFoundError,
@@ -52,6 +54,76 @@ def get_admin_service(portal: PortalDep) -> AdminService:
     :rtype: AdminService
     """
     return portal.admin_service
+
+
+def get_doc_service(portal: PortalDep) -> DocService:
+    """Lesender Service der Dokumentation.
+
+    :param portal: Portal-Kontext
+    :return: Der Service
+    :rtype: DocService
+    """
+    return portal.doc_service
+
+
+def get_doc_write_service(portal: PortalDep) -> DocWriteService:
+    """Schreibender Service der Dokumentation.
+
+    :param portal: Portal-Kontext
+    :return: Der Service
+    :rtype: DocWriteService
+    """
+    return portal.doc_write_service
+
+
+def can_read_docs(cfg_docs, session: SessionDTO | None) -> bool:
+    """Ob eine Session die Dokumentation lesen darf (Lese- oder Bearbeitungsrolle).
+
+    :param cfg_docs: Abschnitt ``docs`` der Konfiguration (:class:`~portal.core.config.DocsConfig`)
+    :param session: Session oder ``None``
+    :return: ``True``, falls eine der Rollen vorhanden ist
+    :rtype: bool
+    """
+    return bool(session and session.roles & (set(cfg_docs.read_roles) | set(cfg_docs.edit_roles)))
+
+
+def can_edit_docs(cfg_docs, session: SessionDTO | None) -> bool:
+    """Ob eine Session die Dokumentation bearbeiten darf.
+
+    :param cfg_docs: Abschnitt ``docs`` der Konfiguration (:class:`~portal.core.config.DocsConfig`)
+    :param session: Session oder ``None``
+    :return: ``True``, falls eine Bearbeitungsrolle vorhanden ist
+    :rtype: bool
+    """
+    return bool(session and session.roles & set(cfg_docs.edit_roles))
+
+
+def require_docs_reader(portal: PortalDep, session: Annotated[SessionDTO, Depends(require_session)]) -> SessionDTO:
+    """Session, die die Dokumentation lesen darf.
+
+    :param portal: Portal-Kontext
+    :param session: Angemeldete Session
+    :return: Die Session
+    :rtype: SessionDTO
+    :raises HTTPException: 403 ohne passende Rolle
+    """
+    if not can_read_docs(portal.cfg.docs, session):
+        raise HTTPException(403)
+    return session
+
+
+def require_docs_editor(portal: PortalDep, session: Annotated[SessionDTO, Depends(require_session)]) -> SessionDTO:
+    """Session, die die Dokumentation bearbeiten darf.
+
+    :param portal: Portal-Kontext
+    :param session: Angemeldete Session
+    :return: Die Session
+    :rtype: SessionDTO
+    :raises HTTPException: 403 ohne passende Rolle
+    """
+    if not can_edit_docs(portal.cfg.docs, session):
+        raise HTTPException(403)
+    return session
 
 
 def check_csrf(session: SessionDTO, token: str) -> None:
@@ -133,7 +205,11 @@ def require_role(role: str) -> Callable[..., SessionDTO]:
 
 AdminServiceDep = Annotated[AdminService, Depends(get_admin_service)]
 AppServiceDep = Annotated[AppService, Depends(get_app_service)]
+DocServiceDep = Annotated[DocService, Depends(get_doc_service)]
+DocWriteServiceDep = Annotated[DocWriteService, Depends(get_doc_write_service)]
 SessionWriteServiceDep = Annotated[SessionWriteService, Depends(get_session_write_service)]
 OptionalSession = Annotated[SessionDTO | None, Depends(optional_session)]
 CurrentSession = Annotated[SessionDTO, Depends(require_session)]
 AdminSession = Annotated[SessionDTO, Depends(require_role("platform-admin"))]
+DocsReader = Annotated[SessionDTO, Depends(require_docs_reader)]
+DocsEditor = Annotated[SessionDTO, Depends(require_docs_editor)]

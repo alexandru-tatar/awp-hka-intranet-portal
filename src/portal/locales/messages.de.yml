@@ -21,6 +21,22 @@ logout.body: Möchten Sie sich vom Portal abmelden?
 footer.label: Fußzeile
 footer.docs: Docs
 
+# ── Dokumentation (/_portal/docs): Meldungen der Schnittstelle, angezeigt im Editor ──
+docs.error.invalid: Die Anfrage ist unvollständig. Bitte laden Sie die Seite neu und versuchen Sie es noch einmal.
+docs.error.csrf: Ihre Sitzung ist abgelaufen. Bitte laden Sie die Seite neu; Ihr Entwurf bleibt im Browser gespeichert.
+docs.error.not_found: Diese Seite oder Version gibt es nicht mehr.
+docs.error.conflict: "{name} hat die Seite inzwischen geändert. Öffnen Sie die neue Fassung und übernehmen Sie Ihre Änderungen; Ihr Entwurf bleibt im Browser gespeichert."
+docs.error.title: Bitte geben Sie einen Titel mit höchstens 120 Zeichen ein (erste Überschrift der Seite).
+docs.error.group: Bitte wählen Sie einen Bereich mit höchstens 60 Zeichen.
+docs.error.note: Die Änderungsnotiz darf höchstens 300 Zeichen lang sein.
+docs.error.level: Diese Stufe gibt es nicht.
+docs.error.too_long: Die Seite ist zu groß. Teilen Sie den Inhalt bitte auf mehrere Seiten auf.
+docs.error.start: Die Startseite der Dokumentation lässt sich nicht löschen.
+docs.error.empty_file: Die Datei ist leer.
+docs.error.too_large: Die Datei ist zu groß. Erlaubt sind höchstens {limit_mb} MB.
+docs.error.media_type: Dieses Format ist nicht erlaubt. Möglich sind PNG, JPEG, GIF, WebP und PDF.
+docs.error.read_only: Die Dokumentation ist hier nur lesbar, weil kein Speicherordner eingerichtet ist.
+
 home.title: Startseite
 home.greeting: Willkommen, {name}
 home.intro: Hier finden Sie alle Anwendungen, die für Sie freigeschaltet sind. Wählen Sie eine Anwendung aus.
