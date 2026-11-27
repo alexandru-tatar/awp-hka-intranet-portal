@@ -108,8 +108,15 @@ pages/<slug>.json          aktueller Stand
 versions/<slug>/<n>.json   jede veröffentlichte Version, wird nie überschrieben
 changes.jsonl              eine Zeile je Änderung: Zeit, Seite, Version, Person, Art, Notiz
 order.json                 Reihenfolge in der Navigation
+seed.json                  Prüfsumme des zuletzt übernommenen Ausgangsstands je Seite
 assets/<hash>.<endung>     Bilder (PNG, JPEG, GIF, WebP) und PDFs, Name aus dem SHA-256 des Inhalts
 ```
+
+**Neue Fassung von `seed.html`.** Ändert jemand `seed.html` im Repository (z. B. eine Anleitung per Pull Request),
+übernimmt der nächste Start die neue Fassung als neue Version (Autor „Projektteam AWP“, Notiz „Ausgangsstand
+aktualisiert“), aber nur für Seiten, die seit dem letzten Ausgangsstand niemand im Browser bearbeitet hat. Bearbeitete
+Seiten bleiben unverändert; das Log nennt sie (`docs seed skipped slug=…`), die Änderung muss dann im Editor nachgezogen
+werden. Neue Seiten aus `seed.html` kommen dazu, gelöschte Seiten bleiben gelöscht.
 
 Ohne `docs.dir` ist die Dokumentation nur lesbar (Ausgangsstand, kein Editor). Zurücksetzen lokal: `dev/docs/` löschen.
 

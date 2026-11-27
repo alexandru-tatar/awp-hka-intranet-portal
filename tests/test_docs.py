@@ -175,3 +175,36 @@ def test_sanitize_keeps_seed_content():
         assert len(out) > 0.97 * len(page.html), page.slug
         for tag in ("<svg", "<table", "<details", "<h2", "<button", "<input", "<a ", "<code"):
             assert out.count(tag) == page.html.count(tag), (page.slug, tag)
+
+
+def _seed(*pages: tuple[str, str]) -> str:
+    """Kleine seed.html aus (slug, Text)."""
+    return "\n".join(f'<article class="page" data-page="{s}" data-title="{s.upper()}" data-group="G">\n'
+                     f"  <h1>{s.upper()}</h1><p>{t}</p>\n</article>" for s, t in pages) + "\n"
+
+
+@pytest.mark.parametrize("without_seed_json", [False, True])
+def test_new_seed_updates_only_pages_nobody_edited(tmp_path, monkeypatch, without_seed_json):
+    import portal.docs.store as store_module
+
+    seed = tmp_path / "seed.html"
+    monkeypatch.setattr(store_module, "SEED_FILE", seed)
+    seed.write_text(_seed(("a", "alt"), ("b", "alt"), ("c", "alt")))
+    store = DocStore(tmp_path / "docs")
+    store.update("b", base_version=1, title="B", group="G", html="<h1>B</h1><p>von Hand</p>", attrs={},
+                 actor="Eva", note="")
+    store.delete("c", actor="Eva")
+    if without_seed_json:  # Speicher von vor der Übernahme neuer Fassungen (VM)
+        (tmp_path / "docs" / "seed.json").unlink()
+
+    seed.write_text(_seed(("a", "neu"), ("b", "neu"), ("c", "neu"), ("d", "neu")))
+    store = DocStore(tmp_path / "docs")
+    a, b = store.page("a"), store.page("b")
+    assert "neu" in a.html and a.version == 2 and a.updated_by == "Projektteam AWP"
+    assert "von Hand" in b.html and b.version == 2 and b.updated_by == "Eva"
+    assert [p.slug for p in store.pages()] == ["a", "b", "d"]
+    assert store.changes(1)[0].slug == "d"
+    assert any(c.slug == "a" and c.note == "Ausgangsstand aktualisiert" for c in store.changes())
+
+    store = DocStore(tmp_path / "docs")  # nochmal starten: nichts Neues
+    assert store.page("a").version == 2 and len(store.changes()) == len(DocStore(tmp_path / "docs").changes())
