@@ -11,8 +11,6 @@ from starlette.exceptions import HTTPException
 from ..context import Portal
 from ..service import (
     AdminService,
-    AppCreationDisabledError,
-    AppCreationService,
     AppService,
     InvalidCsrfError,
     LoginRequiredError,
@@ -54,19 +52,6 @@ def get_admin_service(portal: PortalDep) -> AdminService:
     :rtype: AdminService
     """
     return portal.admin_service
-
-
-def get_app_creation_service(portal: PortalDep) -> AppCreationService:
-    """Service zum Anlegen neuer Apps.
-
-    :param portal: Portal-Kontext
-    :return: Der Service
-    :rtype: AppCreationService
-    :raises AppCreationDisabledError: Falls der Abschnitt ``app_creation`` fehlt (404)
-    """
-    if portal.app_creation_service is None:
-        raise AppCreationDisabledError
-    return portal.app_creation_service
 
 
 def check_csrf(session: SessionDTO, token: str) -> None:
@@ -148,7 +133,6 @@ def require_role(role: str) -> Callable[..., SessionDTO]:
 
 AdminServiceDep = Annotated[AdminService, Depends(get_admin_service)]
 AppServiceDep = Annotated[AppService, Depends(get_app_service)]
-AppCreationServiceDep = Annotated[AppCreationService, Depends(get_app_creation_service)]
 SessionWriteServiceDep = Annotated[SessionWriteService, Depends(get_session_write_service)]
 OptionalSession = Annotated[SessionDTO | None, Depends(optional_session)]
 CurrentSession = Annotated[SessionDTO, Depends(require_session)]

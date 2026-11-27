@@ -82,41 +82,6 @@ class RegistryConfig:
 
 
 @dataclass(frozen=True)
-class AppCreationConfig:
-    """Neue Apps über eine GitHub App anlegen (Abschnitt ``app_creation``, HKA-82).
-
-    :ivar app_id: Nummer der GitHub App
-    :ivar installation_id: Nummer der Installation der GitHub App im Konto der App-Repositories
-    :ivar private_key_file: Datei mit dem privaten Schlüssel der GitHub App (PEM); der Schlüssel bleibt auf dem Server
-    :ivar owner: Konto, in dem die App-Repositories entstehen
-    :ivar template_owner: Konto der Golden Master
-    :ivar templates: Repository des Golden Master je Sprache (``python``, ``js``)
-    :ivar github_api_url: Adresse der GitHub-API
-    :ivar private: ``True``, wenn die App-Repositories privat angelegt werden (Rulesets brauchen dann einen bezahlten Tarif)
-    :ivar topic: Topic, das jedes App-Repository bekommt
-    :ivar check_name: Name des Pflicht-Checks im Ruleset auf ``main``
-    :ivar creator_roles: Rollen, die Apps anlegen dürfen
-    :ivar audit_file: JSON-Lines-Datei, in die jede Anlage geschrieben wird; ohne Wert nur ins Log
-    :ivar wait_seconds: Sekunden zwischen den Abfragen, ob das neue Repository seinen Inhalt hat
-    :ivar wait_tries: Höchstzahl dieser Abfragen
-    """
-    app_id: int
-    installation_id: int
-    private_key_file: Path
-    owner: str
-    template_owner: str
-    templates: Mapping[str, str]
-    github_api_url: str = "https://api.github.com"
-    private: bool = False
-    topic: str = "hka-app"
-    check_name: str = "check"
-    creator_roles: tuple[str, ...] = ("app-creator", "platform-admin")
-    audit_file: Path | None = None
-    wait_seconds: float = 2.0
-    wait_tries: int = 30
-
-
-@dataclass(frozen=True)
 class GatewayConfig:
     issuer: str
     jwks_url: str
@@ -144,7 +109,6 @@ class Config:
     :ivar grants_file: Zusätzliche Rollen je Subject
     :ivar apps: Adressen der App-Container für den Prober, ``None`` ohne Abschnitt
     :ivar registry: Nachladen der Manifeste, Prober und Besitzerdatei
-    :ivar app_creation: Neue Apps über eine GitHub App anlegen, ``None`` ohne Abschnitt (Funktion aus)
     """
     env: str
     kontakt: str
@@ -163,7 +127,6 @@ class Config:
     apps: AppsConfig | None = None
     registry: RegistryConfig = field(default_factory=RegistryConfig)
     gateway: GatewayConfig | None = None
-    app_creation: AppCreationConfig | None = None
 
     @property
     def dev(self) -> bool:
@@ -179,13 +142,9 @@ _KEYS = {
     "env", "kontakt", "manifests_dir", "schema_path", "kit_dist", "role_vocabulary",
     "adapter_scopes", "state_file", "dev_users_file", "session_cookie",
     "cookie_secure", "auth_mode", "logging", "grants_file",
-    "apps", "registry", "gateway", "app_creation",
+    "apps", "registry", "gateway",
 }
 _REGISTRY_KEYS = {"refresh_seconds", "probe", "owners_file", "status_file", "admin_write"}
-_APP_CREATION_KEYS = {
-    "app_id", "installation_id", "private_key_file", "owner", "template_owner", "templates", "github_api_url",
-    "private", "topic", "check_name", "creator_roles", "audit_file", "wait_seconds", "wait_tries",
-}
 _APPS_KEYS = {"upstream", "connect_timeout_seconds", "read_timeout_seconds", "max_body_bytes"}
 
 
@@ -237,7 +196,6 @@ def load_config(path: Path) -> Config:
         apps=_load_apps(path, raw.get("apps")),
         registry=_load_registry(path, base, raw.get("registry")),
         gateway=GatewayConfig(**raw["gateway"]) if raw.get("gateway") else None,
-        app_creation=_load_app_creation(path, base, raw.get("app_creation"), raw.get("role_vocabulary") or ()),
     )
     if cfg.registry.probe:
         if cfg.apps is None:
@@ -262,8 +220,6 @@ def load_config(path: Path) -> Config:
                 raise ConfigError("Invalid gateway URL")
         if cfg.gateway.audience in ("portal", "adapters") or not cfg.gateway.audience:
             raise ConfigError("Dedicated portal audience required")
-    if cfg.app_creation is not None and cfg.registry.owners_file is None:
-        raise ConfigError(f"{path}: app_creation needs registry owners_file (the slug is reserved there)")
     if cfg.grants_file and not cfg.grants_file.exists():
         # Mit admin_write legt die Verwaltungsseite die Datei bei der ersten Änderung an; dann genügt der Ordner.
         if not (cfg.registry.admin_write and cfg.grants_file.parent.is_dir()):
@@ -338,66 +294,6 @@ def _load_apps(path: Path, raw: dict | None) -> AppsConfig | None:
     )
     if min(cfg.connect_timeout_seconds, cfg.read_timeout_seconds, cfg.max_body_bytes) <= 0:
         raise ConfigError(f"{path}: apps timeouts and max_body_bytes must be positive")
-    return cfg
-
-
-def _load_app_creation(path: Path, base: Path, raw: dict | None, role_vocabulary: tuple[str, ...]) -> AppCreationConfig | None:
-    """Den Abschnitt ``app_creation`` lesen und prüfen.
-
-    Der private Schlüssel wird hier nur als Pfad geprüft, nie gelesen oder ausgegeben.
-
-    :param path: Pfad der Konfigurationsdatei, für Fehlermeldungen
-    :param base: Ordner der Konfigurationsdatei, Basis für relative Pfade
-    :param raw: Rohwerte des Abschnitts, ``None`` ohne Abschnitt
-    :param role_vocabulary: Erlaubte Rollen, ``creator_roles`` muss darin liegen
-    :return: Die Einstellungen oder ``None``
-    :rtype: AppCreationConfig | None
-    :raises ConfigError: Bei unbekannten oder fehlenden Schlüsseln, ungültigen Werten oder fehlender Schlüsseldatei
-    """
-    if raw is None:
-        return None
-    if not isinstance(raw, dict):
-        raise ConfigError(f"{path}: app_creation must be a mapping")
-    unknown = set(raw) - _APP_CREATION_KEYS
-    if unknown:
-        raise ConfigError(f"{path}: unknown app_creation key(s) {', '.join(sorted(unknown))}")
-    for key in ("app_id", "installation_id", "private_key_file", "owner", "templates"):
-        if not raw.get(key):
-            raise ConfigError(f"{path}: app_creation missing key {key}")
-    templates = raw["templates"]
-    if not isinstance(templates, dict) or set(templates) != {"python", "js"} or not all(
-            isinstance(v, str) and v for v in templates.values()):
-        raise ConfigError(f"{path}: app_creation templates needs python and js, each a repository name")
-    api_url = str(raw.get("github_api_url", "https://api.github.com")).rstrip("/")
-    if not api_url.startswith(("http://", "https://")):
-        raise ConfigError(f"{path}: app_creation github_api_url must start with http:// or https://")
-    if not isinstance(raw.get("private", False), bool):
-        raise ConfigError(f"{path}: app_creation private must be true or false")
-    roles = tuple(raw.get("creator_roles", ("app-creator", "platform-admin")))
-    unknown_roles = [role for role in roles if role not in role_vocabulary]
-    if unknown_roles:
-        raise ConfigError(f"{path}: app_creation creator_roles not in role_vocabulary: {', '.join(unknown_roles)}")
-    key_file = (base / raw["private_key_file"]).resolve()
-    if not key_file.is_file():
-        raise ConfigError(f"{path}: app_creation private_key_file does not exist: {key_file}")
-    cfg = AppCreationConfig(
-        app_id=int(raw["app_id"]),
-        installation_id=int(raw["installation_id"]),
-        private_key_file=key_file,
-        owner=str(raw["owner"]),
-        template_owner=str(raw.get("template_owner") or raw["owner"]),
-        templates=dict(templates),
-        github_api_url=api_url,
-        private=bool(raw.get("private", False)),
-        topic=str(raw.get("topic", "hka-app")),
-        check_name=str(raw.get("check_name", "check")),
-        creator_roles=roles,
-        audit_file=(base / raw["audit_file"]).resolve() if raw.get("audit_file") else None,
-        wait_seconds=float(raw.get("wait_seconds", 2)),
-        wait_tries=int(raw.get("wait_tries", 30)),
-    )
-    if cfg.wait_seconds < 0 or cfg.wait_tries < 1:
-        raise ConfigError(f"{path}: app_creation wait_seconds must not be negative and wait_tries must be at least 1")
     return cfg
 
 
