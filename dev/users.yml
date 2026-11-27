@@ -5,6 +5,6 @@ users:
   david:     { name: David Coric,                  roles: [student] }
   neumann:   { name: Prof. Dr.-Ing. Rainer Neumann, roles: [professor] }
   max:       { name: Max Beispiel,                 roles: [employee] }
-  admin:     { name: Sam Betrieb,                  roles: [employee, platform-admin] }
-  ersteller: { name: Erika Ersteller,              roles: [employee, app-creator] }
+  entwickler: { name: Eva Entwicklerin,            roles: [employee, maintainer] }
+  admin:     { name: Admin,                        roles: [employee, platform-admin] }
   gast:      { name: Gast ohne Rolle,              roles: [] }

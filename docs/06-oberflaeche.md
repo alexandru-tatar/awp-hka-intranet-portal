@@ -102,3 +102,78 @@ kit/dist/   GENERIERT (make kit): kit-<hash>.css, kit-<hash>.js, icons-<hash>.sv
 
 Skip-Link als erstes Element, `<main tabindex="-1">`, eine Navigations-Landmark (der Menübaum wird zweimal gerendert, CSS blendet
 eine Kopie aus), sichtbarer Fokus, Fehlerhinweise per `role="alert"`, Dialoge mit `<dialog>`. Die Details stehen im Skill `hka-design`.
+
+## Dokumentation (`/_portal/docs`)
+
+Die AWP-Dokumentation ist eine eigenständige Seite mit eigenem Stil (nicht das Kit), die das Portal aus Bausteinen zusammensetzt
+(`web/docs_page.py`):
+
+| Datei in `src/portal/docs/` | Inhalt |
+|---|---|
+| `shell.html` | Hülle: Stil, Kopf, Navigation, Suche, Skript; Platzhalter `<!--DOCS:PAGES-->` und `<!--DOCS:BOOT-->` |
+| `seed.html` | Ausgangsstand der Seiten, je Seite ein `<article class="page" data-page=… data-title=… data-group=…>` |
+| `editor.js`, `editor.css` | Zeile „Zuletzt aktualisiert“, Versionsverlauf, Editor |
+| `store.py` | `DocStore`: Seiten, Versionen, Änderungsprotokoll, hochgeladene Dateien |
+| `sanitize.py` | `sanitize_html`: lässt nur erlaubte Tags und Attribute durch |
+
+**Rollen.** Lesen dürfen `docs.read_roles` (`all` = alle Angemeldeten, so in allen Konfigurationen; sonst eine
+Liste von Rollen). Anlegen, bearbeiten, wiederherstellen und löschen dürfen `docs.edit_roles` (Standard `maintainer`) und
+Personen, die `platform-admin` auf der Verwaltungsseite im Abschnitt „Dokumentation – Maintainer“ freigibt. Eine Freigabe gilt
+sofort, ohne neue Anmeldung, und liegt in `editors.json` im Docs-Speicher. Zur Auswahl stehen alle, die das Portal schon
+genutzt haben (`people.json`: Subject, Name, Rollen, letzter Besuch; aktualisiert beim Aufruf von Startseite und Docs,
+höchstens einmal pro Stunde); sonst wird das Subject eingegeben. Testperson: `entwickler` (Eva Entwicklerin, Rolle
+`maintainer`). Im Gateway-Modus kommt die Rolle aus dem Claim `eduPersonEntitlement` = `urn:hka:portal:maintainer`
+(`dev/roles.yml`).
+
+**Speicher.** `docs.dir` (lokal `dev/docs/`, in `.gitignore`; Compose und VM `/var/lib/portal/registry/docs` im beschreibbaren
+Registry-Volume). Ein leerer Ordner bekommt beim Start `seed.html` als Version 1 (Autor „Projektteam AWP“). Aufbau:
+
+```text
+pages/<slug>.json          aktueller Stand
+versions/<slug>/<n>.json   jede veröffentlichte Version, wird nie überschrieben
+changes.jsonl              eine Zeile je Änderung: Zeit, Seite, Version, Person, Art, Notiz
+order.json                 Reihenfolge in der Navigation
+editors.json               Maintainer, die die Verwaltungsseite freigegeben hat
+people.json                Personen, die das Portal genutzt haben (Auswahl auf der Verwaltungsseite)
+seed.json                  Prüfsumme des zuletzt übernommenen Ausgangsstands je Seite
+assets/<hash>.<endung>     Bilder (PNG, JPEG, GIF, WebP) und PDFs, Name aus dem SHA-256 des Inhalts
+```
+
+**Neue Fassung von `seed.html`.** Ändert jemand `seed.html` im Repository (z. B. eine Anleitung per Pull Request),
+übernimmt der nächste Start die neue Fassung als neue Version (Autor „Projektteam AWP“, Notiz „Ausgangsstand
+aktualisiert“), aber nur für Seiten, die seit dem letzten Ausgangsstand niemand im Browser bearbeitet hat. Bearbeitete
+Seiten bleiben unverändert; das Log nennt sie (`docs seed skipped slug=…`), die Änderung muss dann im Editor nachgezogen
+werden. Neue Seiten aus `seed.html` kommen dazu, gelöschte Seiten bleiben gelöscht.
+
+Ohne `docs.dir` ist die Dokumentation nur lesbar (Ausgangsstand, kein Editor). Zurücksetzen lokal: `dev/docs/` löschen.
+
+**Funktionen.**
+
+- Unter dem Titel jeder Seite steht wie in Confluence, wer sie zuletzt geändert hat und wann (relativ und als Datum), dazu
+  Version, Ersteller und Lesezeit, sowie die Knöpfe „Verlauf“ und „Bearbeiten“.
+- Die Systemseite „Letzte Änderungen“ (`#aenderungen`, Bereich Hilfe) gibt es immer. Sie zeigt alle Änderungen, die neueste zuerst
+  und nach Tagen gruppiert, mit Notiz und Filter. Sie ist auch über das Uhr-Symbol im Kopf und die Fußzeile der Docs erreichbar.
+  Die Fußzeile nennt die letzte Änderung.
+- Im Versionsverlauf lässt sich jede ältere Version ansehen und als neue Version wiederherstellen.
+- Editor (WYSIWYG, `contenteditable`), Start mit „Bearbeiten“ oder der Taste `E`. Fokus-Modus: Navigation und
+  Inhaltsverzeichnis verschwinden, oben steht eine Leiste mit Titel, Status („Keine Änderungen“, „Nicht veröffentlicht“,
+  „Entwurf gespeichert“), Wortzahl, „⋯“ (Seiteneinstellungen, HTML bearbeiten, Tastenkürzel, Seite löschen), „Abbrechen“
+  und „Veröffentlichen“. Darunter die Formatleiste mit Absatzformat, Fett, Kursiv, Code, Link, Listen und „Einfügen“.
+- Schreiben wie in Confluence oder Notion: `/` öffnet das Befehlsmenü (Überschriften, Listen, Bild, Tabelle,
+  Hinweisboxen, Befehl, Codeblock, Zitat, Link, PDF, Trennlinie), filterbar und per Tastatur bedienbar. Über markiertem
+  Text erscheint eine kleine Formatleiste. Markdown-Kürzel: `## ` Überschrift 2, `### ` Überschrift 3, `- ` Aufzählung,
+  `1. ` nummerierte Liste, `> ` Zitat, `` ``` `` Codeblock, `---` + Enter Trennlinie. Leere Zeilen zeigen einen Hinweis.
+- Links zeigen beim Anklicken eine Karte mit Adresse, „Bearbeiten“ und „Entfernen“; Tabellen eine Leiste für Zeilen
+  und Spalten; Bilder eine Leiste für Größe, Zentrieren, Beschreibung (Alternativtext, Bildunterschrift) und Entfernen.
+  Bilder kommen per Menü, Einfügen aus der Zwischenablage oder Ziehen und Ablegen dazu, mit Fortschritt. PDFs werden als
+  Download-Link eingefügt. Eine kopierte Adresse über markiertem Text wird zum Link.
+- „Veröffentlichen“ (oder Strg/⌘+S) öffnet einen Dialog für die Änderungsnotiz. Ein Entwurf liegt laufend im
+  `localStorage` des Browsers und wird beim nächsten Öffnen angeboten. Hat inzwischen jemand anderes veröffentlicht,
+  antwortet die Schnittstelle mit 409, und der Editor fragt nach.
+- Neue Seiten legt „Neue Seite“ im Kopf an (Titel, Bereich, Stufe). Löschen nimmt eine Seite aus der Navigation, ihre Versionen
+  bleiben erhalten. Die Startseite lässt sich nicht löschen.
+
+**Sicherheit.** Gespeichertes HTML läuft durch `sanitize_html` (keine Skripte, keine `on…`-Attribute, keine `javascript:`-Links,
+Bilder nur aus `/_portal/docs/assets/`). Die Seite hat eine eigene Content-Security-Policy mit Nonce: nur das Skript der Hülle und
+des Editors laufen. Hochgeladene Dateien werden am Dateianfang geprüft (kein SVG) und mit `Content-Security-Policy: sandbox`
+ausgeliefert, PDFs als Download. Ändernde Anfragen brauchen das CSRF-Token der Session im Header `X-CSRF-Token`.

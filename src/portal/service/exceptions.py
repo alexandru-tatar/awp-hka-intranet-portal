@@ -84,64 +84,46 @@ class InvalidInputError(Exception):
         self.key: str = key
 
 
-class AppCreationDisabledError(Exception):
-    """Das Anlegen neuer Apps ist nicht eingeschaltet (kein Abschnitt ``app_creation`` in der Konfiguration)."""
+class ConflictError(Exception):
+    """Der Datensatz wurde inzwischen geändert (z. B. eine Docs-Seite seit dem Öffnen des Editors).
+
+    :ivar current_version: Aktuelle Version des Datensatzes
+    :ivar updated_by: Wer die aktuelle Version veröffentlicht hat
+    """
+
+    def __init__(self, current_version: int, updated_by: str) -> None:
+        """:param current_version: Aktuelle Version
+        :param updated_by: Name der Person, die die aktuelle Version veröffentlicht hat
+        """
+        super().__init__(f"Konflikt, aktuelle Version {current_version}")
+        self.current_version: int = current_version
+        self.updated_by: str = updated_by
+
+
+class DocsReadOnlyError(Exception):
+    """Die Dokumentation hat keinen Speicherordner (``docs.dir``) und lässt keine Änderungen zu."""
 
     def __init__(self) -> None:
         """Konstruktor ohne Parameter."""
-        super().__init__("Neue Apps anlegen ist nicht eingeschaltet")
+        super().__init__("Dokumentation ist nur lesend")
 
 
-class NotAllowedError(Exception):
-    """Die Person darf keine Apps anlegen: keine der Rollen aus ``app_creation.creator_roles``."""
+class PayloadTooLargeError(Exception):
+    """Die hochgeladene Datei ist größer als erlaubt.
 
-    def __init__(self) -> None:
-        """Konstruktor ohne Parameter."""
-        super().__init__("Rolle zum Anlegen von Apps fehlt")
-
-
-class InvalidAppRequestError(Exception):
-    """Eingabe zum Anlegen einer App ist ungültig (Slug, Sprache oder GitHub-Name).
-
-    :ivar key: Schlüssel des Fehlertexts in ``messages.de.yml`` (``neue_app.error.<key>``)
-    :ivar field: Betroffenes Feld: ``slug``, ``language`` oder ``github_login``
+    :ivar limit: Erlaubte Größe in Byte
     """
 
-    def __init__(self, key: str, field: str) -> None:
-        """:param key: Schlüssel des Fehlertexts
-        :param field: Betroffenes Feld
-        """
-        super().__init__(f"Ungültige Eingabe {field}: {key}")
-        self.key: str = key
-        self.field: str = field
+    def __init__(self, limit: int) -> None:
+        """:param limit: Erlaubte Größe in Byte"""
+        super().__init__(f"Datei größer als {limit} Byte")
+        self.limit: int = limit
 
 
-class SlugTakenError(Exception):
-    """Der Name ist vergeben, gesperrt oder das Repository gibt es schon. Es wurde nichts angelegt."""
+class UnsupportedMediaTypeError(Exception):
+    """Die hochgeladene Datei hat ein Format, das nicht erlaubt ist."""
 
-    def __init__(self, slug: str) -> None:
-        """:param slug: Name der App"""
-        super().__init__(f"Name vergeben: {slug}")
-        self.slug: str = slug
-
-
-class AppCreationFailedError(Exception):
-    """Das Anlegen ist bei einem Schritt gescheitert.
-
-    :ivar step: Name des Schrittes
-    :ivar repo: ``konto/name`` des Repositorys, ``None`` vor dem Anlegen
-    :ivar url: Adresse des Repositorys, ``None`` vor dem Anlegen
-    :ivar created: ``True``, wenn das Repository schon existiert (nichts wird automatisch gelöscht)
-    """
-
-    def __init__(self, step: str, *, repo: str | None = None, url: str | None = None, created: bool = False) -> None:
-        """:param step: Name des Schrittes
-        :param repo: ``konto/name`` des Repositorys
-        :param url: Adresse des Repositorys
-        :param created: ob das Repository schon existiert
-        """
-        super().__init__(f"Anlegen gescheitert bei: {step}")
-        self.step: str = step
-        self.repo: str | None = repo
-        self.url: str | None = url
-        self.created: bool = created
+    def __init__(self, media_type: str) -> None:
+        """:param media_type: Angegebener oder erkannter Typ"""
+        super().__init__(f"Format nicht erlaubt: {media_type}")
+        self.media_type: str = media_type

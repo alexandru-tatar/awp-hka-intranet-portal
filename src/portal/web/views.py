@@ -45,7 +45,12 @@ class Views:
         :param cfg: Konfiguration
         """
         self._templates = Jinja2Templates(directory=str(templates_dir))
-        self._templates.env.globals.update(t=t, kit=kit, cfg=cfg)
+        docs_all = "*" in cfg.docs.read_roles
+        docs_roles = frozenset(cfg.docs.read_roles) | frozenset(cfg.docs.edit_roles)
+        self._templates.env.globals.update(
+            t=t, kit=kit, cfg=cfg,
+            can_read_docs=lambda user: bool(user and (docs_all or user.roles & docs_roles)))
+        self._templates.env.filters["datum"] = _german_date
         self._apps = apps
         self._t = t
 
@@ -116,3 +121,15 @@ class Views:
             groups=groups, current_slug=current_slug(current)
         )
         return Markup(html)
+
+
+def _german_date(value: str | None) -> str:
+    """ISO-Datum (``2026-11-27…``) als deutsches Datum (``27.11.2026``).
+
+    :param value: Zeitpunkt in ISO 8601 oder ``None``
+    :return: Datum, leer ohne Wert
+    :rtype: str
+    """
+    if not value or len(value) < 10:
+        return value or ""
+    return f"{value[8:10]}.{value[5:7]}.{value[:4]}"

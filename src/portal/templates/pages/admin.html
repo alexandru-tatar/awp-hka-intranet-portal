@@ -16,7 +16,7 @@
 <p class="lead">{{ t('admin.intro') }}</p>
 
 {% if notice %}<div class="notice" role="status"><p>{{ t('admin.notice.' ~ notice) }}</p></div>{% endif %}
-{% if error %}{{ error_summary(t('admin.error.title'), [('apps-heading', t('admin.error.' ~ error))]) }}{% endif %}
+{% if error %}{{ error_summary(t('admin.error.title'), [('maintainer-sub' if error.startswith('maintainer') else 'apps-heading', t('admin.error.' ~ error))]) }}{% endif %}
 {% if not can_manage_apps %}<div class="notice notice--warn"><p>{{ t('admin.read_only') }}</p></div>{% endif %}
 
 <h2 id="apps-heading">{{ t('admin.apps.heading') }}</h2>
@@ -143,5 +143,78 @@
   <div class="actions"><button type="submit" class="btn btn--primary">{{ t('admin.grants.save') }}</button></div>
 </form>
 {% endif %}
+{% endif %}
+
+<h2 id="maintainers-heading">{{ t('admin.maintainers.heading') }}</h2>
+<p class="prose">{{ t('admin.maintainers.intro', roles=docs_edit_roles|join(', ')) }}</p>
+{% if not docs_writable %}<div class="notice notice--warn"><p>{{ t('admin.maintainers.read_only') }}</p></div>{% endif %}
+{% if maintainers %}
+<div class="table-wrap" role="region" aria-labelledby="maintainers-caption" tabindex="0">
+  <table class="table">
+    <caption id="maintainers-caption">{{ t('admin.maintainers.caption') }}</caption>
+    <thead>
+      <tr>
+        <th scope="col">{{ t('admin.col.person') }}</th>
+        <th scope="col">{{ t('admin.col.via') }}</th>
+        <th scope="col">{{ t('admin.col.last_seen') }}</th>
+        <th scope="col">{{ t('admin.col.actions') }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for m in maintainers %}
+      <tr>
+        <th scope="row">{{ m.name }}{% if m.name != m.sub %}<br><span class="muted small">{{ m.sub }}</span>{% endif %}</th>
+        <td>
+          {%- if m.added %}{{ t('admin.maintainers.via_admin', name=m.added_by, date=m.added_at|datum) }}{% endif %}
+          {%- if m.added and m.via_role %}<br>{% endif %}
+          {%- if m.via_role %}{{ t('admin.maintainers.via_role') }}{% endif %}
+        </td>
+        <td>{{ m.last_seen|datum if m.last_seen else t('admin.maintainers.never') }}</td>
+        <td>
+          {%- if m.added and docs_writable %}
+          <form id="maintainer-delete-form-{{ loop.index }}" method="post" action="/_portal/admin/maintainers/delete">
+            <input type="hidden" name="csrf" value="{{ user.csrf }}">
+            <input type="hidden" name="sub" value="{{ m.sub }}">
+            <button type="button" class="btn btn--secondary" data-dialog-open="maintainer-delete-{{ loop.index }}">{{ t('admin.maintainers.remove') }} …<span class="visually-hidden"> {{ m.name }}</span></button>
+          </form>
+          {%- else %}<span class="muted small">{{ t('admin.maintainers.role_only') }}</span>{% endif %}
+        </td>
+      </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+</div>
+{%- for m in maintainers if m.added and docs_writable %}
+{{ dialog('maintainer-delete-' ~ loop.index, t('admin.maintainers.remove_title', name=m.name), t('admin.maintainers.remove_body'), t('admin.maintainers.remove_confirm'), submit_form='maintainer-delete-form-' ~ loop.index) }}
+{%- endfor %}
+{% else %}
+<p>{{ t('admin.maintainers.none') }}</p>
+{% endif %}
+
+{% if docs_writable %}
+<h3>{{ t('admin.maintainers.add') }}</h3>
+<form method="post" action="/_portal/admin/maintainers" class="prose">
+  <input type="hidden" name="csrf" value="{{ user.csrf }}">
+  {%- set taken = maintainers|selectattr('added')|map(attribute='sub')|list %}
+  {%- set choices = people|rejectattr('sub', 'in', taken)|list %}
+  {% if choices %}
+  <div class="field">
+    <label for="maintainer-sub">{{ t('admin.col.person') }}</label>
+    <p id="maintainer-sub-hint" class="field__hint">{{ t('admin.maintainers.person_hint') }}</p>
+    <select id="maintainer-sub" name="sub" aria-describedby="maintainer-sub-hint">
+      <option value="">{{ t('admin.maintainers.choose') }}</option>
+      {%- for p in choices %}
+      <option value="{{ p.sub }}">{{ p.name }} ({{ t('admin.maintainers.seen', date=p.last_seen|datum) }})</option>
+      {%- endfor %}
+    </select>
+  </div>
+  {% endif %}
+  <div class="field">
+    <label for="{{ 'maintainer-sub-manual' if choices else 'maintainer-sub' }}">{{ t('admin.maintainers.manual') if choices else t('admin.col.sub') }}</label>
+    <p id="maintainer-manual-hint" class="field__hint">{{ t('admin.maintainers.manual_hint') }}</p>
+    <input id="{{ 'maintainer-sub-manual' if choices else 'maintainer-sub' }}" name="sub_manual" type="text" maxlength="200" aria-describedby="maintainer-manual-hint">
+  </div>
+  <div class="actions"><button type="submit" class="btn btn--primary">{{ t('admin.maintainers.submit') }}</button></div>
+</form>
 {% endif %}
 {% endblock %}

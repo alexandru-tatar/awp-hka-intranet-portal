@@ -81,39 +81,27 @@ class RegistryConfig:
     admin_write: bool = False
 
 
-@dataclass(frozen=True)
-class AppCreationConfig:
-    """Neue Apps über eine GitHub App anlegen (Abschnitt ``app_creation``, HKA-82).
+#: Wert von ``docs.read_roles`` für „alle angemeldeten Personen“ (in der YAML-Datei ``read_roles: all``).
+DOCS_ALL = "*"
+#: Rollen, die die Dokumentation ohne Abschnitt ``docs`` bearbeiten dürfen.
+DOCS_EDIT_ROLES = ("maintainer",)
 
-    :ivar app_id: Nummer der GitHub App
-    :ivar installation_id: Nummer der Installation der GitHub App im Konto der App-Repositories
-    :ivar private_key_file: Datei mit dem privaten Schlüssel der GitHub App (PEM); der Schlüssel bleibt auf dem Server
-    :ivar owner: Konto, in dem die App-Repositories entstehen
-    :ivar template_owner: Konto der Golden Master
-    :ivar templates: Repository des Golden Master je Sprache (``python``, ``js``)
-    :ivar github_api_url: Adresse der GitHub-API
-    :ivar private: ``True``, wenn die App-Repositories privat angelegt werden (Rulesets brauchen dann einen bezahlten Tarif)
-    :ivar topic: Topic, das jedes App-Repository bekommt
-    :ivar check_name: Name des Pflicht-Checks im Ruleset auf ``main``
-    :ivar creator_roles: Rollen, die Apps anlegen dürfen
-    :ivar audit_file: JSON-Lines-Datei, in die jede Anlage geschrieben wird; ohne Wert nur ins Log
-    :ivar wait_seconds: Sekunden zwischen den Abfragen, ob das neue Repository seinen Inhalt hat
-    :ivar wait_tries: Höchstzahl dieser Abfragen
+
+@dataclass(frozen=True)
+class DocsConfig:
+    """Dokumentation unter ``/_portal/docs`` (Abschnitt ``docs``).
+
+    :ivar dir: Speicherordner für Seiten, Versionen und hochgeladene Dateien; ohne Wert nur lesend aus dem
+        Ausgangsstand (``portal/docs/seed.html``)
+    :ivar read_roles: Rollen, die die Dokumentation lesen dürfen; ``("*",)`` (YAML ``all``) für alle Angemeldeten
+    :ivar edit_roles: Rollen, die Seiten anlegen, bearbeiten, wiederherstellen und löschen dürfen; dazu kommen
+        Personen, die die Verwaltungsseite als Maintainer freigibt
+    :ivar max_upload_bytes: Größte erlaubte Datei beim Hochladen
     """
-    app_id: int
-    installation_id: int
-    private_key_file: Path
-    owner: str
-    template_owner: str
-    templates: Mapping[str, str]
-    github_api_url: str = "https://api.github.com"
-    private: bool = False
-    topic: str = "hka-app"
-    check_name: str = "check"
-    creator_roles: tuple[str, ...] = ("app-creator", "platform-admin")
-    audit_file: Path | None = None
-    wait_seconds: float = 2.0
-    wait_tries: int = 30
+    dir: Path | None = None
+    read_roles: tuple[str, ...] = (DOCS_ALL,)
+    edit_roles: tuple[str, ...] = DOCS_EDIT_ROLES
+    max_upload_bytes: int = 10 * 1024 * 1024
 
 
 @dataclass(frozen=True)
@@ -144,9 +132,9 @@ class Config:
     :ivar grants_file: Zusätzliche Rollen je Subject
     :ivar apps: Adressen der App-Container für den Prober, ``None`` ohne Abschnitt
     :ivar registry: Nachladen der Manifeste, Prober und Besitzerdatei
-    :ivar app_creation: Neue Apps über eine GitHub App anlegen, ``None`` ohne Abschnitt (Funktion aus)
     :ivar language_switch: Umschalter Deutsch/Englisch im Kopf auch im Gateway-Modus zeigen (braucht ``/sprache/<code>`` im Gateway)
     :ivar kontakt_en: Kontaktangabe für Fehlerseiten auf Englisch; leer heißt: ``kontakt`` gilt in beiden Sprachen
+    :ivar docs: Dokumentation: Speicherordner und Rollen
     """
     env: str
     kontakt: str
@@ -165,7 +153,7 @@ class Config:
     apps: AppsConfig | None = None
     registry: RegistryConfig = field(default_factory=RegistryConfig)
     gateway: GatewayConfig | None = None
-    app_creation: AppCreationConfig | None = None
+    docs: DocsConfig = field(default_factory=DocsConfig)
     language_switch: bool = False
     kontakt_en: str = ""
 
@@ -192,13 +180,10 @@ _KEYS = {
     "env", "kontakt", "manifests_dir", "schema_path", "kit_dist", "role_vocabulary",
     "adapter_scopes", "state_file", "dev_users_file", "session_cookie",
     "cookie_secure", "auth_mode", "logging", "grants_file",
-    "apps", "registry", "gateway", "app_creation", "language_switch", "kontakt_en",
+    "apps", "registry", "gateway", "docs", "language_switch", "kontakt_en",
 }
+_DOCS_KEYS = {"dir", "read_roles", "edit_roles", "max_upload_mb"}
 _REGISTRY_KEYS = {"refresh_seconds", "probe", "owners_file", "status_file", "admin_write"}
-_APP_CREATION_KEYS = {
-    "app_id", "installation_id", "private_key_file", "owner", "template_owner", "templates", "github_api_url",
-    "private", "topic", "check_name", "creator_roles", "audit_file", "wait_seconds", "wait_tries",
-}
 _APPS_KEYS = {"upstream", "connect_timeout_seconds", "read_timeout_seconds", "max_body_bytes"}
 
 
@@ -250,7 +235,7 @@ def load_config(path: Path) -> Config:
         apps=_load_apps(path, raw.get("apps")),
         registry=_load_registry(path, base, raw.get("registry")),
         gateway=GatewayConfig(**raw["gateway"]) if raw.get("gateway") else None,
-        app_creation=_load_app_creation(path, base, raw.get("app_creation"), raw.get("role_vocabulary") or ()),
+        docs=_load_docs(path, base, raw.get("docs"), tuple(raw["role_vocabulary"])),
         language_switch=_load_flag(path, raw, "language_switch"),
         kontakt_en=str(raw.get("kontakt_en") or ""),
     )
@@ -277,8 +262,6 @@ def load_config(path: Path) -> Config:
                 raise ConfigError("Invalid gateway URL")
         if cfg.gateway.audience in ("portal", "adapters") or not cfg.gateway.audience:
             raise ConfigError("Dedicated portal audience required")
-    if cfg.app_creation is not None and cfg.registry.owners_file is None:
-        raise ConfigError(f"{path}: app_creation needs registry owners_file (the slug is reserved there)")
     if cfg.grants_file and not cfg.grants_file.exists():
         # Mit admin_write legt die Verwaltungsseite die Datei bei der ersten Änderung an; dann genügt der Ordner.
         if not (cfg.registry.admin_write and cfg.grants_file.parent.is_dir()):
@@ -371,66 +354,6 @@ def _load_apps(path: Path, raw: dict | None) -> AppsConfig | None:
     return cfg
 
 
-def _load_app_creation(path: Path, base: Path, raw: dict | None, role_vocabulary: tuple[str, ...]) -> AppCreationConfig | None:
-    """Den Abschnitt ``app_creation`` lesen und prüfen.
-
-    Der private Schlüssel wird hier nur als Pfad geprüft, nie gelesen oder ausgegeben.
-
-    :param path: Pfad der Konfigurationsdatei, für Fehlermeldungen
-    :param base: Ordner der Konfigurationsdatei, Basis für relative Pfade
-    :param raw: Rohwerte des Abschnitts, ``None`` ohne Abschnitt
-    :param role_vocabulary: Erlaubte Rollen, ``creator_roles`` muss darin liegen
-    :return: Die Einstellungen oder ``None``
-    :rtype: AppCreationConfig | None
-    :raises ConfigError: Bei unbekannten oder fehlenden Schlüsseln, ungültigen Werten oder fehlender Schlüsseldatei
-    """
-    if raw is None:
-        return None
-    if not isinstance(raw, dict):
-        raise ConfigError(f"{path}: app_creation must be a mapping")
-    unknown = set(raw) - _APP_CREATION_KEYS
-    if unknown:
-        raise ConfigError(f"{path}: unknown app_creation key(s) {', '.join(sorted(unknown))}")
-    for key in ("app_id", "installation_id", "private_key_file", "owner", "templates"):
-        if not raw.get(key):
-            raise ConfigError(f"{path}: app_creation missing key {key}")
-    templates = raw["templates"]
-    if not isinstance(templates, dict) or set(templates) != {"python", "js"} or not all(
-            isinstance(v, str) and v for v in templates.values()):
-        raise ConfigError(f"{path}: app_creation templates needs python and js, each a repository name")
-    api_url = str(raw.get("github_api_url", "https://api.github.com")).rstrip("/")
-    if not api_url.startswith(("http://", "https://")):
-        raise ConfigError(f"{path}: app_creation github_api_url must start with http:// or https://")
-    if not isinstance(raw.get("private", False), bool):
-        raise ConfigError(f"{path}: app_creation private must be true or false")
-    roles = tuple(raw.get("creator_roles", ("app-creator", "platform-admin")))
-    unknown_roles = [role for role in roles if role not in role_vocabulary]
-    if unknown_roles:
-        raise ConfigError(f"{path}: app_creation creator_roles not in role_vocabulary: {', '.join(unknown_roles)}")
-    key_file = (base / raw["private_key_file"]).resolve()
-    if not key_file.is_file():
-        raise ConfigError(f"{path}: app_creation private_key_file does not exist: {key_file}")
-    cfg = AppCreationConfig(
-        app_id=int(raw["app_id"]),
-        installation_id=int(raw["installation_id"]),
-        private_key_file=key_file,
-        owner=str(raw["owner"]),
-        template_owner=str(raw.get("template_owner") or raw["owner"]),
-        templates=dict(templates),
-        github_api_url=api_url,
-        private=bool(raw.get("private", False)),
-        topic=str(raw.get("topic", "hka-app")),
-        check_name=str(raw.get("check_name", "check")),
-        creator_roles=roles,
-        audit_file=(base / raw["audit_file"]).resolve() if raw.get("audit_file") else None,
-        wait_seconds=float(raw.get("wait_seconds", 2)),
-        wait_tries=int(raw.get("wait_tries", 30)),
-    )
-    if cfg.wait_seconds < 0 or cfg.wait_tries < 1:
-        raise ConfigError(f"{path}: app_creation wait_seconds must not be negative and wait_tries must be at least 1")
-    return cfg
-
-
 def _load_registry(path: Path, base: Path, raw: dict | None) -> RegistryConfig:
     """Den Abschnitt ``registry`` lesen und prüfen.
 
@@ -463,4 +386,45 @@ def _load_registry(path: Path, base: Path, raw: dict | None) -> RegistryConfig:
         owners_file=(base / raw["owners_file"]).resolve() if raw.get("owners_file") else None,
         status_file=(base / raw["status_file"]).resolve() if raw.get("status_file") else None,
         admin_write=bool(raw.get("admin_write", False)),
+    )
+
+
+def _load_docs(path: Path, base: Path, raw: dict | None, vocabulary: tuple[str, ...]) -> DocsConfig:
+    """Den Abschnitt ``docs`` lesen und prüfen.
+
+    :param path: Pfad der Konfigurationsdatei, für Fehlermeldungen
+    :param base: Ordner der Konfigurationsdatei, Basis für einen relativen ``dir``
+    :param raw: Rohwerte des Abschnitts, ``None`` ohne Abschnitt
+    :param vocabulary: Erlaubte Rollen (``role_vocabulary``)
+    :return: Die Einstellungen, ohne Abschnitt die Voreinstellung (nur lesend)
+    :rtype: DocsConfig
+    :raises ConfigError: Bei unbekannten Schlüsseln, Rollen außerhalb von ``role_vocabulary`` oder ungültiger Größe
+    """
+    if raw is None:
+        return DocsConfig()
+    if not isinstance(raw, dict):
+        raise ConfigError(f"{path}: docs must be a mapping")
+    unknown = set(raw) - _DOCS_KEYS
+    if unknown:
+        raise ConfigError(f"{path}: unknown docs key(s) {', '.join(sorted(unknown))}")
+    roles = {}
+    for key, default in (("read_roles", "all"), ("edit_roles", list(DOCS_EDIT_ROLES))):
+        value = raw.get(key, default)
+        if key == "read_roles" and value == "all":
+            roles[key] = (DOCS_ALL,)
+            continue
+        if not isinstance(value, list) or not value or not all(isinstance(r, str) for r in value):
+            raise ConfigError(f"{path}: docs {key} must be a non-empty list of roles")
+        outside = set(value) - set(vocabulary)
+        if outside:
+            raise ConfigError(f"{path}: docs {key} not in role_vocabulary: {', '.join(sorted(outside))}")
+        roles[key] = tuple(value)
+    size = float(raw.get("max_upload_mb", 10))
+    if not 0 < size <= 100:
+        raise ConfigError(f"{path}: docs max_upload_mb must be between 0 and 100")
+    return DocsConfig(
+        dir=(base / raw["dir"]).resolve() if raw.get("dir") else None,
+        read_roles=roles["read_roles"],
+        edit_roles=tuple(dict.fromkeys(roles["edit_roles"])),
+        max_upload_bytes=int(size * 1024 * 1024),
     )

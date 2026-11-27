@@ -62,7 +62,7 @@ async def error_in_layout(request: Request, layout: Layout, status: int, title: 
         return error(request, status, title, detail)
     try:
         body = env.get_template("error_in_layout.html").render(
-            title=title, detail=detail, request_id=current_request_id.get(), tx=texts()
+            status=status, title=title, detail=detail, request_id=current_request_id.get(), tx=texts()
         )
         html = await layout.render(title=title, body=body, current="", user=user)
     except Exception as exc:  # die einfache Seite ist besser als ein zweiter Fehler

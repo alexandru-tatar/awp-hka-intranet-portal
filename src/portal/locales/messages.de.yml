@@ -29,6 +29,22 @@ lang.name.en: English
 footer.label: Fußzeile
 footer.docs: Docs
 
+# ── Dokumentation (/_portal/docs): Meldungen der Schnittstelle, angezeigt im Editor ──
+docs.error.invalid: Die Anfrage ist unvollständig. Bitte laden Sie die Seite neu und versuchen Sie es noch einmal.
+docs.error.csrf: Ihre Sitzung ist abgelaufen. Bitte laden Sie die Seite neu; Ihr Entwurf bleibt im Browser gespeichert.
+docs.error.not_found: Diese Seite oder Version gibt es nicht mehr.
+docs.error.conflict: "{name} hat die Seite inzwischen geändert. Öffnen Sie die neue Fassung und übernehmen Sie Ihre Änderungen; Ihr Entwurf bleibt im Browser gespeichert."
+docs.error.title: Bitte geben Sie einen Titel mit höchstens 120 Zeichen ein (erste Überschrift der Seite).
+docs.error.group: Bitte wählen Sie einen Bereich mit höchstens 60 Zeichen.
+docs.error.note: Die Änderungsnotiz darf höchstens 300 Zeichen lang sein.
+docs.error.level: Diese Stufe gibt es nicht.
+docs.error.too_long: Die Seite ist zu groß. Teilen Sie den Inhalt bitte auf mehrere Seiten auf.
+docs.error.start: Die Startseite der Dokumentation lässt sich nicht löschen.
+docs.error.empty_file: Die Datei ist leer.
+docs.error.too_large: Die Datei ist zu groß. Erlaubt sind höchstens {limit_mb} MB.
+docs.error.media_type: Dieses Format ist nicht erlaubt. Möglich sind PNG, JPEG, GIF, WebP und PDF.
+docs.error.read_only: Die Dokumentation ist hier nur lesbar, weil kein Speicherordner eingerichtet ist.
+
 home.title: Startseite
 home.greeting: Willkommen, {name}
 home.intro: Hier finden Sie alle Anwendungen, die für Sie freigeschaltet sind. Wählen Sie eine Anwendung aus.
@@ -143,6 +159,33 @@ admin.grants.delete: Löschen
 admin.grants.delete_title: Rollen von „{sub}“ löschen?
 admin.grants.delete_body: Die Person verliert ihre zusätzlichen Rollen ab der nächsten Anmeldung.
 admin.grants.delete_confirm: Löschen
+admin.notice.maintainer_added: Die Person ist jetzt Maintainer. Sie kann die Dokumentation sofort bearbeiten, ohne sich neu anzumelden.
+admin.notice.maintainer_removed: Die Person ist kein Maintainer mehr. Sie kann die Dokumentation ab sofort nur noch lesen.
+admin.error.maintainer_sub: Wählen Sie eine Person aus der Liste oder geben Sie ihr Subject ein (höchstens 200 Zeichen).
+admin.error.maintainer_read_only: Die Dokumentation hat hier keinen Speicherordner. Maintainer lassen sich deshalb nicht verwalten.
+admin.col.person: Person
+admin.col.via: Darf bearbeiten durch
+admin.col.last_seen: Zuletzt im Portal
+admin.maintainers.heading: Dokumentation – Maintainer
+admin.maintainers.intro: "Alle Angemeldeten können die Dokumentation lesen. Bearbeiten dürfen nur Maintainer: Personen mit der Rolle aus der Anmeldung ({roles}) und Personen, die Sie hier freigeben. Eine Freigabe gilt sofort."
+admin.maintainers.caption: Personen, die die Dokumentation bearbeiten dürfen
+admin.maintainers.read_only: Die Dokumentation hat hier keinen Speicherordner. Maintainer lassen sich deshalb nicht verwalten.
+admin.maintainers.none: Es gibt noch keine Maintainer. Personen mit der Rolle aus der Anmeldung erscheinen hier, sobald sie das Portal einmal genutzt haben.
+admin.maintainers.via_admin: Freigabe von {name} am {date}
+admin.maintainers.via_role: Rolle aus der Anmeldung
+admin.maintainers.never: noch nicht
+admin.maintainers.role_only: kommt aus der Anmeldung
+admin.maintainers.remove: Entfernen
+admin.maintainers.remove_title: „{name}“ als Maintainer entfernen?
+admin.maintainers.remove_body: Die Person kann die Dokumentation danach nur noch lesen. Ihre bisherigen Änderungen bleiben im Versionsverlauf.
+admin.maintainers.remove_confirm: Entfernen
+admin.maintainers.add: Maintainer hinzufügen
+admin.maintainers.person_hint: Hier stehen alle, die das Portal schon einmal genutzt haben.
+admin.maintainers.choose: Person auswählen …
+admin.maintainers.seen: zuletzt {date}
+admin.maintainers.manual: Oder Subject eingeben
+admin.maintainers.manual_hint: Für Personen, die noch nicht in der Liste stehen. Das Subject steht im Anmeldesystem.
+admin.maintainers.submit: Als Maintainer hinzufügen
 
 connections.title: Meine Verbindungen
 connections.intro: Für einige Systeme braucht das Portal einmal Ihr Passwort, damit Anwendungen dort für Sie lesen können. Das Passwort wird verschlüsselt und nur für diese Sitzung gespeichert.
@@ -167,57 +210,3 @@ dev.app.subject_error: Bitte geben Sie einen Betreff ein.
 dev.app.message: Nachricht
 dev.app.required: Pflichtfeld
 dev.app.error_summary: Bitte prüfen Sie Ihre Eingaben
-
-header.new_app: Neue App
-neue_app.title: Neue App anlegen
-neue_app.eyebrow: Selbstbedienung
-neue_app.intro: Hier legen Sie das Repository für Ihre App an. Es entsteht aus der Vorlage, hat die Zweige main und develop und ist sofort startklar. Sie brauchen dafür keine Befehle und keine besonderen Rechte auf GitHub.
-neue_app.form.slug: Kurzname
-neue_app.form.slug_hint: "Er steht später in der Adresse der App. Erlaubt sind 3 bis 31 Zeichen, nur Kleinbuchstaben, Ziffern und Bindestrich, der Anfang ist ein Buchstabe. Zum Beispiel urlaubsantrag. Das Repository heißt dann app-urlaubsantrag, schreiben Sie „app-“ also nicht selbst davor."
-neue_app.form.language: Vorlage
-neue_app.form.language_hint: Beide Vorlagen bringen einen DevContainer und eine automatische Prüfung mit. Wählen Sie die Sprache, die Ihr Team kennt.
-neue_app.form.python: Python
-neue_app.form.python_meta: FastAPI und uv
-neue_app.form.js: JavaScript
-neue_app.form.js_meta: Express und npm
-neue_app.form.github_login: Ihr GitHub-Name
-neue_app.form.github_login_hint: An diesen Namen geht die Einladung zum Repository. Sie finden ihn in Ihrem Profil auf github.com.
-neue_app.form.submit: App anlegen
-neue_app.form.submit_hint: Das Anlegen dauert meist 10 bis 20 Sekunden.
-neue_app.panel.title: Das bekommen Sie
-neue_app.panel.repo: Ein eigenes Repository auf GitHub, aus der Vorlage kopiert
-neue_app.panel.branches: Die Zweige main und develop
-neue_app.panel.protect: "Schutz für main: Änderungen nur über einen Pull Request"
-neue_app.panel.invite: Eine Einladung an Ihren GitHub-Namen
-neue_app.busy.eyebrow: Einen Moment bitte
-neue_app.busy.title: Ihre App entsteht
-neue_app.busy.body: Das Portal legt jetzt Ihr Repository auf GitHub an. Das dauert meist 10 bis 20 Sekunden. Bitte schließen Sie diese Seite nicht.
-neue_app.busy.steps: Fortschritt
-neue_app.busy.note: Die Seite wechselt von selbst, sobald alles fertig ist.
-neue_app.error.title: Die App wurde nicht angelegt
-neue_app.error.slug_form: Der Kurzname hat 3 bis 31 Zeichen, nur Kleinbuchstaben, Ziffern und Bindestrich, und beginnt mit einem Buchstaben.
-neue_app.error.slug_reserved: Diesen Kurznamen dürfen Sie nicht verwenden. Wählen Sie einen Namen, der sagt, worum es in Ihrer App geht.
-neue_app.error.language: Wählen Sie Python oder JavaScript.
-neue_app.error.github_login: Das ist kein GitHub-Name. Er besteht aus Buchstaben, Ziffern und einzelnen Bindestrichen und hat höchstens 39 Zeichen.
-neue_app.error.slug_taken: Der Kurzname ist schon vergeben oder gesperrt. Wählen Sie einen anderen. Es wurde nichts angelegt.
-neue_app.error.failed_before: "Beim Schritt „{step}“ ist etwas schiefgegangen. Es wurde nichts angelegt. Versuchen Sie es noch einmal oder melden Sie sich bei {kontakt}. Nennen Sie die Nummer {request_id}."
-neue_app.error.failed_after: "Das Repository „{repo}“ wurde angelegt, aber beim Schritt „{step}“ ist etwas schiefgegangen. Es wurde nichts gelöscht. Melden Sie sich bei {kontakt} und nennen Sie die Nummer {request_id}."
-neue_app.step.pruefen: Prüfen
-neue_app.step.vorlage: Vorlage prüfen
-neue_app.step.repository: Repository prüfen
-neue_app.step.reservieren: Namen reservieren
-neue_app.step.protokollieren: Anlage protokollieren
-neue_app.step.anlegen: Repository anlegen
-neue_app.step.warten: Auf die Dateien der Vorlage warten
-neue_app.step.slug: Kurznamen in manifest.json setzen
-neue_app.step.develop: Zweig develop anlegen
-neue_app.step.topic: Thema setzen
-neue_app.step.einladen: Person einladen
-neue_app.step.ruleset: Schutz für main einrichten
-neue_app.done.eyebrow: Fertig
-neue_app.done.title: Ihre App ist angelegt
-neue_app.done.next_title: So geht es weiter
-neue_app.done.body: "Das Repository „{repo}“ ist fertig. Es hat die Zweige main und develop. Der Zweig main ist geschützt: Änderungen kommen nur über einen Pull Request mit einer Freigabe."
-neue_app.done.invite: Die Einladung ist an „{login}“ gegangen. Nehmen Sie sie auf GitHub an, dann können Sie das Repository klonen.
-neue_app.done.open: Repository auf GitHub öffnen
-neue_app.done.next: Wie es weitergeht, steht in der Anleitung unter „Arbeitsplatz öffnen“.

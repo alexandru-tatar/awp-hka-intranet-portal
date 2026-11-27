@@ -49,6 +49,7 @@ intranet-portal/
 │   │   ├── session_service.py      # SessionService(MemorySessionStore): find_by_id
 │   │   └── session_write_service.py # SessionWriteService(store, dev_users): create, delete
 │   ├── registry/                   # models · validation (Manifest) · sources (RegistrySource) · store (Snapshot)
+│   ├── docs/                       # Dokumentation /_portal/docs: store (DocStore: Seiten, Versionen, Änderungen, Dateien) · sanitize · shell.html · seed.html · editor.js/.css
 │   ├── auth/                       # sessions (Protocol SessionStore + Memory) · redis_sessions (RedisSessionStore, RedisLoginStore) · oidc (OidcClient) · roles (RoleMapper) · dev_users · redirects
 │   ├── web/                        # views (Rendern) · menu (current_slug) · deps (Session/Rolle/Service-Dependencies) · errors · middleware
 │   ├── router/                     # HTTP-Schnittstelle, ein APIRouter pro Datei
@@ -60,6 +61,7 @@ intranet-portal/
 │   │   ├── health_router.py        # /readyz (Redis-Ping, 503 bei Ausfall)
 │   │   ├── oidc_router.py          # /login, /oidc/callback (nur auth_mode: oidc)
 │   │   ├── dev_login_router.py     # /login Testpersonen-Auswahl (nur auth_mode: dev)
+│   │   ├── docs_router.py          # /_portal/docs (Seite), /_portal/docs/api/* (JSON), /_portal/docs/assets/*
 │   │   └── dev_router.py           # /apps/{slug}/ Platzhalter (nur env: dev)
 │   ├── locales/messages.de.yml     # ALLE UI-Texte
 │   └── templates/
@@ -130,8 +132,6 @@ Nie umgekehrt (z. B. importiert `service/` nie aus `web/` oder `router/`, `regis
 | neue Geschäftsregel | `service/<entity>_service.py` (lesen) bzw. `<entity>_write_service.py` (schreiben) |
 | neuer Rückgabetyp eines Services | `service/<entity>_dto.py`, Export in `service/__init__.py` |
 | neue fachliche Exception | `service/exceptions.py` + Status-Mapping in `web/errors.py` (`SERVICE_ERROR_STATUS`) |
-| neuer GitHub-Aufruf (App anlegen) | `github/client.py` (nur `GitHubError` mit Schritt und Status, nie Header oder Antworttext), Ablauf in `service/app_creation_service.py`, Test mit `tests/fakes/fake_github.py` |
-| Protokoll einer Verwaltungsaktion (wer, wann, welche App) | `service/audit.py` (`AuditLog`), nie Token oder Schlüssel hineinschreiben |
 | Service in Handler nutzen | `Depends`-Alias in `web/deps.py` (z. B. `AppServiceDep`), Instanz in `context.py` bauen |
 | Session-/Rollen-Prüfung | `web/deps.py` |
 | Fehlerseite / Statuscode-Mapping | `web/errors.py` |
@@ -144,6 +144,8 @@ Nie umgekehrt (z. B. importiert `service/` nie aus `web/` oder `router/`, `regis
 | CSS / Farbe / Schrift / Icon | `kit/` (Tokens nur in `kit/css/tokens.css`), danach `make kit contrast` |
 | Test | `tests/test_<thema>.py`, Fixtures in `tests/conftest.py` |
 | nur-Dev-Funktion | `router/dev_router.py` (wird nur bei `cfg.dev` eingehängt) |
+| Dokumentation (Inhalt) | im Browser unter `/_portal/docs` mit Rolle `maintainer`; Ausgangsstand `docs/seed.html`, Speicher `docs.dir` (lokal `dev/docs/`) |
+| Dokumentation (Hülle, Editor) | `docs/shell.html`, `docs/editor.js`, `docs/editor.css`; Zusammensetzen in `web/docs_page.py` |
 
 ## Kernregeln
 

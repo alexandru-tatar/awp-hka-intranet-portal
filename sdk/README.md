@@ -52,8 +52,9 @@ Knopf, Texte und Dialog selbst; das Skript meldet nur Zustände (wartet, verbund
 1. **Reine Bibliothek.** Unter `adapters/` und `common/` gibt es kein HTML, kein CSS, keine Vorlagen und keine
    Texte für Nutzer. Oberfläche, Wortwahl und Muster dafür stehen im Golden Master (Skill `schnittstellen`) oder in
    der App. Vom Portal vorgegeben und deshalb im SDK: Seitenrahmen (`layout`), Fehlerseite (auch für die
-   Standardbehandlung von Fehlern, siehe „Fehler: Standard“), Test-Anmeldung. „Kein Zugriff“ (403 aus
-   `portal.requires`) erscheint im Browser als Seite im Seitenrahmen mit Weg zur Startseite, sonst als problem+json.
+   Standardbehandlung von Fehlern, siehe „Fehler: Standard“), Test-Anmeldung. „Dafür fehlt Ihnen die Berechtigung“ (403
+   aus `portal.requires`) erscheint im Browser als Seite im Seitenrahmen, gleich gestaltet und formuliert wie die
+   403-Seite des Portals (Fehler 403, Weg zur Startseite, Fehlernummer), sonst als problem+json.
 2. **Andere Systeme nur über das SDK.** Eine App ruft nie selbst einen Dienst auf, sondern
    `portal.adapters.<system>.<aufruf>(…)`. Das SDK schickt die Anmeldung der Person mit; die App braucht kein
    Passwort und kein Token. Durchgesetzt durch Regel R-SCHN-1 im Golden Master: `make lint` meldet eigene

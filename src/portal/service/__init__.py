@@ -1,24 +1,24 @@
 """Service-Schicht: Geschäftslogik zwischen router/ und registry/ bzw. auth/."""
 
 from .admin_service import AdminAppDTO, AdminService, GrantDTO
-from .app_creation_service import AppCreationService, CreateAppRequest, CreatedAppDTO
 from .app_dto import AppDTO, NavGroupDTO
 from .app_service import AppService
-from .audit import AuditLog
+from .doc_dto import DocChangeDTO, DocPageDTO, DocVersionDTO, MaintainerDTO, PersonDTO
+from .doc_service import DocService
+from .doc_write_service import DocWriteService
 from .exceptions import (
     AdminReadOnlyError,
-    AppCreationDisabledError,
-    AppCreationFailedError,
+    ConflictError,
+    DocsReadOnlyError,
     ForbiddenError,
-    InvalidAppRequestError,
     InvalidCsrfError,
     InvalidInputError,
     LoginFailedError,
     LoginRequiredError,
-    NotAllowedError,
     NotFoundError,
-    SlugTakenError,
+    PayloadTooLargeError,
     UnavailableError,
+    UnsupportedMediaTypeError,
     UnknownUserError,
 )
 from .session_dto import SessionDTO
@@ -28,8 +28,8 @@ from .session_write_service import SessionWriteService
 __all__ = [
     "AdminAppDTO", "AdminService", "GrantDTO", "AdminReadOnlyError", "InvalidInputError",
     "AppDTO", "NavGroupDTO", "AppService",
-    "AppCreationService", "CreateAppRequest", "CreatedAppDTO", "AuditLog", "AppCreationDisabledError",
-    "AppCreationFailedError", "InvalidAppRequestError", "NotAllowedError", "SlugTakenError",
+    "DocChangeDTO", "DocPageDTO", "DocVersionDTO", "MaintainerDTO", "PersonDTO", "DocService", "DocWriteService",
+    "ConflictError", "DocsReadOnlyError", "PayloadTooLargeError", "UnsupportedMediaTypeError",
     "SessionDTO", "SessionService", "SessionWriteService",
     "ForbiddenError", "InvalidCsrfError", "LoginFailedError", "LoginRequiredError",
     "NotFoundError", "UnavailableError", "UnknownUserError",

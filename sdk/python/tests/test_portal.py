@@ -74,12 +74,13 @@ def test_requires_403_im_browser_als_seite_im_portal_rahmen(client):
     html = response.text
     assert response.status_code == 403
     assert response.headers["content-type"].startswith("text/html")
-    assert "<title>Kein Zugriff – HKA Portal</title>" in html
+    assert "<title>Dafür fehlt Ihnen die Berechtigung – HKA Portal</title>" in html
     assert 'class="site-header"' in html and 'aria-label="Hauptnavigation"' in html  # Rahmen und Menü
     assert 'href="/_portal/static/kit.css"' in html  # gestaltet mit dem Kit
-    assert "<h1>Kein Zugriff</h1>" in html
-    assert "Diese Seite ist für Ihre Rolle nicht freigegeben." in html
-    assert '<a href="/">Zur Startseite des Portals</a>' in html
+    assert '<p class="error-page__status">Fehler 403</p>' in html  # Markup wie die Fehlerseite des Portals
+    assert "<h1>Dafür fehlt Ihnen die Berechtigung</h1>" in html
+    assert "Diese Anwendung ist für Ihre Rolle nicht freigegeben." in html
+    assert '<a class="cta" href="/">zur Startseite</a>' in html
     assert "dev-banner" not in html
 
 
@@ -87,7 +88,8 @@ def test_requires_403_ohne_text_html_bleibt_problem_json(client):
     response = client.get("/nur-professor", headers={"X-Portal-Assertion": make_token()})
     assert response.status_code == 403
     assert response.headers["content-type"].startswith("application/problem+json")
-    assert response.json()["type"] == "urn:hka:problem:403" and response.json()["title"] == "Kein Zugriff"
+    assert response.json()["type"] == "urn:hka:problem:403"
+    assert response.json()["title"] == "Dafür fehlt Ihnen die Berechtigung"
 
 
 def test_requires_mit_der_rolle_keine_fehlerseite(client):
@@ -104,7 +106,7 @@ def test_requires_403_faellt_auf_einfache_seite_zurueck(client, monkeypatch):
     monkeypatch.setattr(layout_module.Layout, "render", kaputt)
     response = client.get("/nur-professor", headers={"X-Portal-Assertion": make_token(), "Accept": "text/html"})
     assert response.status_code == 403
-    assert "<h1>Kein Zugriff</h1>" in response.text and "site-header" not in response.text
+    assert "<h1>Dafür fehlt Ihnen die Berechtigung</h1>" in response.text and "site-header" not in response.text
 
 
 def test_adapter_nicht_erreichbar():
@@ -154,7 +156,7 @@ def test_dev_403_seite_im_rahmen_zeigt_den_entwicklungsmodus(dev_client):
     assert response.status_code == 403
     assert "Entwicklungsmodus – Testperson: Erika Musterfrau" in response.text
     assert 'href="/__dev/kit/kit.css"' in response.text
-    assert '<a href="/">Zur Startseite des Portals</a>' in response.text
+    assert '<a class="cta" href="/">zur Startseite</a>' in response.text
 
 
 def test_dev_rollen(dev_client):

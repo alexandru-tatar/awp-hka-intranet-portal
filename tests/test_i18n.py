@@ -42,8 +42,9 @@ def test_english_texts_are_translated():
     same = sorted(k for k in de if de[k] == en[k])
     # Eigennamen, Sprachnamen und Zeichen, die in beiden Sprachen gleich sind
     allowed = {"app.title", "brand.name", "brand.sub", "lang.name.de", "lang.name.en", "status.unknown",
-               "neue_app.form.python", "neue_app.form.js", "footer.docs",
-               "status.col.version", "status.col.status", "admin.col.version", "admin.col.status", "admin.col.sub"}
+               "footer.docs",
+               "status.col.version", "status.col.status", "admin.col.version", "admin.col.status", "admin.col.sub",
+               "admin.col.person"}
     assert [k for k in same if k not in allowed] == []
 
 

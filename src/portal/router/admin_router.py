@@ -6,13 +6,14 @@ from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from loguru import logger
 
-from portal.service import InvalidInputError
+from portal.service import DocsReadOnlyError, InvalidInputError
 from portal.web.deps import AdminServiceDep, AdminSession, PortalDep, check_csrf
 
 router: Final = APIRouter(prefix="/_portal/admin", tags=["Verwaltung"])
 
 # Meldungen nach einer Änderung (Post/Redirect/Get); nur diese Schlüssel erscheinen auf der Seite.
-NOTICES: Final = frozenset({"app_removed", "app_roles", "grant_set", "grant_deleted"})
+NOTICES: Final = frozenset({"app_removed", "app_roles", "grant_set", "grant_deleted", "maintainer_added",
+                            "maintainer_removed"})
 
 
 def _page(request: Request, portal: PortalDep, service: AdminServiceDep, session: AdminSession, *,
@@ -34,6 +35,9 @@ def _page(request: Request, portal: PortalDep, service: AdminServiceDep, session
         apps=service.find_apps(), grants=service.find_grants(), roles=service.role_vocabulary,
         can_manage_apps=service.can_manage_apps, can_manage_grants=service.can_manage_grants,
         has_grants=service.has_grants, notice=notice if notice in NOTICES else None, error=error,
+        maintainers=portal.doc_service.find_maintainers(portal.cfg.docs.edit_roles),
+        people=portal.doc_service.find_people(), docs_writable=portal.doc_service.writable,
+        docs_edit_roles=portal.cfg.docs.edit_roles,
     )
 
 
@@ -138,3 +142,49 @@ def delete_grant(service: AdminServiceDep, session: AdminSession, csrf: str = Fo
     check_csrf(session, csrf)
     service.delete_grant(sub, session)
     return RedirectResponse("/_portal/admin?notice=grant_deleted", status_code=303)
+
+
+@router.post("/maintainers")
+def add_maintainer(request: Request, portal: PortalDep, service: AdminServiceDep, session: AdminSession,
+                   csrf: str = Form(""), sub: str = Form(""), sub_manual: str = Form("")) -> Response:
+    """Eine Person als Maintainer der Dokumentation freigeben; gilt sofort, ohne neue Anmeldung.
+
+    :param request: Injiziertes Request-Objekt
+    :param portal: Injizierter Portal-Kontext
+    :param service: Service der Verwaltungsseite
+    :param session: Session mit Rolle platform-admin
+    :param csrf: CSRF-Token aus dem Formular
+    :param sub: Subject der Person aus der Auswahl
+    :param sub_manual: Von Hand eingegebenes Subject; hat Vorrang vor der Auswahl
+    :return: Redirect auf die Verwaltungsseite, bei ungültiger Eingabe die Seite mit Fehler (422)
+    :rtype: Response
+    :raises InvalidCsrfError: Falls das CSRF-Token nicht passt
+    """
+    logger.debug("sub={}", session.sub)
+    check_csrf(session, csrf)
+    try:
+        portal.doc_write_service.add_editor(session, sub_manual.strip() or sub)
+    except InvalidInputError as exc:
+        return _page(request, portal, service, session, error=exc.key, status_code=422)
+    except DocsReadOnlyError:
+        return _page(request, portal, service, session, error="maintainer_read_only", status_code=403)
+    return RedirectResponse("/_portal/admin?notice=maintainer_added#maintainers-heading", status_code=303)
+
+
+@router.post("/maintainers/delete")
+def remove_maintainer(portal: PortalDep, session: AdminSession, csrf: str = Form(""), sub: str = Form("")) -> Response:
+    """Freigabe als Maintainer der Dokumentation entfernen; gilt sofort.
+
+    :param portal: Injizierter Portal-Kontext
+    :param session: Session mit Rolle platform-admin
+    :param csrf: CSRF-Token aus dem Formular
+    :param sub: Subject der Person im IdP
+    :return: Redirect auf die Verwaltungsseite
+    :rtype: Response
+    :raises InvalidCsrfError: Falls das CSRF-Token nicht passt
+    :raises NotFoundError: Falls es keine Freigabe gibt
+    """
+    logger.debug("sub={}", session.sub)
+    check_csrf(session, csrf)
+    portal.doc_write_service.remove_editor(session, sub)
+    return RedirectResponse("/_portal/admin?notice=maintainer_removed#maintainers-heading", status_code=303)

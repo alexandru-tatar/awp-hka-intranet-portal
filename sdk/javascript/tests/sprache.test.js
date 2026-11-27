@@ -76,11 +76,12 @@ test("kein Zugriff auf Englisch", async () => {
   const response = await fetch(`${prod.base}/nur-professor`, { headers: student({ Accept: "text/html", ...EN }) });
   assert.equal(response.status, 403);
   const text = await response.text();
-  assert.ok(text.includes("No access") && text.includes("This page is not available for your role."));
-  assert.ok(!text.includes("Kein Zugriff"));
+  assert.ok(text.includes("You do not have permission for this") && text.includes("This app is not available for your role."));
+  assert.ok(!text.includes("Dafür fehlt Ihnen die Berechtigung"));
+  assert.ok(text.includes('<p class="error-page__status">Error 403</p>'));
   // HKA-95: Seite im Seitenrahmen mit Weg zur Startseite, auch auf Englisch
   assert.ok(text.includes('class="site-header"') && text.includes('<html lang="en">'));
-  assert.ok(text.includes('<a href="/">To the portal home page</a>') && !text.includes("Zur Startseite"));
+  assert.ok(text.includes('<a class="cta" href="/">back to home</a>') && !text.includes("zur Startseite"));
 });
 
 test("Menü-Anfrage an das Portal trägt die Sprache", async () => {

@@ -66,11 +66,12 @@ def test_ohne_assertion_problem_json_auf_englisch(client):
 def test_kein_zugriff_auf_englisch(client):
     r = client.get("/nur-professor", headers=student(**HTML, **EN))
     assert r.status_code == 403
-    assert "No access" in r.text and "This page is not available for your role." in r.text
-    assert "Kein Zugriff" not in r.text
+    assert "You do not have permission for this" in r.text and "This app is not available for your role." in r.text
+    assert "Dafür fehlt Ihnen die Berechtigung" not in r.text
+    assert '<p class="error-page__status">Error 403</p>' in r.text
     # HKA-95: Seite im Seitenrahmen mit Weg zur Startseite, auch auf Englisch
     assert 'class="site-header"' in r.text and '<html lang="en">' in r.text
-    assert '<a href="/">To the portal home page</a>' in r.text and "Zur Startseite" not in r.text
+    assert '<a class="cta" href="/">back to home</a>' in r.text and "zur Startseite" not in r.text
 
 
 def test_menue_anfrage_traegt_sprache(client, monkeypatch):

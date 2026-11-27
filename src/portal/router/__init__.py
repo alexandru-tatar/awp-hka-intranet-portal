@@ -1,16 +1,16 @@
 """Router-Schicht: REST-/HTML-Schnittstelle, ruft nur Services und Views auf."""
 
 from portal.router.admin_router import router as admin_router
-from portal.router.app_creation_router import router as app_creation_router
 from portal.router.auth_router import router as auth_router
 from portal.router.dev_login_router import router as dev_login_router
 from portal.router.dev_router import router as dev_router
+from portal.router.docs_router import router as docs_router
 from portal.router.health_router import router as health_router
 from portal.router.language_router import router as language_router
 from portal.router.nav_router import router as nav_router
 from portal.router.page_router import router as page_router
 
 __all__ = [
-    "admin_router", "app_creation_router", "auth_router", "dev_login_router", "dev_router", "health_router",
+    "admin_router", "auth_router", "dev_login_router", "dev_router", "docs_router", "health_router",
     "language_router", "nav_router", "page_router",
 ]

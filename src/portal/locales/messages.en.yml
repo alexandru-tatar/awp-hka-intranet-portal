@@ -28,6 +28,20 @@ lang.name.en: English
 
 footer.label: Footer
 footer.docs: Docs
+docs.error.invalid: The request is incomplete. Please reload the page and try again.
+docs.error.csrf: Your session has expired. Please reload the page; your draft stays saved in the browser.
+docs.error.not_found: This page or version no longer exists.
+docs.error.conflict: "{name} has changed the page in the meantime. Open the new version and apply your changes; your draft stays saved in the browser."
+docs.error.title: Please enter a title with at most 120 characters (first heading of the page).
+docs.error.group: Please choose a section with at most 60 characters.
+docs.error.note: The change note may be at most 300 characters long.
+docs.error.level: This level does not exist.
+docs.error.too_long: The page is too large. Please split the content across several pages.
+docs.error.start: The start page of the docs cannot be deleted.
+docs.error.empty_file: The file is empty.
+docs.error.too_large: The file is too large. At most {limit_mb} MB are allowed.
+docs.error.media_type: This format is not allowed. Possible are PNG, JPEG, GIF, WebP and PDF.
+docs.error.read_only: The docs are read-only here because no storage folder is set up.
 
 home.title: Home
 home.greeting: Welcome, {name}
@@ -109,11 +123,15 @@ admin.notice.app_removed: The app was removed. It is no longer in the menu.
 admin.notice.app_roles: The roles of the app were saved. The menu shows them right away.
 admin.notice.grant_set: The extra roles were saved. They apply from the person's next login.
 admin.notice.grant_deleted: The extra roles were deleted. This applies from the person's next login.
+admin.notice.maintainer_added: The person is now a maintainer. They can edit the docs right away without logging in again.
+admin.notice.maintainer_removed: The person is no longer a maintainer. From now on they can only read the docs.
 admin.error.title: Your input could not be saved
 admin.error.app_roles_empty: Choose at least one role. Nobody can see an app without a role.
 admin.error.app_roles_unknown: One of the chosen roles does not exist. Please reload the page.
 admin.error.grant_sub: Enter the subject of the person (at most 200 characters).
 admin.error.grant_roles_unknown: One of the chosen roles does not exist. Please reload the page.
+admin.error.maintainer_sub: Choose a person from the list or enter their subject (at most 200 characters).
+admin.error.maintainer_read_only: The docs have no storage folder here. Maintainers therefore cannot be managed.
 admin.apps.heading: Apps
 admin.apps.caption: All apps with owner, status and roles
 admin.apps.note: If the pipeline registers a manifest again, the roles from the app's repository apply again.
@@ -124,6 +142,9 @@ admin.col.status: Status
 admin.col.roles: Roles
 admin.col.actions: Action
 admin.col.sub: Subject
+admin.col.person: Person
+admin.col.via: May edit through
+admin.col.last_seen: Last in the portal
 admin.owner.none: set up by hand
 admin.retired_since: since {date}
 admin.roles.legend: Roles
@@ -143,6 +164,26 @@ admin.grants.delete: Delete
 admin.grants.delete_title: Delete the roles of “{sub}”?
 admin.grants.delete_body: The person loses their extra roles from the next login.
 admin.grants.delete_confirm: Delete
+admin.maintainers.heading: Docs – maintainers
+admin.maintainers.intro: "Everyone who is logged in can read the docs. Only maintainers may edit them: people with the role from the login ({roles}) and people you approve here. An approval applies right away."
+admin.maintainers.caption: People who may edit the docs
+admin.maintainers.read_only: The docs have no storage folder here. Maintainers therefore cannot be managed.
+admin.maintainers.none: There are no maintainers yet. People with the role from the login appear here as soon as they have used the portal once.
+admin.maintainers.via_admin: Approved by {name} on {date}
+admin.maintainers.via_role: Role from the login
+admin.maintainers.never: not yet
+admin.maintainers.role_only: comes from the login
+admin.maintainers.remove: Remove
+admin.maintainers.remove_title: Remove “{name}” as maintainer?
+admin.maintainers.remove_body: The person can then only read the docs. Their earlier changes stay in the version history.
+admin.maintainers.remove_confirm: Remove
+admin.maintainers.add: Add maintainer
+admin.maintainers.person_hint: Everyone who has used the portal at least once is listed here.
+admin.maintainers.choose: Choose a person …
+admin.maintainers.seen: last {date}
+admin.maintainers.manual: Or enter a subject
+admin.maintainers.manual_hint: For people who are not in the list yet. The subject is shown in the login system.
+admin.maintainers.submit: Add as maintainer
 
 connections.title: My connections
 connections.intro: For some systems the portal needs your password once, so that apps can read there for you. The password is encrypted and stored only for this session.
@@ -168,56 +209,3 @@ dev.app.message: Message
 dev.app.required: required
 dev.app.error_summary: Please check your input
 
-header.new_app: New app
-neue_app.title: Create a new app
-neue_app.eyebrow: Self-service
-neue_app.intro: Here you create the repository for your app. It is made from the template, has the branches main and develop and is ready to start at once. You need no commands and no special rights on GitHub.
-neue_app.form.slug: Short name
-neue_app.form.slug_hint: "It later appears in the address of the app. Allowed are 3 to 31 characters: lowercase letters, digits and hyphens only, and it starts with a letter. For example leave-request. The repository is then called app-leave-request, so do not type “app-” in front yourself."
-neue_app.form.language: Template
-neue_app.form.language_hint: Both templates come with a dev container and an automatic check. Choose the language your team knows.
-neue_app.form.python: Python
-neue_app.form.python_meta: FastAPI and uv
-neue_app.form.js: JavaScript
-neue_app.form.js_meta: Express and npm
-neue_app.form.github_login: Your GitHub name
-neue_app.form.github_login_hint: The invitation to the repository goes to this name. You find it in your profile on github.com.
-neue_app.form.submit: Create app
-neue_app.form.submit_hint: Creating the app usually takes 10 to 20 seconds.
-neue_app.panel.title: What you get
-neue_app.panel.repo: Your own repository on GitHub, copied from the template
-neue_app.panel.branches: The branches main and develop
-neue_app.panel.protect: "Protection for main: changes only through a pull request"
-neue_app.panel.invite: An invitation to your GitHub name
-neue_app.busy.eyebrow: One moment please
-neue_app.busy.title: Your app is being created
-neue_app.busy.body: The portal is now creating your repository on GitHub. This usually takes 10 to 20 seconds. Please do not close this page.
-neue_app.busy.steps: Progress
-neue_app.busy.note: The page changes by itself as soon as everything is done.
-neue_app.error.title: The app was not created
-neue_app.error.slug_form: "The short name has 3 to 31 characters: lowercase letters, digits and hyphens only, and it starts with a letter."
-neue_app.error.slug_reserved: You may not use this short name. Choose a name that says what your app is about.
-neue_app.error.language: Choose Python or JavaScript.
-neue_app.error.github_login: This is not a GitHub name. It consists of letters, digits and single hyphens and has at most 39 characters.
-neue_app.error.slug_taken: The short name is already taken or blocked. Choose another one. Nothing was created.
-neue_app.error.failed_before: "Something went wrong at the step “{step}”. Nothing was created. Try again or contact {kontakt}. Give the number {request_id}."
-neue_app.error.failed_after: "The repository “{repo}” was created, but something went wrong at the step “{step}”. Nothing was deleted. Contact {kontakt} and give the number {request_id}."
-neue_app.step.pruefen: Check
-neue_app.step.vorlage: Check template
-neue_app.step.repository: Check repository
-neue_app.step.reservieren: Reserve name
-neue_app.step.protokollieren: Log creation
-neue_app.step.anlegen: Create repository
-neue_app.step.warten: Wait for the template files
-neue_app.step.slug: Set short name in manifest.json
-neue_app.step.develop: Create branch develop
-neue_app.step.topic: Set topic
-neue_app.step.einladen: Invite person
-neue_app.step.ruleset: Set up protection for main
-neue_app.done.eyebrow: Done
-neue_app.done.title: Your app is created
-neue_app.done.next_title: What happens next
-neue_app.done.body: "The repository “{repo}” is ready. It has the branches main and develop. The branch main is protected: changes come only through a pull request with an approval."
-neue_app.done.invite: The invitation went to “{login}”. Accept it on GitHub, then you can clone the repository.
-neue_app.done.open: Open repository on GitHub
-neue_app.done.next: How to continue is described in the guide under “Open workspace”.

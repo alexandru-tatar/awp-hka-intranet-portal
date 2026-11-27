@@ -8,7 +8,7 @@ dev_users_file: users.yml
 schema_path: ../schemas/manifest.schema.json
 kit_dist: ../kit/dist
 session_cookie: portal_sid
-role_vocabulary: [student, employee, professor, platform-admin, pilot-tester, app-creator]   # = roles.yml + grants.yml (02 §8)
+role_vocabulary: [student, employee, professor, platform-admin, maintainer, pilot-tester]   # = roles.yml + grants.yml (02 §8)
 adapter_scopes: [noten:read, mail:send]                                         # later: x-required-scope from adapter OpenAPI (05)
 # Logging (core/log.py): Konsole immer, Logdatei optional. Level je Logger überschreiben die Mindestlevel.
 logging:
@@ -30,15 +30,12 @@ registry:
   owners_file: owners.json
   admin_write: true
 
-# Neue Apps über eine GitHub App anlegen (HKA-82, Seite /_portal/neue-app, Schnittstelle /_portal/api/apps).
-# Ohne diesen Abschnitt ist die Funktion aus. Braucht registry.owners_file. Der Schlüssel der GitHub App liegt nur als
-# Datei auf dem Server (Docker-Secret), nie im Repository.
-# app_creation:
-#   app_id: 123456
-#   installation_id: 7890123
-#   private_key_file: /run/secrets/github_app_private_key
-#   owner: hka-apps                  # Konto oder Organisation der App-Repositories
-#   template_owner: hka-apps         # Konto der Golden Master
-#   templates: { python: awp-hka-gold-python, js: awp-hka-gold-js }
-#   private: false                   # Rulesets auf privaten Repositories brauchen einen bezahlten GitHub-Tarif
-#   audit_file: app-creation.jsonl   # wer, wann, welche App
+# Dokumentation /_portal/docs (docs/06-oberflaeche.md): lesen alle Angemeldeten, bearbeiten Rolle maintainer und
+# Personen, die die Verwaltungsseite als Maintainer freigibt.
+# Seiten, Versionen und hochgeladene Bilder liegen in docs/ neben dieser Datei (in .gitignore); ein leerer Ordner bekommt
+# beim Start den Ausgangsstand aus src/portal/docs/seed.html. Zurücksetzen: Ordner dev/docs löschen.
+docs:
+  dir: docs
+  read_roles: all
+  edit_roles: [maintainer]
+  max_upload_mb: 10

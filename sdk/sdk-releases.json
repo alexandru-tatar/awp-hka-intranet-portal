@@ -64,16 +64,16 @@
     "released": "2026-11-18"
   },
   "1.2.1-dev": {
-    "python": "sha256:20e5b4698d89a0bd50cf1a789227a8a30fb1cc11d8affd5536862eb7d3b29dc1",
-    "javascript": "sha256:94a7518262e4b1ebf8a6531a9c860043446d780ffda87fd7eb8975b781726a02",
+    "python": "sha256:890c310522fe36988cb9532ade433ee239df6155a6e7912311f57f65e6dd7ae8",
+    "javascript": "sha256:0a1c225c7ae0bd33a25cd1c0422d424f67b04ea5c82cc3ac71d12909393e5953",
     "assertion_versions": [
       1
     ],
-    "released": "2026-11-25"
+    "released": "2026-11-27"
   },
   "1.3.0-dev": {
-    "python": "sha256:6cfe4f63795057efb966eb50598cf21de9c38943be37a5dc85faa92bb04324e4",
-    "javascript": "sha256:b66b4340026fb2cf8cb027eb52478c5b397e7a94055ed9e0b5791b5c94c7e0e5",
+    "python": "sha256:e905e6422bbd52c89c66f3974183034914cf3915f9cf5a62fefa34a3732f50ee",
+    "javascript": "sha256:f25ca932af9efc5af28e0da7b4cef0dfbb1f58af92c0e507a0393a9877aab6d7",
     "assertion_versions": [
       1
     ],

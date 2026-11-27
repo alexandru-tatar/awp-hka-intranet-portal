@@ -36,6 +36,7 @@ async function errorInLayout(req, res, layout, status, title, detail) {
   try {
     const requestId = requestContext.getStore()?.requestId ?? null;
     const body = env.render("error_in_layout.html", {
+      status,
       title,
       detail,
       request_id: requestId,

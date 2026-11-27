@@ -27,7 +27,8 @@ def home(request: Request, portal: PortalDep, service: AppServiceDep, session: C
 - Eine Datei pro Thema (`<thema>_router.py`), ein `router` pro Datei, Export in `router/__init__.py`, Einhängen in `app.py`.
 - Handler sind Funktionen mit Rückgabetyp `Response`; keine Fachlogik, kein Zugriff auf Registry oder Store.
 - Private Hilfsfunktionen stehen mit `_` am Dateiende. HTTP-Konstanten (Header-Namen, Cache-Werte) in `router/constants.py`.
-- Wer angemeldet sein muss, nimmt `CurrentSession`; optional `OptionalSession`; nur `platform-admin`: `AdminSession`.
+- Wer angemeldet sein muss, nimmt `CurrentSession`; optional `OptionalSession`; nur `platform-admin`: `AdminSession`;
+  Dokumentation lesen bzw. ändern: `DocsReader` bzw. `DocsEditor` (Rollen aus dem Abschnitt `docs` der Konfiguration).
 
 ## Service
 
@@ -38,6 +39,8 @@ per Konstruktor als `self.repo`.
 |---|---|---|
 | `AppService` | `Registry` | `find_nav_groups(roles)`, `find_all()`, `find_authorized(slug, session)` |
 | `SessionService` | `SessionStore` | `find_by_id(sid)` |
+| `DocService` | `DocStore` (`portal/docs/store.py`) | `find_all()`, `find_by_slug(slug)`, `find_history(slug)`, `find_version(slug, n)`, `find_changes()`, `find_asset(name)` |
+| `DocWriteService` | `DocStore` | `create(…)`, `update(…, base_version=…)`, `restore(slug, n)`, `delete(slug)`, `upload_asset(data, media_type)` |
 | `SessionWriteService` | `SessionStore`, Testpersonen | `create(user_id)`, `create_for_subject(sub, name, roles)`, `delete(sid, csrf)`, `discard(sid)` |
 | `LoginService` | `OidcClient`, `RedisLoginStore`, `RoleMapper`, `SessionWriteService` | `start(next)`, `finish(...)` |
 
