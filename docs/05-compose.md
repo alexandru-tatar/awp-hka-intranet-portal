@@ -30,6 +30,7 @@ Portal: http://localhost:18080 (über das Gateway; das Portal hat keinen Hostpor
 | Image | `hka/portal:local`, gebaut mit `Dockerfile.local` (öffentliche Basisimages) | `hka/portal:<PORTAL_IMAGE_TAG>`, gebaut mit `Dockerfile` (gehärtet), auf der VM nur geladen |
 | Konfiguration (`PORTAL_CONFIG`) | `/opt/app/dev/gateway.compose.yml` | `/opt/app/dev/gateway.vm.yml` |
 | Daten (Manifeste, Status, Registry) | `.local/portal/*` in diesem Repo | `/srv/portal/*` |
+| Dokumentation (Seiten, Versionen, Bilder) | `.local/portal/registry/docs` | `/srv/portal/registry/docs` (im Registry-Volume, kein eigenes Volume nötig) |
 | Service-Token für die Registry-API | `server/.secrets/registry-service-token` | `/srv/portal/gateway/secrets/registry-service-token` |
 
 Die Konfigurationen sind ins Image eingebaut: Nach Änderungen an `dev/gateway.compose.yml` oder `dev/gateway.vm.yml`

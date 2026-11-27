@@ -81,3 +81,57 @@ kit/dist/   GENERIERT (make kit): kit-<hash>.css, kit-<hash>.js, icons-<hash>.sv
 
 Skip-Link als erstes Element, `<main tabindex="-1">`, eine Navigations-Landmark (der Menübaum wird zweimal gerendert, CSS blendet
 eine Kopie aus), sichtbarer Fokus, Fehlerhinweise per `role="alert"`, Dialoge mit `<dialog>`. Die Details stehen im Skill `hka-design`.
+
+## Dokumentation (`/_portal/docs`)
+
+Die AWP-Dokumentation ist eine eigenständige Seite mit eigenem Stil (nicht das Kit), die das Portal aus Bausteinen zusammensetzt
+(`web/docs_page.py`):
+
+| Datei in `src/portal/docs/` | Inhalt |
+|---|---|
+| `shell.html` | Hülle: Stil, Kopf, Navigation, Suche, Skript; Platzhalter `<!--DOCS:PAGES-->` und `<!--DOCS:BOOT-->` |
+| `seed.html` | Ausgangsstand der Seiten, je Seite ein `<article class="page" data-page=… data-title=… data-group=…>` |
+| `editor.js`, `editor.css` | Zeile „Zuletzt aktualisiert“, Versionsverlauf, Editor |
+| `store.py` | `DocStore`: Seiten, Versionen, Änderungsprotokoll, hochgeladene Dateien |
+| `sanitize.py` | `sanitize_html`: lässt nur erlaubte Tags und Attribute durch |
+
+**Rollen.** Lesen dürfen `docs.read_roles`, anlegen, bearbeiten, wiederherstellen und löschen `docs.edit_roles` (beide Standard
+`maintainer` und `platform-admin`). Der Footer-Link erscheint nur für diese Rollen. Testperson: `entwickler` (Eva Entwicklerin,
+Rolle `maintainer`). Im Gateway-Modus kommt die Rolle aus dem Claim `eduPersonEntitlement` = `urn:hka:portal:maintainer`
+(`dev/roles.yml`) oder aus einem Grant.
+
+**Speicher.** `docs.dir` (lokal `dev/docs/`, in `.gitignore`; Compose und VM `/var/lib/portal/registry/docs` im beschreibbaren
+Registry-Volume). Ein leerer Ordner bekommt beim Start `seed.html` als Version 1 (Autor „Projektteam AWP“). Aufbau:
+
+```text
+pages/<slug>.json          aktueller Stand
+versions/<slug>/<n>.json   jede veröffentlichte Version, wird nie überschrieben
+changes.jsonl              eine Zeile je Änderung: Zeit, Seite, Version, Person, Art, Notiz
+order.json                 Reihenfolge in der Navigation
+assets/<hash>.<endung>     Bilder (PNG, JPEG, GIF, WebP) und PDFs, Name aus dem SHA-256 des Inhalts
+```
+
+Ohne `docs.dir` ist die Dokumentation nur lesbar (Ausgangsstand, kein Editor). Zurücksetzen lokal: `dev/docs/` löschen.
+
+**Funktionen.**
+
+- Unter dem Titel jeder Seite steht wie in Confluence, wer sie zuletzt geändert hat und wann (relativ und als Datum), dazu
+  Version, Ersteller und Lesezeit, sowie die Knöpfe „Verlauf“ und „Bearbeiten“.
+- Die Systemseite „Letzte Änderungen“ (`#aenderungen`, Bereich Hilfe) gibt es immer. Sie zeigt alle Änderungen, die neueste zuerst
+  und nach Tagen gruppiert, mit Notiz und Filter. Sie ist auch über das Uhr-Symbol im Kopf und die Fußzeile der Docs erreichbar.
+  Die Fußzeile nennt die letzte Änderung.
+- Im Versionsverlauf lässt sich jede ältere Version ansehen und als neue Version wiederherstellen.
+- Editor (WYSIWYG, `contenteditable`): Absatzformate, Fett, Kursiv, Code, Links (auch auf andere Docs-Seiten), Listen,
+  Hinweisboxen, Befehls-Blöcke mit Kopier-Knopf, Tabellen mit Zeilen und Spalten bearbeiten, Trennlinie, HTML-Ansicht.
+  Bilder kommen per Knopf, Einfügen aus der Zwischenablage oder Ziehen und Ablegen dazu, mit Fortschritt, Alternativtext,
+  Bildunterschrift und Größe (klein, mittel, volle Breite, zentriert). PDFs werden als Download-Link eingefügt.
+- Veröffentlichen mit optionaler Änderungsnotiz (Strg/⌘+S). Ein Entwurf liegt laufend im `localStorage` des Browsers und wird beim
+  nächsten Öffnen angeboten. Hat inzwischen jemand anderes veröffentlicht, antwortet die Schnittstelle mit 409, und der Editor fragt
+  nach.
+- Neue Seiten legt „Neue Seite“ im Kopf an (Titel, Bereich, Stufe). Löschen nimmt eine Seite aus der Navigation, ihre Versionen
+  bleiben erhalten. Die Startseite lässt sich nicht löschen.
+
+**Sicherheit.** Gespeichertes HTML läuft durch `sanitize_html` (keine Skripte, keine `on…`-Attribute, keine `javascript:`-Links,
+Bilder nur aus `/_portal/docs/assets/`). Die Seite hat eine eigene Content-Security-Policy mit Nonce: nur das Skript der Hülle und
+des Editors laufen. Hochgeladene Dateien werden am Dateianfang geprüft (kein SVG) und mit `Content-Security-Policy: sandbox`
+ausgeliefert, PDFs als Download. Ändernde Anfragen brauchen das CSRF-Token der Session im Header `X-CSRF-Token`.

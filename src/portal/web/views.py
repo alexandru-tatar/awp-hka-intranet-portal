@@ -45,7 +45,9 @@ class Views:
         :param cfg: Konfiguration
         """
         self._templates = Jinja2Templates(directory=str(templates_dir))
-        self._templates.env.globals.update(t=t, kit=kit, cfg=cfg)
+        docs_roles = frozenset(cfg.docs.read_roles) | frozenset(cfg.docs.edit_roles)
+        self._templates.env.globals.update(
+            t=t, kit=kit, cfg=cfg, can_read_docs=lambda user: bool(user and user.roles & docs_roles))
         self._apps = apps
         self._t = t
 

@@ -4,5 +4,5 @@ sources:
   - claim: eduPersonAffiliation
     map: { student: student, employee: employee, faculty: professor, staff: employee }
   - claim: eduPersonEntitlement
-    map: { "urn:hka:portal:admin": platform-admin }
+    map: { "urn:hka:portal:admin": platform-admin, "urn:hka:portal:maintainer": maintainer }
 default_roles: []

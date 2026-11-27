@@ -82,3 +82,48 @@ class InvalidInputError(Exception):
         """:param key: Schlüssel des Fehlertexts"""
         super().__init__(f"Ungültige Eingabe: {key}")
         self.key: str = key
+
+
+class ConflictError(Exception):
+    """Der Datensatz wurde inzwischen geändert (z. B. eine Docs-Seite seit dem Öffnen des Editors).
+
+    :ivar current_version: Aktuelle Version des Datensatzes
+    :ivar updated_by: Wer die aktuelle Version veröffentlicht hat
+    """
+
+    def __init__(self, current_version: int, updated_by: str) -> None:
+        """:param current_version: Aktuelle Version
+        :param updated_by: Name der Person, die die aktuelle Version veröffentlicht hat
+        """
+        super().__init__(f"Konflikt, aktuelle Version {current_version}")
+        self.current_version: int = current_version
+        self.updated_by: str = updated_by
+
+
+class DocsReadOnlyError(Exception):
+    """Die Dokumentation hat keinen Speicherordner (``docs.dir``) und lässt keine Änderungen zu."""
+
+    def __init__(self) -> None:
+        """Konstruktor ohne Parameter."""
+        super().__init__("Dokumentation ist nur lesend")
+
+
+class PayloadTooLargeError(Exception):
+    """Die hochgeladene Datei ist größer als erlaubt.
+
+    :ivar limit: Erlaubte Größe in Byte
+    """
+
+    def __init__(self, limit: int) -> None:
+        """:param limit: Erlaubte Größe in Byte"""
+        super().__init__(f"Datei größer als {limit} Byte")
+        self.limit: int = limit
+
+
+class UnsupportedMediaTypeError(Exception):
+    """Die hochgeladene Datei hat ein Format, das nicht erlaubt ist."""
+
+    def __init__(self, media_type: str) -> None:
+        """:param media_type: Angegebener oder erkannter Typ"""
+        super().__init__(f"Format nicht erlaubt: {media_type}")
+        self.media_type: str = media_type

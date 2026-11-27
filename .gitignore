@@ -3,6 +3,7 @@ __pycache__/
 .pytest_cache/
 kit/dist/
 *.egg-info/
+build/
 docs/api/generated/
 docs/api/_build/
 .DS_Store
@@ -14,6 +15,11 @@ secrets/
 dev/owners.json
 dev/owners.json.lock
 dev/retired.json
+# Docs-Speicher in dev (Seiten, Versionen, hochgeladene Bilder)
+dev/docs/
+
+# Eigene lokale Konfiguration (nicht fürs Team)
+dev/gateway.local.yml
 *.tar.gz
 
 # Local credentials and runtime artifacts (never commit actual secrets).

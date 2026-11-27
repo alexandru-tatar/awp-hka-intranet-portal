@@ -40,7 +40,7 @@ def env(tmp_path, kit_dist) -> Path:
     :return: Der kopierte Ordner ``dev``
     """
     d = tmp_path / "dev"
-    shutil.copytree(ROOT / "dev", d)
+    shutil.copytree(ROOT / "dev", d, ignore=shutil.ignore_patterns("docs"))  # eigener Docs-Speicher je Test
     cfg = (d / "gateway.dev.yml").read_text(encoding="utf-8")
     cfg = cfg.replace("../schemas/manifest.schema.json", str(ROOT / "schemas" / "manifest.schema.json"))
     cfg = cfg.replace("../kit/dist", str(kit_dist))

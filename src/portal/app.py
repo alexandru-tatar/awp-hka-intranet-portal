@@ -26,6 +26,7 @@ from .router import (
     auth_router,
     dev_login_router,
     dev_router,
+    docs_router,
     health_router,
     nav_router,
     page_router,
@@ -90,6 +91,7 @@ def create_app(
 
     app.include_router(page_router)
     app.include_router(admin_router)
+    app.include_router(docs_router)
     if cfg.auth_mode != "gateway":
         app.include_router(auth_router)
     app.include_router(nav_router)
