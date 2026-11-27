@@ -14,6 +14,10 @@ const { portalMiddleware } = require("./middleware");
 const pages = require("./pages");
 
 const KIT_DIR = path.join(__dirname, "kit");
+// Wortlaut wie im Portal (src/portal/locales/messages.de.yml: error.403.*, kontakt aus dev/gateway.*.yml)
+const NO_ACCESS_TITLE = "Dafür fehlt Ihnen die Berechtigung";
+const NO_ACCESS_TEXT =
+  "Diese Anwendung ist für Ihre Rolle nicht freigegeben. Wenn Sie glauben, dass das ein Fehler ist, melden Sie sich bei dem IT-Servicedesk (Kontakt folgt).";
 
 class Portal {
   constructor(config) {
@@ -63,7 +67,10 @@ class Portal {
     return express.Router();
   }
 
-  /** Schützt eine Route für die genannten Rollen (403 sonst). Die Person steht in `req.portal.user`. */
+  /**
+   * Schützt eine Route für die genannten Rollen (403 sonst, im Browser als Seite im Seitenrahmen des Portals mit
+   * Weg zur Startseite). Die Person steht in `req.portal.user`.
+   */
   requires(...roles) {
     return (req, res, next) => {
       const user = req.portal?.user;
@@ -71,7 +78,7 @@ class Portal {
         return pages.error(req, res, 401, "Anmeldung fehlt", "Bitte melden Sie sich im Portal an.");
       }
       if (!user.roles.some((r) => roles.includes(r))) {
-        return pages.error(req, res, 403, "Kein Zugriff", "Diese Seite ist für Ihre Rolle nicht freigegeben.");
+        return pages.errorInLayout(req, res, this._layout, 403, NO_ACCESS_TITLE, NO_ACCESS_TEXT);
       }
       return next();
     };

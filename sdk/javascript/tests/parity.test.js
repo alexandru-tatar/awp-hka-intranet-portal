@@ -62,6 +62,16 @@ test("README, Testdaten und Browser-Skript byte-gleich", () => {
   }
 });
 
+test("Seiten des SDK gleich: Vorlagen byte-gleich, Rahmen bis auf `| safe` (HKA-95)", () => {
+  const read = (root, file) => fs.readFileSync(path.join(root, "templates", file));
+  for (const file of ["error.html", "error_in_layout.html", "dev_login.html"]) {
+    assert.ok(read(PY, file).equals(read(JS, file)), file);
+  }
+  // Nunjucks braucht `| safe` für fertiges HTML, Jinja bekommt `Markup`; sonst gleicher Rahmen
+  assert.equal(read(JS, "layout.html").toString().replaceAll(" | safe", ""), read(PY, "layout.html").toString());
+  assert.deepEqual(fs.readdirSync(path.join(JS, "templates")).sort(), fs.readdirSync(path.join(PY, "templates")).sort());
+});
+
 test("gleiche Fehlertypen", () => {
   for (const file of ["adapters/bwsync/errors", "adapters/noten/errors", "adapters/transport"]) {
     assert.deepEqual(constants(path.join(JS, `${file}.js`), "js"), constants(path.join(PY, `${file}.py`), "py"), file);

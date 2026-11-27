@@ -68,6 +68,47 @@ def test_requires_403(client):
     assert response.status_code == 403
 
 
+def test_requires_403_im_browser_als_seite_im_portal_rahmen(client):
+    """HKA-95: Meldung im Seitenrahmen des Portals, mit Menü, Kit und Weg zur Startseite."""
+    response = client.get("/nur-professor", headers={"X-Portal-Assertion": make_token(), "Accept": "text/html"})
+    html = response.text
+    assert response.status_code == 403
+    assert response.headers["content-type"].startswith("text/html")
+    assert "<title>Dafür fehlt Ihnen die Berechtigung – HKA Portal</title>" in html
+    assert 'class="site-header"' in html and 'aria-label="Hauptnavigation"' in html  # Rahmen und Menü
+    assert 'href="/_portal/static/kit.css"' in html  # gestaltet mit dem Kit
+    assert '<p class="error-page__status">Fehler 403</p>' in html  # Markup wie die Fehlerseite des Portals
+    assert "<h1>Dafür fehlt Ihnen die Berechtigung</h1>" in html
+    assert "Diese Anwendung ist für Ihre Rolle nicht freigegeben." in html
+    assert '<a class="cta" href="/">zur Startseite</a>' in html
+    assert "dev-banner" not in html
+
+
+def test_requires_403_ohne_text_html_bleibt_problem_json(client):
+    response = client.get("/nur-professor", headers={"X-Portal-Assertion": make_token()})
+    assert response.status_code == 403
+    assert response.headers["content-type"].startswith("application/problem+json")
+    assert response.json()["type"] == "urn:hka:problem:403"
+    assert response.json()["title"] == "Dafür fehlt Ihnen die Berechtigung"
+
+
+def test_requires_mit_der_rolle_keine_fehlerseite(client):
+    response = client.get(
+        "/nur-professor", headers={"X-Portal-Assertion": make_token(roles=["professor"]), "Accept": "text/html"}
+    )
+    assert response.status_code == 200 and response.json() == {"ok": True}
+
+
+def test_requires_403_faellt_auf_einfache_seite_zurueck(client, monkeypatch):
+    async def kaputt(self, **kwargs):
+        raise RuntimeError("kaputt")
+
+    monkeypatch.setattr(layout_module.Layout, "render", kaputt)
+    response = client.get("/nur-professor", headers={"X-Portal-Assertion": make_token(), "Accept": "text/html"})
+    assert response.status_code == 403
+    assert "<h1>Dafür fehlt Ihnen die Berechtigung</h1>" in response.text and "site-header" not in response.text
+
+
 def test_adapter_nicht_erreichbar():
     import asyncio
 
@@ -107,6 +148,15 @@ def test_dev_login(dev_client):
     assert '<a href="/__dev/login">Abmelden</a>' in page.text and "logout-form" not in page.text
     assert dev_client.get("/noten").json() == {"count": 5}
     assert dev_client.get("/nur-professor").status_code == 403
+
+
+def test_dev_403_seite_im_rahmen_zeigt_den_entwicklungsmodus(dev_client):
+    dev_client.post("/__dev/login", data={"sub": "student-test", "roles": "student"}, follow_redirects=False)
+    response = dev_client.get("/nur-professor", headers={"Accept": "text/html"})
+    assert response.status_code == 403
+    assert "Entwicklungsmodus – Testperson: Erika Musterfrau" in response.text
+    assert 'href="/__dev/kit/kit.css"' in response.text
+    assert '<a class="cta" href="/">zur Startseite</a>' in response.text
 
 
 def test_dev_rollen(dev_client):
