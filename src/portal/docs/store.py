@@ -6,10 +6,13 @@ Aufbau des Ordners (``docs.dir`` in der Konfiguration)::
     versions/<slug>/<n>.json     jede veröffentlichte Version, nie überschrieben
     changes.jsonl                eine Zeile je Änderung (neueste unten)
     order.json                   Reihenfolge der Seiten in der Navigation
+    seed.json                    Prüfsumme des Ausgangsstands je Seite, der zuletzt übernommen wurde
     assets/<hash>.<endung>       hochgeladene Bilder und PDFs
 
-Ist der Ordner leer, übernimmt der Speicher beim Start den Ausgangsstand aus ``seed.html`` als Version 1. Ohne
-Ordner liest er nur den Ausgangsstand und lässt keine Änderungen zu.
+Ist der Ordner leer, übernimmt der Speicher beim Start den Ausgangsstand aus ``seed.html`` als Version 1. Ändert sich
+``seed.html`` später (neue Fassung im Repository), übernimmt der Start die neue Fassung als neue Version, aber nur für
+Seiten, die seit dem letzten Ausgangsstand niemand im Browser bearbeitet hat; neue Seiten aus ``seed.html`` kommen dazu.
+Ohne Ordner liest er nur den Ausgangsstand und lässt keine Änderungen zu.
 """
 
 from __future__ import annotations
@@ -172,6 +175,7 @@ class DocStore:
         if not any((directory / "pages").glob("*.json")):
             self._seed()
         self._load()
+        self._sync_seed()
 
     @property
     def writable(self) -> bool:
@@ -484,10 +488,62 @@ class DocStore:
             atomic_write(folder / "1.json", json.dumps(version.__dict__, ensure_ascii=False))
             atomic_write(directory / "pages" / f"{page.slug}.json", json.dumps(page.__dict__, ensure_ascii=False))
         atomic_write(directory / "order.json", json.dumps([p.slug for p in pages], ensure_ascii=False, indent=1))
+        atomic_write(directory / "seed.json", json.dumps({p.slug: _digest(p.html) for p in pages}, indent=1))
         change = DocChange(SEED_TS, "start", "Dokumentation", 1, SEED_ACTOR["name"], "create",
                            f"Ausgangsstand der Dokumentation mit {len(pages)} Seiten")
         self._log(directory, change)
         logger.info("docs seeded pages={} dir={}", len(pages), directory)
+
+    def _sync_seed(self) -> None:
+        """Neue Fassung von ``seed.html`` übernehmen, ohne Bearbeitungen im Browser zu überschreiben.
+
+        Eine Seite bekommt die neue Fassung als neue Version (Autor „Projektteam AWP“), wenn ihr aktueller Inhalt
+        noch genau dem zuletzt übernommenen Ausgangsstand entspricht. Wurde sie im Browser bearbeitet, bleibt sie, wie
+        sie ist, und das Log nennt sie. Seiten, die neu in ``seed.html`` stehen, kommen dazu; gelöschte Seiten nicht.
+        Ohne ``seed.json`` (Speicher von vor dieser Funktion) gilt Version 1 des Projektteams als Ausgangsstand.
+        """
+        directory = self._require_dir()
+        seed_file = directory / "seed.json"
+        applied: dict[str, str] = json.loads(seed_file.read_text(encoding="utf-8")) if seed_file.exists() else {}
+        if not seed_file.exists():
+            for folder in (directory / "versions").iterdir():
+                first = folder / "1.json"
+                if first.exists():
+                    v1 = _read_version(folder.name, first)
+                    if v1.actor == SEED_ACTOR["name"]:
+                        applied[folder.name] = _digest(v1.html)
+        changed = False
+        for seed in parse_seed(SEED_FILE.read_text(encoding="utf-8")):
+            new = _digest(seed.html)
+            if applied.get(seed.slug) == new:
+                continue
+            current = self._pages.get(seed.slug)
+            if current is None:
+                if (directory / "versions" / seed.slug).exists():
+                    applied[seed.slug] = new  # gelöscht: nicht wiederbeleben
+                    changed = True
+                    continue
+                now = _now()
+                page = replace(seed, created_at=now, created_by=SEED_ACTOR["name"], updated_at=now,
+                               updated_by=SEED_ACTOR["name"])
+                self._write_page(directory, page, SEED_ACTOR["name"], "Neue Seite aus dem Ausgangsstand", "create")
+                self._insert_order(seed.slug, seed.group, None)
+                logger.info("docs seed added slug={}", seed.slug)
+            elif _digest(current.html) == applied.get(seed.slug):
+                page = replace(current, title=seed.title, group=seed.group, html=seed.html, attrs=dict(seed.attrs),
+                               version=current.version + 1, updated_at=_now(), updated_by=SEED_ACTOR["name"])
+                self._write_page(directory, page, SEED_ACTOR["name"], "Ausgangsstand aktualisiert", "update")
+                if seed.group != current.group:
+                    self._order.remove(seed.slug)
+                    self._insert_order(seed.slug, seed.group, None)
+                logger.info("docs seed updated slug={} version={}", seed.slug, page.version)
+            else:
+                logger.warning("docs seed skipped slug={} reason=edited in browser", seed.slug)
+            applied[seed.slug] = new
+            changed = True
+        if changed or not seed_file.exists():
+            atomic_write(directory / "order.json", json.dumps(self._order, ensure_ascii=False, indent=1))
+            atomic_write(seed_file, json.dumps(applied, indent=1))
 
     def _load(self) -> None:
         """Seiten und Reihenfolge aus dem Ordner lesen; Seiten ohne Eintrag in ``order.json`` kommen ans Ende."""
@@ -577,6 +633,16 @@ def _read_version(slug: str, path: Path) -> DocVersion:
     raw = json.loads(path.read_text(encoding="utf-8"))
     raw["slug"] = slug
     return DocVersion(**raw)
+
+
+def _digest(html: str) -> str:
+    """Prüfsumme eines Seiteninhalts.
+
+    :param html: Inhalt
+    :return: SHA-256 als Hex
+    :rtype: str
+    """
+    return hashlib.sha256(html.encode("utf-8")).hexdigest()
 
 
 def _now() -> str:
