@@ -171,3 +171,22 @@ def test_missing_grants_file_is_allowed_with_admin_write_and_created_on_first_ch
     assert yaml.safe_load((env / "neu" / "grants.yml").read_text(encoding="utf-8"))["grants"] == [
         {"sub": "x", "roles": ["student"]}]
 
+
+def test_set_app_roles_on_old_manifest_without_english_fields(env, admin):
+    """HKA-101: Apps, die vor den englischen Pflichtfeldern registriert wurden, bleiben in den Rollen änderbar."""
+    import json
+    path = env / "manifests" / "noten.json"
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    manifest.pop("name_en", None)
+    manifest["menu"].pop("label_en", None)
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    client = login(make_client(env), "admin")
+    r = client.post(f"{BASE}/apps/noten/roles", data={"csrf": csrf_of(client), "roles": ["student"]})
+    assert r.status_code == 303 and r.headers["location"] == f"{BASE}?notice=app_roles"
+    assert json.loads(path.read_text(encoding="utf-8"))["roles"] == ["student"]
+
+
+def test_switcher_after_post_goes_home(admin):
+    """Nach einem POST zeigt der Umschalter auf die Startseite, nicht auf die POST-Adresse."""
+    r = admin.post(f"{BASE}/apps/noten/roles", data={"csrf": csrf_of(admin)})
+    assert r.status_code == 422 and 'href="/sprache/en?next=/"' in r.text

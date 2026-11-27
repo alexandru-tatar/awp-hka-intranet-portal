@@ -158,3 +158,17 @@ for (const [env, marker] of [
     assert.ok(result.stderr.includes(marker), result.stderr);
   });
 }
+
+for (const broken of ["texts.json", "i18n.js"]) {
+  test(`PF-103 auch wenn ${broken} kaputt ist`, () => {
+    const copy = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "sdk-")), "platform_sdk");
+    fs.cpSync(path.join(__dirname, "..", "platform_sdk"), copy, { recursive: true });
+    fs.writeFileSync(path.join(copy, broken), "{ kaputt");
+    const clean = Object.fromEntries(Object.entries(process.env).filter(([k]) => !["PORTAL_LANG", "LC_ALL", "LC_MESSAGES", "LANG"].includes(k)));
+    const result = require("node:child_process").spawnSync(process.execPath, [path.join(copy, "verify-tree.js")], {
+      env: { ...clean, PORTAL_LANG: "en" }, encoding: "utf-8",
+    });
+    assert.equal(result.status, 1);
+    assert.ok(result.stderr.includes("PF-103") && !result.stderr.includes("SyntaxError"), result.stderr);
+  });
+}

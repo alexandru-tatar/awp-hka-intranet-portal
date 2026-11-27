@@ -259,3 +259,12 @@ def test_foreign_next_goes_home(client, target):
 
 def test_no_next_goes_home(client):
     assert client.get("/sprache/de").headers["location"] == "/"
+
+
+@pytest.mark.parametrize("value", ['"false"', '"no"', "1"])
+def test_language_switch_must_be_a_boolean(env, value):
+    from portal.core.config import ConfigError, load_config
+    cfg = env / "gateway.dev.yml"
+    cfg.write_text(cfg.read_text(encoding="utf-8") + f"language_switch: {value}\n", encoding="utf-8")
+    with pytest.raises(ConfigError, match="language_switch must be true or false"):
+        load_config(cfg)

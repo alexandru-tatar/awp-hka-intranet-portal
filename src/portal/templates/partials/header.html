@@ -8,7 +8,9 @@
   <div class="site-header__user">
     {%- if cfg.show_language_switch %}
     {%- set other = 'en' if t.lang == 'de' else 'de' %}
-    <a href="/sprache/{{ other }}?next={{ (request.url.path ~ ('?' ~ request.url.query if request.url.query else ''))|urlencode }}" lang="{{ other }}" hreflang="{{ other }}" aria-label="{{ t('lang.name.' ~ other) }}" title="{{ t('lang.name.' ~ other) }}">{{ other|upper }}</a>
+    {#- Nach einem POST zur Startseite: Die Weiterleitung kommt als GET an, die Route nimmt vielleicht nur POST an. #}
+    {%- set back = (request.url.path ~ ('?' ~ request.url.query if request.url.query else '')) if request.method == 'GET' else '/' %}
+    <a href="/sprache/{{ other }}?next={{ back|urlencode }}" lang="{{ other }}" hreflang="{{ other }}" aria-label="{{ t('lang.name.' ~ other) }}" title="{{ t('lang.name.' ~ other) }}">{{ other|upper }}</a>
     {%- endif %}
     {%- if user %}
     <span class="muted"><span class="visually-hidden">{{ t('header.signed_in_as') }} </span>{{ user.name }}</span>

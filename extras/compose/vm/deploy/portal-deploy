@@ -29,7 +29,7 @@ fi
 pick_lang() {
   local value=${PORTAL_LANG:-}
   if [ -z "$value" ] && [ -r "$ENV_FILE" ]; then
-    value=$(sed -n 's/^PORTAL_LANG=\([A-Za-z]*\).*/\1/p' "$ENV_FILE" | head -n 1)
+    value=$(sed -n "s/^PORTAL_LANG=[\"']\{0,1\}\([A-Za-z]*\).*/\1/p" "$ENV_FILE" | head -n 1)
   fi
   case "$value" in
     en|EN) echo en; return ;;

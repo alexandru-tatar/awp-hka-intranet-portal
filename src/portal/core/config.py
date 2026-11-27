@@ -251,7 +251,7 @@ def load_config(path: Path) -> Config:
         registry=_load_registry(path, base, raw.get("registry")),
         gateway=GatewayConfig(**raw["gateway"]) if raw.get("gateway") else None,
         app_creation=_load_app_creation(path, base, raw.get("app_creation"), raw.get("role_vocabulary") or ()),
-        language_switch=bool(raw.get("language_switch", False)),
+        language_switch=_load_flag(path, raw, "language_switch"),
         kontakt_en=str(raw.get("kontakt_en") or ""),
     )
     if cfg.registry.probe:
@@ -284,6 +284,21 @@ def load_config(path: Path) -> Config:
         if not (cfg.registry.admin_write and cfg.grants_file.parent.is_dir()):
             raise ConfigError(f"{path}: grants_file does not exist: {cfg.grants_file}")
     return cfg
+
+
+def _load_flag(path: Path, raw: dict, key: str) -> bool:
+    """Einen Schalter lesen: nur ``true``/``false`` (YAML-Boolean), ohne Angabe ``False``.
+
+    :param path: Pfad der Konfigurationsdatei, für Fehlermeldungen
+    :param raw: Rohwerte der Datei
+    :param key: Name des Schalters
+    :return: Wert des Schalters
+    :raises ConfigError: Falls der Wert kein Boolean ist (etwa ``"false"`` in Anführungszeichen)
+    """
+    value = raw.get(key, False)
+    if not isinstance(value, bool):
+        raise ConfigError(f"{path}: {key} must be true or false")
+    return value
 
 
 _LOG_LEVELS = ("TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL")

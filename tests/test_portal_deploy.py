@@ -198,3 +198,12 @@ def test_missing_settings_in_english(box, tmp_path):
 
 def test_script_passes_bash_syntax_check():
     assert subprocess.run(["bash", "-n", str(SCRIPT)], capture_output=True).returncode == 0
+
+
+@pytest.mark.parametrize("line", ['PORTAL_LANG="en"', "PORTAL_LANG='en'"])
+def test_language_from_the_settings_file_with_quotes(box, tmp_path, line):
+    (tmp_path / "deploy.env").write_text(
+        f"PORTAL_IMAGE=hka/portal:test\nMANIFESTS_DIR=/srv/m\nREGISTRY_DIR=/srv/r\n{line}\n")
+    assert box.run("list", stdin=b"", env={"LANG": "de_DE.UTF-8"}).returncode == 0
+    args = box.docker_args()
+    assert args[args.index("-e") + 1] == "PORTAL_LANG=en"

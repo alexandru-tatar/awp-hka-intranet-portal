@@ -1635,19 +1635,21 @@ code .ph{font-family:var(--mono)}
       <div class="vs-ed"><span class="ln">1</span>{
 <span class="ln">2</span>  <span class="k1">"slug"</span>: <span class="s1">"ihr-kurzname"</span>,
 <span class="ln">3</span>  <span class="k1">"name"</span>: <span class="s1">"Name Ihrer App"</span>,
-<span class="ln">4</span>  <span class="k1">"category"</span>: <span class="s1">"Verwaltung"</span>,
-<span class="ln">5</span>  <span class="k1">"menu"</span>: { <span class="k1">"label"</span>: <span class="s1">"Text der Kachel"</span>, <span class="k1">"icon"</span>: <span class="s1">"document"</span> },
-<span class="ln">6</span>  <span class="k1">"roles"</span>: [<span class="s1">"employee"</span>],
-<span class="ln">7</span>  <span class="k1">"version"</span>: <span class="s1">"0.1.0"</span>
-<span class="ln">8</span>}</div>
+<span class="ln">4</span>  <span class="k1">"name_en"</span>: <span class="s1">"Name of your app"</span>,
+<span class="ln">5</span>  <span class="k1">"category"</span>: <span class="s1">"Verwaltung"</span>,
+<span class="ln">6</span>  <span class="k1">"menu"</span>: { <span class="k1">"label"</span>: <span class="s1">"Text der Kachel"</span>, <span class="k1">"label_en"</span>: <span class="s1">"Tile text"</span>, <span class="k1">"icon"</span>: <span class="s1">"document"</span> },
+<span class="ln">7</span>  <span class="k1">"roles"</span>: [<span class="s1">"employee"</span>],
+<span class="ln">8</span>  <span class="k1">"version"</span>: <span class="s1">"0.1.0"</span>
+<span class="ln">9</span>}</div>
     </div>
   </div>
   <h2>Was bedeuten die Felder?</h2>
   <div class="tbl-wrap"><table><thead><tr><th>Feld</th><th>Bedeutung</th><th>Aus Ihrem Ideen-Steckbrief</th></tr></thead><tbody>
     <tr><td><code>slug</code></td><td>Kurzname in der Adresse</td><td>Ihr Kurzname aus der letzten Etappe</td></tr>
     <tr><td><code>name</code></td><td>Angezeigter Name</td><td>„App-Idee“</td></tr>
+    <tr><td><code>name_en</code></td><td>Angezeigter Name auf Englisch</td><td>„App-Idee“ übersetzt</td></tr>
     <tr><td><code>category</code></td><td>Gruppe im Portal: <code>Studium</code>, <code>Verwaltung</code>, <code>Kommunikation</code>, <code>Sonstiges</code></td><td>passend zum Thema</td></tr>
-    <tr><td><code>menu</code></td><td>Text und Symbol der Kachel</td><td>kurz, ein bis drei Wörter</td></tr>
+    <tr><td><code>menu</code></td><td>Text und Symbol der Kachel, <code>label_en</code> ist der Text auf Englisch</td><td>kurz, ein bis drei Wörter</td></tr>
     <tr><td><code>roles</code></td><td>Wer die App sehen darf</td><td>„Wer nutzt sie“ – so klein wie möglich</td></tr>
     <tr><td><code>version</code></td><td>Versionsnummer</td><td>für den Anfang <code>0.1.0</code></td></tr>
   </tbody></table></div>
@@ -2041,13 +2043,14 @@ code .ph{font-family:var(--mono)}
   <h1>manifest.json</h1>
   <p class="lede">Der Steckbrief Ihrer App. Damit meldet sie sich beim Portal an.</p>
   <h2>Beispiel</h2>
-  <div class="code"><button class="copy" data-copy='{&#10;  "slug": "ihr-kurzname",&#10;  "name": "Name Ihrer App",&#10;  "category": "Organisation",&#10;  "menu": { "label": "Text der Kachel", "icon": "calendar" },&#10;  "roles": ["student", "staff"],&#10;  "version": "0.1.0"&#10;}'>Kopieren</button>{<br>&nbsp;&nbsp;"slug": "ihr-kurzname",<br>&nbsp;&nbsp;"name": "Name Ihrer App",<br>&nbsp;&nbsp;"category": "Organisation",<br>&nbsp;&nbsp;"menu": { "label": "Text der Kachel", "icon": "calendar" },<br>&nbsp;&nbsp;"roles": ["student", "staff"],<br>&nbsp;&nbsp;"version": "0.1.0"<br>}</div>
+  <div class="code"><button class="copy" data-copy='{&#10;  "slug": "ihr-kurzname",&#10;  "name": "Name Ihrer App",&#10;  "name_en": "Name of your app",&#10;  "category": "Verwaltung",&#10;  "menu": { "label": "Text der Kachel", "label_en": "Tile text", "icon": "calendar" },&#10;  "roles": ["student", "employee"],&#10;  "version": "0.1.0"&#10;}'>Kopieren</button>{<br>&nbsp;&nbsp;"slug": "ihr-kurzname",<br>&nbsp;&nbsp;"name": "Name Ihrer App",<br>&nbsp;&nbsp;"name_en": "Name of your app",<br>&nbsp;&nbsp;"category": "Verwaltung",<br>&nbsp;&nbsp;"menu": { "label": "Text der Kachel", "label_en": "Tile text", "icon": "calendar" },<br>&nbsp;&nbsp;"roles": ["student", "employee"],<br>&nbsp;&nbsp;"version": "0.1.0"<br>}</div>
   <h2>Felder</h2>
   <div class="tbl-wrap"><table><thead><tr><th>Feld</th><th>Bedeutung</th><th>Regel</th></tr></thead><tbody>
     <tr><td><code>slug</code></td><td>Kurzname, steht in <code>/apps/&lt;slug&gt;/</code></td><td>Kleinbuchstaben, Zahlen, Bindestrich. Nicht <code>meine-app</code>.</td></tr>
     <tr><td><code>name</code></td><td>Angezeigter Name</td><td>–</td></tr>
-    <tr><td><code>category</code></td><td>Gruppe im Portal</td><td>Vom Portal geprüft</td></tr>
-    <tr><td><code>menu</code></td><td>Beschriftung und Symbol der Kachel</td><td>Vom Portal geprüft</td></tr>
+    <tr><td><code>name_en</code></td><td>Angezeigter Name auf Englisch</td><td>Pflicht</td></tr>
+    <tr><td><code>category</code></td><td>Gruppe im Portal: <code>Studium</code>, <code>Verwaltung</code>, <code>Kommunikation</code>, <code>Sonstiges</code></td><td>Vom Portal geprüft</td></tr>
+    <tr><td><code>menu</code></td><td>Beschriftung (<code>label</code>, englisch <code>label_en</code>) und Symbol der Kachel</td><td>Vom Portal geprüft, <code>label_en</code> Pflicht</td></tr>
     <tr><td><code>roles</code></td><td>Wer die App sehen darf</td><td>So wenige wie nötig</td></tr>
     <tr><td><code>version</code></td><td>Versionsnummer</td><td>Bei Änderungen erhöhen</td></tr>
   </tbody></table></div>

@@ -13,11 +13,25 @@
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
-const { TEXTS, envLanguage } = require("./i18n");
 
 const ROOT = __dirname;
 const SUM_FILE_NAME = "SHA256";
 const SKIP_DIRS = new Set(["__pycache__", "node_modules"]);
+
+// PF-103 steht hier und nicht in texts.json: Die Prüfung soll auch melden können, wenn i18n.js oder texts.json kaputt sind.
+const PF103 = {
+  de: "FEHLER PF-103  –  Portal-Bibliothek verändert\nWas tun: Änderungen in platform_sdk/ zurücknehmen oder `make sdk-update` ausführen.",
+  en: "ERROR PF-103  –  Portal library changed\nWhat to do: Undo changes in platform_sdk/ or run `make sdk-update`.",
+};
+
+/** Sprache der Meldung wie `i18n.envLanguage`, bei kaputtem `i18n`-Modul Deutsch. */
+function language() {
+  try {
+    return require("./i18n").envLanguage();
+  } catch {
+    return "de";
+  }
+}
 
 function listFiles(root, parts = []) {
   const found = [];
@@ -51,7 +65,7 @@ function main() {
   const sumFile = path.join(ROOT, SUM_FILE_NAME);
   const expected = fs.existsSync(sumFile) ? fs.readFileSync(sumFile, "utf-8").trim() : "";
   if (treeHash() === expected) return 0;
-  console.error(TEXTS[envLanguage()].pf103); // PORTAL_LANG=de|en (HKA-101)
+  console.error(PF103[language()] ?? PF103.de); // PORTAL_LANG=de|en (HKA-101)
   return 1;
 }
 

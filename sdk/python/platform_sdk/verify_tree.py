@@ -12,11 +12,26 @@ import hashlib
 import sys
 from pathlib import Path
 
-from .i18n import TEXTS, env_language
 
 ROOT = Path(__file__).parent
 SUM_FILE_NAME = "SHA256"
 SKIP_DIRS = {"__pycache__", "node_modules"}
+
+# PF-103 steht hier und nicht in texts.json: Die Prüfung soll auch melden können, wenn i18n.py oder texts.json kaputt sind.
+PF103 = {
+    "de": "FEHLER PF-103  –  Portal-Bibliothek verändert\nWas tun: Änderungen in platform_sdk/ zurücknehmen oder `make sdk-update` ausführen.",
+    "en": "ERROR PF-103  –  Portal library changed\nWhat to do: Undo changes in platform_sdk/ or run `make sdk-update`.",
+}
+
+
+def _language() -> str:
+    """Sprache der Meldung wie ``i18n.env_language``, bei kaputtem ``i18n``-Modul Deutsch."""
+    try:
+        from .i18n import env_language
+
+        return env_language()
+    except Exception:  # noqa: BLE001 – genau der Fall, den die Prüfung melden soll
+        return "de"
 
 
 def tree_hash(root: Path = ROOT) -> str:
@@ -38,7 +53,7 @@ def main() -> int:
     expected = sum_file.read_text(encoding="utf-8").strip() if sum_file.is_file() else ""
     if tree_hash() == expected:
         return 0
-    print(TEXTS[env_language()]["pf103"], file=sys.stderr)  # PORTAL_LANG=de|en (HKA-101)
+    print(PF103.get(_language(), PF103["de"]), file=sys.stderr)  # PORTAL_LANG=de|en (HKA-101)
     return 1
 
 

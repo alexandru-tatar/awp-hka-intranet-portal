@@ -154,3 +154,10 @@ def test_english_texts_are_not_copies_of_german():
     allowed = {"list.slug", "list.version", "list.status", "arg.owner_form"}
     same = [k for k in TEXTS["de"] if TEXTS["de"][k] == TEXTS["en"][k] and k not in allowed]
     assert same == []
+
+
+def test_remove_refused_detail_in_english(cfg_path):
+    run(cfg_path, "register", GOOD)
+    code, _, err = run(cfg_path, "remove", owner=OTHER, slug="pruefung")
+    assert code == 1 and f"slug=pruefung requested by {OTHER}, bound to another repository" in err
+    assert "angefragt von" not in err

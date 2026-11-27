@@ -153,3 +153,22 @@ def test_pf103_in_der_sprache_der_umgebung(tmp_path, env, marker):
     result = subprocess.run([sys.executable, "-m", "platform_sdk.verify_tree"], cwd=tmp_path, env={**clean, **env},
                             capture_output=True, text=True)
     assert result.returncode == 1 and marker in result.stderr
+
+
+@pytest.mark.parametrize("broken", ["texts.json", "i18n.py"])
+def test_pf103_auch_wenn_i18n_kaputt_ist(tmp_path, broken):
+    """Die Prüfung meldet PF-103 (auf Deutsch), auch wenn i18n.py oder texts.json beschädigt sind."""
+    import os
+    import shutil
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    source = Path(__file__).resolve().parent.parent / "platform_sdk"
+    copy = tmp_path / "platform_sdk"
+    shutil.copytree(source, copy, ignore=shutil.ignore_patterns("__pycache__"))
+    (copy / broken).write_text("{ kaputt", encoding="utf-8")
+    clean = {k: v for k, v in os.environ.items() if k not in ("PORTAL_LANG", "LC_ALL", "LC_MESSAGES", "LANG")}
+    result = subprocess.run([sys.executable, "-m", "platform_sdk.verify_tree"], cwd=tmp_path,
+                            env={**clean, "PORTAL_LANG": "en"}, capture_output=True, text=True)
+    assert result.returncode == 1 and "PF-103" in result.stderr and "Traceback" not in result.stderr

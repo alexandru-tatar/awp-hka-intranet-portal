@@ -357,7 +357,8 @@ class Registrar:
                 raise RegistryError(say("reg.unreadable", path=path))
             manifest["roles"] = wanted
             try:
-                self._validator.validate(manifest)
+                # lenient: nur die Rollen ändern sich, ältere Manifeste ohne englische Felder bleiben änderbar (HKA-101)
+                self._validator.validate(manifest, lenient=True)
             except ManifestInvalid as exc:
                 raise RegistryError(say("reg.would_be_invalid", file=path.name, detail=exc)) from exc
             try:
@@ -385,7 +386,7 @@ class Registrar:
                 raise Rejected(
                     "PF-202", say("pf202r.title"), say("pf202r.what", slug=slug), say("pf202r.why"),
                     [say("pf202r.check_owner"), say("pf202r.ask")],
-                    [f"slug={slug} angefragt von {owner}, gebunden an ein anderes Repository"],
+                    [say("pf202.foreign_detail", slug=slug, owner=owner)],
                 )
             try:
                 target.unlink()  # zuerst: Scheitert das Merken danach, bleibt der Name trotzdem an den Besitzer gebunden
